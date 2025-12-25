@@ -1,0 +1,3300 @@
+<!DOCTYPE html><html><head><meta charset='UTF-8'>
+<title>KarpTree096 - Use Standard Layout</title>
+<style>
+html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
+#zoom{transform-origin:0 0;}
+svg{background:transparent;}
+.n{text-anchor:middle;font-size:12px;font-weight:bold;}
+.d{text-anchor:middle;font-size:11px;}
+.l{stroke:#444;stroke-width:1.1;fill:none;}
+
+/* Photo & Document Styles */
+.photo-icon{cursor:pointer;opacity:0.8;transition:opacity 0.2s;}
+.photo-icon:hover{opacity:1;}
+#photoPopup{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;
+}
+#photoPopup.show{display:flex;}
+.popup-content{
+  background:white;border-radius:8px;padding:20px;max-width:90%;max-height:90%;
+  overflow:auto;position:relative;
+}
+.popup-close{
+  position:absolute;top:10px;right:10px;font-size:28px;font-weight:bold;
+  cursor:pointer;color:#666;background:none;border:none;padding:0 10px;z-index:10;
+}
+.popup-close:hover{color:#000;}
+.popup-photo{max-width:100%;max-height:60vh;display:block;margin:0 auto;}
+.popup-name{font-size:20px;font-weight:bold;margin-bottom:10px;text-align:center;}
+.popup-dates{font-size:14px;color:#666;margin-bottom:20px;text-align:center;}
+.gallery-container{position:relative;text-align:center;min-height:400px;}
+.gallery-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  background:rgba(0,0,0,0.5);color:white;border:none;
+  font-size:32px;padding:10px 15px;cursor:pointer;border-radius:4px;
+}
+.gallery-nav:hover{background:rgba(0,0,0,0.7);}
+.gallery-prev{left:10px;}
+.gallery-next{right:10px;}
+.gallery-counter{margin-top:10px;color:#666;font-size:14px;}
+.photo-filename{margin-top:5px;color:#999;font-size:12px;font-style:italic;}
+.doc-list{margin-top:20px;padding-top:20px;border-top:2px solid #eee;}
+.doc-item{padding:8px;margin:5px 0;background:#f5f5f5;border-radius:4px;display:flex;
+  align-items:center;justify-content:space-between;}
+.doc-item a{color:#337BFF;text-decoration:none;font-weight:500;}
+.doc-item a:hover{text-decoration:underline;}
+/* User Guide Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  overflow: auto;
+  padding: 20px;
+}
+.modal-content {
+  background: white;
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 15px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 32px;
+  background: #c0392b;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 10;
+}
+.modal-close:hover {
+  background: #a93226;
+}
+.modal-body {
+  padding: 40px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal-body h1 {
+  color: #667eea;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+}
+.modal-body h2 {
+  color: #667eea;
+  font-size: 2em;
+  margin: 30px 0 20px 0;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #667eea;
+}
+.modal-body h3 {
+  color: #764ba2;
+  font-size: 1.4em;
+  margin: 25px 0 15px 0;
+}
+.modal-body p, .modal-body li {
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.modal-body ul {
+  margin-left: 40px;
+}
+.modal-body .tip {
+  background: #e7f3ff;
+  border-left: 4px solid #2196F3;
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 5px;
+}
+.modal-body .tip strong {
+  color: #1976D2;
+}
+.modal-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+.modal-body table th {
+  background: #667eea;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+.modal-body table td {
+  padding: 12px;
+  border-bottom: 1px solid #e9ecef;
+}
+.modal-body table tr:hover {
+  background: #f8f9fa;
+}
+</style></head>
+<body>
+<!-- Menu Bar -->
+<div style='position:fixed;top:0;left:0;right:0;height:40px;background:#2c3e50;z-index:30;display:flex;align-items:center;padding:0 10px;box-shadow:0 2px 5px rgba(0,0,0,0.2);'>
+<button onclick='toggleMenu("genMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Generations</button>
+<button onclick='toggleMenu("focusMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Focus</button>
+<button onclick='toggleMenu("relMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Find Relationship</button>
+<button onclick='toggleMenu("cousinMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Find Cousins</button>
+<button onclick='openUserGuide()' style='margin-right:10px;padding:8px 16px;background:#27ae60;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>📖 User Guide</button>
+<div style='flex:1;'></div>
+<div id='zoomDisplay' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border-radius:4px;font-size:14px;min-width:60px;text-align:center;'>1.0x</div>
+<button onclick='clearAll()' style='margin-right:10px;padding:8px 16px;background:#c0392b;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Clear All</button>
+<div style='color:#ecf0f1;font-size:16px;font-weight:bold;'>Descendants of Avigdor and Sarah Karp</div>
+</div>
+
+<!-- Generations Menu (hidden by default) -->
+<div id='genMenu' style='display:none;position:fixed;top:50px;left:10px;z-index:25;background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);min-width:220px;'>
+<div style='font-weight:bold;margin-bottom:8px;'>Generation Filter</div>
+<label style='font-size:12px;display:block;margin-bottom:4px;'>Show Generations: 1 to <span id='genLabel'>7</span></label>
+<input id='genSlider' type='range' min='1' max='7' value='7' style='width:100%;' oninput='filterByGeneration(this.value)'>
+</div>
+
+<!-- Focus Menu (hidden by default) -->
+<div id='focusMenu' style='display:none;position:fixed;top:50px;left:10px;z-index:25;background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);min-width:220px;'>
+<div style='font-weight:bold;margin-bottom:8px;'>Focus on Subtree</div>
+<label style='font-size:12px;display:block;margin-bottom:4px;'>Select person:</label>
+<input id='subtreeRoot' type='text' placeholder='Enter person name' style='width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;font-size:12px;margin-bottom:8px;' list='peopleSubtree'>
+<datalist id='peopleSubtree'></datalist>
+<button onclick='showSubtree()' style='width:48%;padding:6px;background:#337BFF;color:white;border:none;border-radius:4px;cursor:pointer;margin-right:4%;font-size:12px;'>Apply</button>
+<button onclick='resetView()' style='width:48%;padding:6px;background:#999;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;'>Reset</button>
+</div>
+
+<!-- Cousin Finder Menu (hidden by default) -->
+<div id='cousinMenu' style='display:none;position:fixed;top:50px;left:10px;z-index:25;background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);min-width:250px;max-height:600px;overflow-y:auto;'>
+<div style='font-weight:bold;margin-bottom:8px;'>Find Cousins</div>
+<label style='font-size:12px;display:block;margin-bottom:4px;'>Your name:</label>
+<input id='cousinPerson' type='text' placeholder='Enter your name' style='width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;font-size:12px;margin-bottom:8px;' list='peopleCousin'>
+<datalist id='peopleCousin'></datalist>
+<label style='font-size:12px;display:block;margin-bottom:4px;'>Cousin degree:</label>
+<select id='cousinDegree' style='width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;font-size:12px;margin-bottom:8px;'>
+<option value='1'>1st cousins</option>
+<option value='2'>2nd cousins</option>
+<option value='3'>3rd cousins</option>
+<option value='4'>4th cousins</option>
+</select>
+<button onclick='findCousins()' style='width:100%;padding:8px;background:#337BFF;color:white;border:none;border-radius:4px;cursor:pointer;margin-bottom:8px;'>Find</button>
+<div id='cousinResult' style='font-size:12px;'></div>
+</div>
+
+<!-- Relationship Finder Menu (hidden by default) -->
+<div id='relMenu' style='display:none;position:fixed;top:50px;left:10px;z-index:25;background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);min-width:220px;'>
+<div style='font-weight:bold;margin-bottom:8px;'>Find Relationship</div>
+<input id='person1' type='text' placeholder='Person 1' style='width:180px;padding:6px;margin-bottom:6px;border:1px solid #ccc;border-radius:4px;' list='people1'>
+<datalist id='people1'></datalist>
+<input id='person2' type='text' placeholder='Person 2' style='width:180px;padding:6px;margin-bottom:8px;border:1px solid #ccc;border-radius:4px;' list='people2'>
+<datalist id='people2'></datalist>
+<button onclick='findRelationship()' style='width:48%;padding:6px;background:#337BFF;color:white;border:none;border-radius:4px;cursor:pointer;margin-right:4%;'>Find</button>
+<button onclick='clearRelationship()' style='width:48%;padding:6px;background:#999;color:white;border:none;border-radius:4px;cursor:pointer;'>Clear</button>
+<div id='result' style='margin-top:8px;font-size:12px;max-width:200px;'></div>
+</div>
+<div id='wrap' style='position:absolute;top:40px;left:0;right:0;bottom:0;overflow:auto;'><div id='zoom'><svg id='svg' width='50000' height='15000'></svg></div></div>
+
+<!-- User Guide Modal -->
+<div id='userGuideModal' class='modal-overlay' onclick='if(event.target===this) closeUserGuide()'>
+  <div class='modal-content'>
+    <button class='modal-close' onclick='closeUserGuide()'>✕</button>
+    <div class='modal-body'>
+      <h1>🌳 KarpTree User Guide</h1>
+      <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
+      
+      <h2>📖 Overview</h2>
+      <p>KarpTree is an interactive family tree visualization featuring 229 people across 7 generations. The tree uses a horizontal spouse layout where married couples are shown side-by-side with connecting lines.</p>
+      
+      <h2>🧭 Navigation & Controls</h2>
+      <h3>Toolbar Buttons</h3>
+      <table>
+        <tr><th>Button</th><th>Function</th></tr>
+        <tr><td><strong>Generations</strong></td><td>Show/hide generations (1-7)</td></tr>
+        <tr><td><strong>Focus</strong></td><td>Select a person to show as root of subtree</td></tr>
+        <tr><td><strong>Find Relationship</strong></td><td>Find relationship between two people</td></tr>
+        <tr><td><strong>Find Cousins</strong></td><td>Find all cousins of a selected person</td></tr>
+        <tr><td><strong>User Guide</strong></td><td>Open this help guide</td></tr>
+        <tr><td><strong>Clear All</strong></td><td>Return to full tree view</td></tr>
+      </table>
+      
+      <div class='tip'>
+        <strong>💡 Zoom Tip:</strong> Use your mouse wheel to zoom in/out. Click and drag to pan around!
+      </div>
+      
+      <h2>📷 Photo Galleries</h2>
+      <p>Look for the 📷 icon in the top-right corner of a person's box. Click the box to open their photo gallery.</p>
+      <ul>
+        <li>Use arrow buttons (← →) to navigate photos</li>
+        <li>Press Escape to close the gallery</li>
+        <li>Currently 109 photos across 16 family members</li>
+      </ul>
+      
+      <h2>🔗 Relationship Finder</h2>
+      <p>Find the relationship between any two people:</p>
+      <ol style='margin-left:40px;'>
+        <li>Click <strong>Find Relationship</strong> button</li>
+        <li>Select first person from dropdown</li>
+        <li>Select second person from dropdown</li>
+        <li>Click <strong>Find</strong></li>
+      </ol>
+      <p>The tree will show only the relevant path between the two people with colored highlighting!</p>
+      
+      <h2>👥 Cousin Finder</h2>
+      <p>Find all cousins of a specific person:</p>
+      <ol style='margin-left:40px;'>
+        <li>Click <strong>Find Cousins</strong> button</li>
+        <li>Select a person</li>
+        <li>Choose cousin degree (1st, 2nd, 3rd)</li>
+        <li>Click <strong>Find</strong></li>
+      </ol>
+      
+      <h2>⭐ Visual Features</h2>
+      <ul>
+        <li><strong>Generation Stripes:</strong> Alternating colored bands identify generations</li>
+        <li><strong>Spouse Layout:</strong> Spouses appear beside partners with === lines</li>
+        <li><strong>Box Colors:</strong> Blood relatives have darker boxes, spouses lighter</li>
+        <li><strong>Gender Borders:</strong> Blue for males, pink for females</li>
+        <li><strong>Connection Lines:</strong> Show family relationships clearly</li>
+      </ul>
+      
+      <h2>💡 Tips & Shortcuts</h2>
+      <ul>
+        <li><strong>Mouse Wheel:</strong> Zoom in/out</li>
+        <li><strong>Click + Drag:</strong> Pan around the tree</li>
+        <li><strong>← →:</strong> Navigate photos in gallery</li>
+        <li><strong>Esc:</strong> Close photo gallery or this guide</li>
+      </ul>
+      
+      <div class='tip'>
+        <strong>📱 Mobile/Tablet:</strong> Pinch to zoom, swipe to pan, tap to view photos. Use landscape orientation for best viewing.
+      </div>
+      
+      <h2>ℹ️ About</h2>
+      <p><strong>Total People:</strong> 229 | <strong>Generations:</strong> 7 | <strong>Photos:</strong> 109</p>
+      <p style='margin-top:20px;text-align:center;color:#999;'>Click the ✕ button or press Escape to close this guide</p>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// Auto-generated photo manifest - embedded from photo_manifest.csv
+// 109 photos for 16 people
+// To update: run scan_photos.ps1, upload new CSV, and I'll regenerate
+
+const photoManifestData = [
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000004A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000016A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000017A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000023A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000026A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000040A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000042A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000044A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000069A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000070A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0000072A.jpg'},
+  {personId: 'p4011', folder: 'p4011_hershel', filename: '4400_Karp_Asher_P_0001004A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000002A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000004A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000036A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000046A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000050A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000055A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000058A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000061A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000063A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000069A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000076A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000081A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000095A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0000996A.jpg'},
+  {personId: 'p4011s1', folder: 'p4011s1_esther', filename: '4400_Karp_Asher_P_0001001A.jpg'},
+  {personId: 'p4012', folder: 'p4012_itzik', filename: '4400_Karp_Asher_P_0001004A.jpg'},
+  {personId: 'p5021', folder: 'p5021_jeff', filename: '4400_Karp_Asher_P_0000091A.jpg'},
+  {personId: 'p5021', folder: 'p5021_jeff', filename: '4400_Karp_Asher_P_0000094A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000025A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000028A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000029A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000036A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000051A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000052A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000054A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000057A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000093A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000096A.jpg'},
+  {personId: 'p5022', folder: 'p5022_asher', filename: '4400_Karp_Asher_P_0000119A.jpg'},
+  {personId: 'p5022s1', folder: 'p5022s1_cheryl', filename: '4400_Karp_Asher_P_0000032A.jpg'},
+  {personId: 'p5022s1', folder: 'p5022s1_cheryl', filename: '4400_Karp_Asher_P_0000991A.jpg'},
+  {personId: 'p5022s1', folder: 'p5022s1_cheryl', filename: '4400_Karp_Asher_P_0001001A.jpg'},
+  {personId: 'p5022s1', folder: 'p5022s1_cheryl', filename: '4400_Karp_Asher_P_0001002A.jpg'},
+  {personId: 'p5023', folder: 'p5023_melanie', filename: '4400_Karp_Asher_P_0000012A.jpg'},
+  {personId: 'p5023', folder: 'p5023_melanie', filename: '4400_Karp_Asher_P_0000017A.jpg'},
+  {personId: 'p5023', folder: 'p5023_melanie', filename: '4400_Karp_Asher_P_0000070A.jpg'},
+  {personId: 'p5023', folder: 'p5023_melanie', filename: '4400_Karp_Asher_P_0000074A.jpg'},
+  {personId: 'p5023', folder: 'p5023_melanie', filename: '4400_Karp_Asher_P_0000083A.jpg'},
+  {personId: 'p5023', folder: 'p5023_melanie', filename: '4400_Karp_Asher_P_0000996A.jpg'},
+  {personId: 'p5023s1', folder: 'p5023s1_david', filename: '4400_Karp_Asher_P_0000017A.jpg'},
+  {personId: 'p5023s1', folder: 'p5023s1_david', filename: '4400_Karp_Asher_P_0000074A.jpg'},
+  {personId: 'p5023s1', folder: 'p5023s1_david', filename: '4400_Karp_Asher_P_0000086A.jpg'},
+  {personId: 'p6030', folder: 'p6030_rachel', filename: '4400_Karp_Asher_P_0000021A.jpg'},
+  {personId: 'p6030', folder: 'p6030_rachel', filename: '4400_Karp_Asher_P_0000023A.jpg'},
+  {personId: 'p6030', folder: 'p6030_rachel', filename: '4400_Karp_Asher_P_0000026A.jpg'},
+  {personId: 'p6030', folder: 'p6030_rachel', filename: '4400_Karp_Asher_P_0000054A.jpg'},
+  {personId: 'p6030', folder: 'p6030_rachel', filename: '4400_Karp_Asher_P_0000055A.jpg'},
+  {personId: 'p6030', folder: 'p6030_rachel', filename: '4400_Karp_Asher_P_0000057A.jpg'},
+  {personId: 'p6030', folder: 'p6030_rachel', filename: '4400_Karp_Asher_P_0000058A.jpg'},
+  {personId: 'p6030', folder: 'p6030_rachel', filename: '4400_Karp_Asher_P_0000118A.jpg'},
+  {personId: 'p6031', folder: 'p6031_dassi', filename: '4400_Karp_Asher_P_0000991A.jpg'},
+  {personId: 'p6031', folder: 'p6031_dassi', filename: '4400_Karp_Asher_P_0000993A.jpg'},
+  {personId: 'p6031', folder: 'p6031_dassi', filename: '4400_Karp_Asher_P_0000995A.jpg'},
+  {personId: 'p6031', folder: 'p6031_dassi', filename: '4400_Karp_Asher_P_0000998A.jpg'},
+  {personId: 'p6031', folder: 'p6031_dassi', filename: '4400_Karp_Asher_P_0001000A.jpg'},
+  {personId: 'p6031', folder: 'p6031_dassi', filename: '4400_Karp_Asher_P_0001001A.jpg'},
+  {personId: 'p6032', folder: 'p6032_didi', filename: '4400_Karp_Asher_P_0000032A.jpg'},
+  {personId: 'p6032', folder: 'p6032_didi', filename: '4400_Karp_Asher_P_0000990A.jpg'},
+  {personId: 'p6032', folder: 'p6032_didi', filename: '4400_Karp_Asher_P_0000991A.jpg'},
+  {personId: 'p6032', folder: 'p6032_didi', filename: '4400_Karp_Asher_P_0000999A.jpg'},
+  {personId: 'p6032', folder: 'p6032_didi', filename: '4400_Karp_Asher_P_0001001A.jpg'},
+  {personId: 'p6033', folder: 'p6033_kobi', filename: '4400_Karp_Asher_P_0000033A.jpg'},
+  {personId: 'p6033', folder: 'p6033_kobi', filename: '4400_Karp_Asher_P_0000991A.jpg'},
+  {personId: 'p6033', folder: 'p6033_kobi', filename: '4400_Karp_Asher_P_0000992A.jpg'},
+  {personId: 'p6033', folder: 'p6033_kobi', filename: '4400_Karp_Asher_P_0000994A.jpg'},
+  {personId: 'p6033', folder: 'p6033_kobi', filename: '4400_Karp_Asher_P_0000996A.jpg'},
+  {personId: 'p6033', folder: 'p6033_kobi', filename: '4400_Karp_Asher_P_0001002A.jpg'},
+  {personId: 'p6034', folder: 'p6034_frimy', filename: '4400_Karp_Asher_P_0000036A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000012A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000017A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000021A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000023A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000025A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000040A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000042A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000044A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000046A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000071A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000073A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000074A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000083A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000086A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000087A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000088A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000090A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000996A.jpg'},
+  {personId: 'p6035', folder: 'p6035_ariel', filename: '4400_Karp_Asher_P_0000998A.jpg'},
+  {personId: 'p6036', folder: 'p6036_elie', filename: '4400_Karp_Asher_P_0000074A.jpg'},
+  {personId: 'p6036', folder: 'p6036_elie', filename: '4400_Karp_Asher_P_0000076A.jpg'},
+  {personId: 'p6036', folder: 'p6036_elie', filename: '4400_Karp_Asher_P_0000077A.jpg'},
+  {personId: 'p6036', folder: 'p6036_elie', filename: '4400_Karp_Asher_P_0000078A.jpg'},
+  {personId: 'p6036', folder: 'p6036_elie', filename: '4400_Karp_Asher_P_0000085A.jpg'},
+  {personId: 'p6036', folder: 'p6036_elie', filename: '4400_Karp_Asher_P_0000086A.jpg'},
+  {personId: 'p6036', folder: 'p6036_elie', filename: '4400_Karp_Asher_P_0000996A.jpg'},
+  {personId: 'p6036', folder: 'p6036_elie', filename: '4400_Karp_Asher_P_0000998A.jpg'},
+  {personId: 'p6037', folder: 'p6037_yoel', filename: '4400_Karp_Asher_P_0000996A.jpg'},
+  {personId: 'p6037', folder: 'p6037_yoel', filename: '4400_Karp_Asher_P_0000998A.jpg'},
+];
+
+
+
+// ==================== RELATIONSHIP CALCULATOR ====================
+// Extracted from relationship_calculator_id_based.html
+class RelationshipCalculator {
+    constructor() {
+        this.persons = [];
+        this.ancestor = [];
+        this.spouseMap = new Map();
+        this.personById = new Map();
+        this.personByName = new Map();
+    }
+
+    loadData(personsData, ancestorData) {
+        this.persons = personsData;
+        personsData.forEach(p => {
+            this.personById.set(p.person_id, p);
+            this.personByName.set(p.name, p);
+        });
+
+        this.ancestor = ancestorData;
+        this.buildSpouseMap(ancestorData);
+    }
+
+    buildSpouseMap(ancestorData) {
+        ancestorData.forEach(row => {
+            const relativeId = row.Gen0_ID;
+            if (row.Gen0_Spouse1_ID) {
+                this.spouseMap.set(row.Gen0_Spouse1_ID, relativeId);
+            }
+            if (row.Gen0_Spouse2_ID) {
+                this.spouseMap.set(row.Gen0_Spouse2_ID, relativeId);
+            }
+        });
+    }
+
+    getAncestorRecord(personId) {
+        return this.ancestor.find(row => row.Gen0_ID === personId);
+    }
+
+    buildChain(ancestorRow) {
+        const chain = [];
+        const spouseChain = [];
+        
+        for (let i = 0; i <= 6; i++) {
+            const personId = ancestorRow[`Gen${i}_ID`];
+            if (personId) {
+                chain.push(personId);
+                if (i > 0) {
+                    const spouseId = ancestorRow[`Gen${i}_Spouse_ID`];
+                    if (spouseId) spouseChain.push(spouseId);
+                }
+            }
+        }
+        
+        return { chain, spouseChain, gen: chain.length };
+    }
+
+    findLCA(chainA, chainB, genA, genB) {
+        let lcaId = null;
+        let dcaA = 0;
+        let dcaB = 0;
+
+        if (genA <= genB) {
+            const genD = genB - genA;
+            for (let i = 0; i < genA; i++) {
+                const i1 = i;
+                const i2 = i + genD;
+                if (chainA[i1] === chainB[i2]) {
+                    lcaId = chainA[i1];
+                    dcaA = i1;
+                    dcaB = i2;
+                    break;
+                }
+            }
+        } else {
+            const genD = genA - genB;
+            for (let i = 0; i < genB; i++) {
+                const i1 = i;
+                const i2 = i + genD;
+                if (chainB[i1] === chainA[i2]) {
+                    lcaId = chainB[i1];
+                    dcaB = i1;
+                    dcaA = i2;
+                    break;
+                }
+            }
+        }
+
+        return { lcaId, dcaA, dcaB };
+    }
+
+    getGender(personId) {
+        const person = this.personById.get(personId);
+        if (person && person.gender) return person.gender;
+        return 'u';
+    }
+
+    getName(personId) {
+        const person = this.personById.get(personId);
+        return person ? person.name : personId;
+    }
+
+    calculateBaseRelation(dcaA, dcaB, g1) {
+        const ancestorList = ['parent', 'grandparent', 'great-grandparent', 'great-great-grandparent', 
+                              'great-great-great-grandparent', 'great-great-great-great-grandparent'];
+        const descList = ['child', 'grandchild', 'great-grandchild', 'great-great-grandchild', 
+                          'great-great-great-grandchild', 'great-great-great-great-grandchild'];
+        const parsibList = ['parsib', 'great parsib', 'great-great parsib', 'great-great-great parsib', 
+                           'great-great-great-great parsib', 'great-great-great-great-great parsib'];
+        const niblingList = ['nibling', 'great nibling', 'great-great nibling', 'great-great-great nibling', 
+                            'great-great-great-great nibling', 'great-great-great-great-great nibling'];
+
+        let relation = 'Undefined';
+        let caseNum = 0;
+
+        if (dcaA === 0 && dcaB === 0) {
+            caseNum = 7;
+            relation = 'Self';
+        }
+        else if (dcaA === 1 && dcaB === 1) {
+            caseNum = 1;
+            relation = 'Sibling';
+            if (g1 === 'm') relation = 'Brother';
+            else if (g1 === 'f') relation = 'Sister';
+        }
+        else if (dcaA === 0 && dcaB >= 1) {
+            caseNum = 2;
+            relation = ancestorList[dcaB - dcaA - 1];
+            if (g1 === 'm') relation = relation.replaceAll('parent', 'father');
+            else if (g1 === 'f') relation = relation.replaceAll('parent', 'mother');
+        }
+        else if (dcaA >= 1 && dcaB === 0) {
+            caseNum = 3;
+            relation = descList[dcaA - dcaB - 1];
+            if (g1 === 'm') relation = relation.replaceAll('child', 'son');
+            else if (g1 === 'f') relation = relation.replaceAll('child', 'daughter');
+        }
+        else if (dcaA === 1 && dcaB >= 2) {
+            caseNum = 4;
+            relation = parsibList[dcaB - dcaA - 1];
+            if (g1 === 'm') relation = relation.replaceAll('parsib', 'uncle');
+            else if (g1 === 'f') relation = relation.replaceAll('parsib', 'aunt');
+        }
+        else if (dcaA >= 2 && dcaB === 1) {
+            caseNum = 5;
+            relation = niblingList[dcaA - dcaB - 1];
+            if (g1 === 'm') relation = relation.replaceAll('nibling', 'nephew');
+            else if (g1 === 'f') relation = relation.replaceAll('nibling', 'niece');
+        }
+        else if (dcaA >= 2 && dcaB >= 2) {
+            caseNum = 6;
+            const minDCA = Math.min(dcaA, dcaB);
+            const degrees = ['1st', '2nd', '3rd', '4th', '5th', '6th'];
+            const deg = degrees[minDCA - 2];
+            relation = `${deg} Cousin`;
+            const removal = Math.abs(dcaB - dcaA);
+            if (removal > 0) {
+                relation += ` ${removal}x Removed`;
+            }
+        }
+
+        return { relation, caseNum };
+    }
+
+    applySpouseLogic(relation, caseNum, spouse1Id, spouse2Id, g1, g2, spouseChainA, spouseChainB, person1Id, person2Id) {
+        if (!spouse1Id && !spouse2Id) {
+            return { relation, caseNum };
+        }
+
+        let relation2 = relation;
+        let case2 = caseNum;
+
+        const person1Name = this.getName(person1Id);
+        const person2Name = this.getName(person2Id);
+
+        if (caseNum === 7) {
+            if (spouse1Id && !spouse2Id) {
+                relation2 = (g2 === 'm') ? 'Wife' : (g2 === 'f') ? 'Husband' : 'Spouse';
+                case2 = 7.1;
+            } else if (!spouse1Id && spouse2Id) {
+                relation2 = (g2 === 'm') ? 'Husband' : (g2 === 'f') ? 'Wife' : 'Spouse';
+                case2 = 7.2;
+            } else if (spouse1Id && spouse2Id) {
+                if (spouse1Id !== spouse2Id) {
+                    relation2 = (g1 === 'm') ? `Wives of ${person1Name}` : (g1 === 'f') ? `Husbands of ${person2Name}` : 'Spouses';
+                    case2 = 7.3;
+                } else {
+                    relation2 = 'Self';
+                    case2 = 7.4;
+                }
+            }
+        }
+        else if (caseNum === 1) {
+            if (spouse1Id && !spouse2Id) {
+                relation2 = (relation === 'Brother') ? 'Sister-in-law' : 'Brother-in-law';
+                case2 = 1.1;
+            } else if (!spouse1Id && spouse2Id) {
+                relation2 = (relation === 'Brother') ? 'Brother-in-law' : 'Sister-in-law';
+                case2 = 1.2;
+            } else if (spouse1Id && spouse2Id) {
+                relation2 = (relation === 'Brother') ? 'Wife of Brother-in-law' : 'Husband of Sister-in-law';
+                case2 = 1.3;
+            }
+        }
+        else if (caseNum === 2) {
+            if (spouse1Id && !spouse2Id) {
+                if (relation.includes('father')) {
+                    relation2 = spouseChainB.includes(spouse1Id) 
+                        ? relation.replaceAll('father', 'mother')
+                        : 'Step-' + relation.replaceAll('father', 'mother');
+                } else if (relation.includes('mother')) {
+                    relation2 = spouseChainB.includes(spouse1Id)
+                        ? relation.replaceAll('mother', 'father')
+                        : 'Step-' + relation.replaceAll('mother', 'father');
+                }
+                case2 = 2.1;
+            } else if (!spouse1Id && spouse2Id) {
+                relation2 = relation.replaceAll('father', 'father-in-law').replaceAll('mother', 'mother-in-law');
+                case2 = 2.2;
+            } else if (spouse1Id && spouse2Id) {
+                if (relation.includes('father')) {
+                    relation2 = spouseChainB.includes(spouse1Id)
+                        ? relation.replaceAll('father', 'mother-in-law')
+                        : 'Step-' + relation.replaceAll('father', 'mother-in-law');
+                } else if (relation.includes('mother')) {
+                    relation2 = spouseChainB.includes(spouse1Id)
+                        ? relation.replaceAll('mother', 'father-in-law')
+                        : 'Step-' + relation.replaceAll('mother', 'father-in-law');
+                }
+                case2 = 2.3;
+            }
+        }
+        else if (caseNum === 3) {
+            if (spouse1Id && !spouse2Id) {
+                if (relation.includes('daughter')) {
+                    relation2 = relation.replaceAll('daughter', 'son-in-law');
+                } else if (relation.includes('son')) {
+                    relation2 = relation.replaceAll('son', 'daughter-in-law');
+                }
+                case2 = 3.1;
+            } else if (!spouse1Id && spouse2Id) {
+                if (relation.includes('daughter') || relation.includes('son')) {
+                    relation2 = spouseChainA.includes(spouse2Id) ? relation : 'Step-' + relation;
+                }
+                case2 = 3.2;
+            } else if (spouse1Id && spouse2Id) {
+                if (relation.includes('daughter')) {
+                    const baseRel = relation.replaceAll('daughter', 'son-in-law');
+                    relation2 = spouseChainA.includes(spouse2Id) ? baseRel : 'Step-' + baseRel;
+                } else if (relation.includes('son')) {
+                    const baseRel = relation.replaceAll('son', 'daughter-in-law');
+                    relation2 = spouseChainA.includes(spouse2Id) ? baseRel : 'Step-' + baseRel;
+                }
+                case2 = 3.3;
+            }
+        }
+        else if (caseNum === 4) {
+            if (spouse1Id && !spouse2Id) {
+                if (relation.includes('uncle')) {
+                    relation2 = relation.replaceAll('uncle', 'aunt by marriage');
+                } else if (relation.includes('aunt')) {
+                    relation2 = relation.replaceAll('aunt', 'uncle by marriage');
+                }
+                case2 = 4.1;
+            } else if (!spouse1Id && spouse2Id) {
+                if (relation.includes('uncle')) {
+                    relation2 = relation.replaceAll('uncle', 'uncle by marriage');
+                } else if (relation.includes('aunt')) {
+                    relation2 = relation.replaceAll('aunt', 'aunt by marriage');
+                }
+                case2 = 4.2;
+            } else if (spouse1Id && spouse2Id) {
+                if (relation.includes('uncle')) {
+                    relation2 = 'Wife of ' + relation.replaceAll('uncle', 'uncle by marriage');
+                } else if (relation.includes('aunt')) {
+                    relation2 = 'Husband of ' + relation.replaceAll('aunt', 'aunt by marriage');
+                }
+                case2 = 4.3;
+            }
+        }
+        else if (caseNum === 5) {
+            if (spouse1Id && !spouse2Id) {
+                if (relation.includes('nephew')) {
+                    relation2 = relation.replaceAll('nephew', 'niece by marriage');
+                } else if (relation.includes('niece')) {
+                    relation2 = relation.replaceAll('niece', 'nephew by marriage');
+                }
+                case2 = 5.1;
+            } else if (!spouse1Id && spouse2Id) {
+                if (relation.includes('nephew')) {
+                    relation2 = relation.replaceAll('nephew', 'nephew by marriage');
+                } else if (relation.includes('niece')) {
+                    relation2 = relation.replaceAll('niece', 'niece by marriage');
+                }
+                case2 = 5.2;
+            } else if (spouse1Id && spouse2Id) {
+                if (relation.includes('nephew')) {
+                    relation2 = 'Wife of ' + relation.replaceAll('nephew', 'nephew by marriage');
+                } else if (relation.includes('niece')) {
+                    relation2 = 'Husband of ' + relation.replaceAll('niece', 'niece by marriage');
+                }
+                case2 = 5.3;
+            }
+        }
+        else if (caseNum === 6) {
+            if (spouse1Id && !spouse2Id) {
+                relation2 = relation + ' by marriage';
+                case2 = 6.1;
+            } else if (!spouse1Id && spouse2Id) {
+                relation2 = relation + ' by marriage';
+                case2 = 6.2;
+            } else if (spouse1Id && spouse2Id) {
+                relation2 = 'Spouse of ' + relation + ' by marriage';
+                case2 = 6.3;
+            }
+        }
+
+        return { relation: relation2, caseNum: case2 };
+    }
+
+    getRelationship(personId1, personId2) {
+        const p1 = this.personById.get(personId1);
+        const p2 = this.personById.get(personId2);
+
+        if (!p1 || !p2) {
+            return { relationship: 'Unknown', lca: null, lca_id: null, case: 0 };
+        }
+
+        let person1Id = personId1;
+        let person2Id = personId2;
+        let spouse1Id = null;
+        let spouse2Id = null;
+
+        if (this.spouseMap.has(person1Id)) {
+            spouse1Id = person1Id;
+            person1Id = this.spouseMap.get(person1Id);
+        }
+
+        if (this.spouseMap.has(person2Id)) {
+            spouse2Id = person2Id;
+            person2Id = this.spouseMap.get(person2Id);
+        }
+
+        const ancestorA = this.getAncestorRecord(person1Id);
+        const ancestorB = this.getAncestorRecord(person2Id);
+
+        if (!ancestorA || !ancestorB) {
+            return { relationship: 'Unknown', lca: null, lca_id: null, case: 0 };
+        }
+
+        const { chain: chainA, spouseChain: spouseChainA, gen: genA } = this.buildChain(ancestorA);
+        const { chain: chainB, spouseChain: spouseChainB, gen: genB } = this.buildChain(ancestorB);
+
+        const { lcaId, dcaA, dcaB } = this.findLCA(chainA, chainB, genA, genB);
+
+        if (!lcaId) {
+            return { relationship: 'Unrelated', lca: null, lca_id: null, case: 0 };
+        }
+
+        const g1 = this.getGender(person1Id);
+        const g2 = this.getGender(person2Id);
+
+        const { relation, caseNum } = this.calculateBaseRelation(dcaA, dcaB, g1);
+
+        const { relation: finalRelation, caseNum: finalCase } = this.applySpouseLogic(
+            relation, caseNum, spouse1Id, spouse2Id, g1, g2, spouseChainA, spouseChainB, person1Id, person2Id
+        );
+
+        const lcaName = this.getName(lcaId);
+        
+        // Build paths from LCA to both people for highlighting
+        // Chains go: [PERSON, ..., Gen2, Gen1, Gen0_ROOT]  (backwards!)
+        // dcaA/dcaB are indices where LCA appears
+        // We want: [LCA, ..., PERSON] so take from 0 to dcaA+1 and reverse
+        const path1 = chainA.slice(0, dcaA + 1).reverse(); // [LCA → person1]
+        const path2 = chainB.slice(0, dcaB + 1).reverse(); // [LCA → person2]
+        
+        console.log('LCA:', lcaId, lcaName);
+        console.log('Path1 (LCA→person1):', path1.map(id => `${id}(${this.getName(id)})`));
+        console.log('Path2 (LCA→person2):', path2.map(id => `${id}(${this.getName(id)})`));
+
+        return {
+            relationship: finalRelation,
+            lca: lcaName,
+            lca_id: lcaId,
+            case: finalCase,
+            path1: path1,
+            path2: path2
+        };
+    }
+}
+
+// ==================== CALCULATOR INITIALIZATION ====================
+let relationshipCalc = null;
+
+// Menu toggle function
+function toggleMenu(menuId){
+  let menus=['genMenu','focusMenu','relMenu','cousinMenu'];
+  menus.forEach(id=>{
+    if(id===menuId){
+      let menu=document.getElementById(id);
+      menu.style.display=menu.style.display==='none'?'block':'none';
+    }else{
+      document.getElementById(id).style.display='none';
+    }
+  });
+}
+
+// Close menus when clicking outside
+document.addEventListener('click',function(e){
+  let menus=['genMenu','focusMenu','relMenu','cousinMenu'];
+  let clickedInside=false;
+  
+  // Check if click was inside any menu or on a menu button
+  menus.forEach(menuId=>{
+    let menu=document.getElementById(menuId);
+    if(menu&&menu.contains(e.target))clickedInside=true;
+  });
+  
+  // Check if click was on a menu button in the top bar
+  if(e.target.closest('button')&&e.target.closest('button').onclick)clickedInside=true;
+  
+  // Close all menus if click was outside
+  if(!clickedInside){
+    menus.forEach(id=>document.getElementById(id).style.display='none');
+  }
+});
+
+// DATA (people, spouses, parents) INSERTED COMPACTLY
+const P={
+p1001:{n:"Avigdor Karp",b:1839,d:null,g:"m"}, p1001s1:{n:"Sarah (unknown) Karp",b:null,d:null,g:"f"},
+p2001:{n:"Menachem Karp",b:1859,d:1939,g:"m"}, p2002:{n:"Sprintza Karp",b:null,d:null,g:"f"},
+p2003:{n:"Kraindel Karp",b:null,d:1925,g:"f"}, p2001s1:{n:"Tilla Fraida Wiesen",b:1860,d:1942,g:"f"},
+p2003s1:{n:"Shlomo Zev Flus",b:1870,d:null,g:"m"}, p2003s2:{n:"Mr. Berta",b:null,d:null,g:"m"},
+p3001:{n:"Hitzel Karp",b:1880,d:null,g:"f"}, p3002:{n:"Maima Frimit Karp",b:1881,d:1967,g:"f"},
+p3003:{n:"Melech Max Karp",b:1893,d:1956,g:"m"}, p3004:{n:"Shprintza Karp",b:1894,d:1976,g:"f"},
+p3005:{n:"Chaya Karp",b:1898,d:1976,g:"f"}, p3006:{n:"Sarah Breindel Karp",b:1900,d:1949,g:"f"},
+p3007:{n:"Mintcha Karp",b:1904,d:1971,g:"f"}, p3008:{n:"Mintcha Flus",b:null,d:null,g:"f"},
+p3009:{n:"Clara Flus",b:null,d:null,g:"f"}, p3010:{n:"Max Flus",b:1894,d:1961,g:"m"},
+p3011:{n:"Victor Flus",b:1904,d:1963,g:"m"}, p3012:{n:"Abraham Adolf Flus",b:null,d:null,g:"m"},
+p3013:{n:"Yehudit Berta",b:null,d:null,g:"f"}, p3001s1:{n:"Husband of Hitzel Karp",b:null,d:null,g:"m"},
+p3002s1:{n:"Moshe Lewenhek",b:1880,d:1967,g:"m"}, p3003s1:{n:"Ida Wiesen",b:1896,d:1960,g:"f"},
+p3004s1:{n:"Mordechai Einesman",b:1890,d:1936,g:"m"}, p3005s1:{n:"Leon Laibish Rosenbaum",b:1896,d:1954,g:"m"},
+p3006s1:{n:"Joseph Moishe Freedman",b:1894,d:1966,g:"m"}, p3007s1:{n:"Yaacov Schwartz",b:1900,d:1940,g:"m"},
+p3007s2:{n:"Shloma Solomon Balsam",b:null,d:1985,g:"m"}, p3008s1:{n:"Mr. Blumenkrantz",b:null,d:null,g:"m"},
+p3009s1:{n:"Monyek Kropp",b:null,d:null,g:"m"}, p3010s1:{n:"Lucia Brlowitz",b:1901,d:1984,g:"f"},
+p3011s1:{n:"Faige Chalupovitch",b:1908,d:null,g:"f"}, p3012s1:{n:"Wife (unknown) Flus",b:null,d:null,g:"f"},
+p3013s1:{n:"Mr. Kraus",b:null,d:null,g:"m"},
+p4001:{n:"Lycha Karp",b:1904,d:null,g:"f"}, p4002:{n:"Anne Sheila Karp",b:1923,d:2011,g:"f"},
+p4003:{n:"Leonard Karp",b:1928,d:1986,g:"m"}, p4004:{n:"Victor Einesman",b:1921,d:1941,g:"m"},
+p4005:{n:"Manya Karp Einesman",b:1923,d:2008,g:"f"}, p4006:{n:"Rose Rosenbaum",b:1923,d:null,g:"f"},
+p4007:{n:"Shirley Rosenbaum",b:1927,d:null,g:"f"}, p4008:{n:"Chana Honey Rosenbaum",b:1934,d:1995,g:"f"},
+p4009:{n:"Miriam Freedman",b:1926,d:null,g:"f"}, p4010:{n:"William Alexander Freedman",b:1932,d:null,g:"m"},
+p4011:{n:"Harold Hersh Elimelech Karp",b:1932,d:2019,g:"m"}, p4012:{n:"Irvin Isaac Itzicle Karp",b:1935,d:2022,g:"m"},
+p4013:{n:"Resha Abraham",b:null,d:null,g:"f"}, p4014:{n:"Salek Abraham",b:null,d:null,g:"m"},
+p4015:{n:"Helga Flus",b:1923,d:null,g:"f"},
+p4016:{n:"Ilsa Kreindel Flus",b:1926,d:null,g:"f"}, p4017:{n:"Ruth Flus",b:1931,d:null,g:"f"},
+p4018:{n:"Kleile Flus",b:1934,d:null,g:"f"}, p4019:{n:"Sev Flus",b:1935,d:null,g:"m"},
+p4020:{n:"David Flus",b:null,d:null,g:"m"}, p4021:{n:"Baruch Barry Flus",b:1937,d:null,g:"m"},
+p4022:{n:"Erica Flus",b:null,d:null,g:"f"}, p4023:{n:"Naomi Kraus",b:null,d:null,g:"f"},
+p4024:{n:"Yochanan Kraus",b:null,d:null,g:"m"},
+p4002s1:{n:"Isaac Rosenberg",b:1917,d:2009,g:"m"}, p4005s1:{n:"Benyamin Stone",b:1917,d:null,g:"m"},
+p4006s1:{n:"Irvin Jacob",b:1923,d:null,g:"m"}, p4007s1:{n:"Coleman Bloomfield",b:1926,d:1995,g:"m"},
+p4009s1:{n:"Joseph Morris Sanders",b:1926,d:null,g:"m"}, p4010s1:{n:"Rachel Mimi Nagler",b:1940,d:null,g:"f"},
+p4011s1:{n:"Esther Telpinsterin",b:1933,d:2022,g:"f"}, p4012s1:{n:"Beatrice Kraus",b:1935,d:2002,g:"f"},
+p4013s1:{n:"Mr. Schiff",b:null,d:null,g:"m"},
+p4015s1:{n:"Herbert Lipow",b:1913,d:null,g:"m"}, p4016s1:{n:"Gus Goldschmid",b:1922,d:null,g:"m"},
+p4017s1:{n:"Henry Wertheimer",b:1928,d:null,g:"m"}, p4018s1:{n:"Moshe Lerner",b:1929,d:null,g:"m"},
+p4019s1:{n:"Vera (unknown) Flus",b:null,d:null,g:"f"}, p4021s1:{n:"Ruth Lowenthal",b:1937,d:null,g:"f"},
+p5001:{n:"Tyla Rae Rosenberg",b:1949,d:null,g:"f"}, p5002:{n:"Norman Stone",b:1947,d:null,g:"m"},
+p5003:{n:"Victor Stone",b:1953,d:null,g:"m"}, p5004:{n:"Arnold Stone",b:1959,d:null,g:"m"},
+p5005:{n:"Leonard Leibel Stone",b:1962,d:null,g:"m"}, p5006:{n:"Cydney Susan Jacob",b:1950,d:null,g:"f"},
+p5007:{n:"Vivian Lorraine Jacob",b:1953,d:null,g:"f"}, p5008:{n:"Lanny Michael Jacob",b:1955,d:null,g:"m"},
+p5009:{n:"Catherine Sandra Bloomfield",b:1950,d:null,g:"f"}, p5010:{n:"Laura Joan Bloomfield",b:1953,d:null,g:"f"},
+p5011:{n:"Leon Michael Bloomfield",b:1958,d:null,g:"m"}, p5012:{n:"Diane Bloomfield",b:1960,d:null,g:"f"},
+p5013:{n:"Richard David Bloomfield",b:1962,d:null,g:"m"},
+p5034:{n:"Lawrence Saper Meyer",b:1949,d:null,g:"m"}, p5002s1:{n:"Rachelle Sapoznikow",b:1947,d:null,g:"f"},
+p5003s1:{n:"Debra Ann Lander",b:null,d:null,g:"f"}, p5006s1:{n:"Gary Hayes",b:1950,d:null,g:"m"},
+p5007s1:{n:"Conrad Gavaga",b:null,d:null,g:"m"}, p5008s1:{n:"Marni Cheryl Guttman",b:null,d:null,g:"f"},
+p5009s1:{n:"Samuel Medal",b:null,d:null,g:"m"}, p5009s2:{n:"Brock Siegel",b:1947,d:null,g:"m"},
+p5010s1:{n:"Mark Pitt",b:1948,d:null,g:"m"}, p5013s1:{n:"Carrie Sue Taran",b:1964,d:null,g:"f"},
+p5014:{n:"Simon Sanders",b:1960,d:1960,g:"m"}, p5015:{n:"Barry Cyril Sanders",b:1961,d:null,g:"m"},
+p5015s1:{n:"Shanno Lata Sen",b:1964,d:null,g:"f"}, p5016:{n:"Alias Amelia Sanders",b:1962,d:null,g:"x"},
+p5017:{n:"Harry Max Sanders",b:1966,d:null,g:"m"}, p5017s1:{n:"Kirsten Sanders",b:null,d:null,g:"f"},
+p5018:{n:"Lisa Ann Freedman",b:1964,d:null,g:"f"}, p5018s1:{n:"Ian Thomson",b:1962,d:null,g:"m"},
+p5019:{n:"Mark Jacob Freedman",b:1967,d:1970,g:"m"}, p5020:{n:"Stephen Mendel Freedman",b:1969,d:null,g:"m"},
+p5020s1:{n:"Jennifer Green",b:1969,d:null,g:"f"},
+p5021:{n:"Jeffrey Moss Karp",b:1960,d:null,g:"m"}, p5021s1:{n:"Sherry Lynn Katz",b:null,d:2002,g:"f"},
+p5021s2:{n:"Lidia Karp",b:null,d:null,g:"f"}, p5022:{n:"Asher Miles Karp",b:1962,d:null,g:"m"},
+p5022s1:{n:"Cheryl Robin Karp",b:1963,d:null,g:"f"}, p5023:{n:"Melanie Sue Karp",b:1965,d:null,g:"f"},
+p5023s1:{n:"David Lasry",b:1963,d:null,g:"m"}, p5024:{n:"Gary Steven Karp",b:1962,d:null,g:"m"},
+p5025:{n:"Michael Leonard Karp",b:1964,d:null,g:"m"}, p5026:{n:"Adit Schiff",b:null,d:null,g:"f"},
+p5026s1:{n:"Avi Zucker",b:null,d:null,g:"m"}, p5027:{n:"Jane Lipow",b:1948,d:null,g:"f"},
+p5027s1:{n:"Alan Cornell",b:1946,d:null,g:"m"}, p5028:{n:"Wendy Lipow",b:1952,d:null,g:"f"},
+p5028s1:{n:"Richard Goldstein",b:1953,d:null,g:"m"}, p5029:{n:"Eric Goldschmidt",b:1946,d:null,g:"m"},
+p5029s1:{n:"Cathy Green",b:null,d:null,g:"f"}, p5029s2:{n:"Pamela Bodek",b:1946,d:null,g:"f"},
+p5030:{n:"Sidney Goldschmidt",b:1938,d:null,g:"m"}, p5030s1:{n:"Sandra Wincelberg",b:1953,d:null,g:"f"},
+p5031:{n:"Debra Goldschmidt",b:1955,d:null,g:"f"}, p5031s1:{n:"Mark Blechner",b:1949,d:null,g:"m"},
+p5032:{n:"Janet Wertheimer",b:1954,d:null,g:"f"}, p5032s1:{n:"Sholom Spitz",b:null,d:null,g:"m"},
+p5033:{n:"Judy Wertheimer",b:1959,d:null,g:"f"}, p5033s1:{n:"Seth Altholz",b:null,d:null,g:"m"},
+p5042:{n:"Ruth Lerner",b:1961,d:null,g:"f"}, p5035:{n:"Nadia Flus",b:null,d:null,g:"f"},
+p5036:{n:"Yoel Flus",b:null,d:null,g:"m"}, p5037:{n:"Karen Flus",b:null,d:null,g:"f"},
+p5038:{n:"Jonathan Flus",b:1962,d:null,g:"m"}, p5039:{n:"Gideon Flus",b:1964,d:null,g:"m"},
+p5039s1:{n:"Shlomit Netzer",b:1968,d:null,g:"f"}, p5040:{n:"Ilan Flus",b:1965,d:null,g:"m"},
+p5040s1:{n:"Gila Brachfeld",b:1968,d:null,g:"f"}, p5041:{n:"Ronen Flus",b:1969,d:null,g:"m"},
+p6001:{n:"Eadie Beth Meyer",b:1979,d:null,g:"f"}, p6001s1:{n:"Jason Joseph Kaltenbacher",b:1981,d:null,g:"m"},
+p6002:{n:"Solomon Eugene Meyer",b:1981,d:null,g:"m"}, p6067:{n:"Myriane Beland",b:1980,d:null,g:"f"},
+p6003:{n:"Michael Stone",b:1972,d:null,g:"m"}, p6003s1:{n:"Hedy Bercovitz",b:null,d:null,g:"f"},
+p6004:{n:"Bryan Stone",b:1972,d:null,g:"m"}, p6005:{n:"Faith-Ann Stone",b:1975,d:null,g:"f"},
+p6006:{n:"Stephen Samuel Stone",b:1995,d:null,g:"m"}, p6007:{n:"Stuart James Hayes",b:1977,d:null,g:"m"},
+p6008:{n:"Adam Jacob Hayes",b:1980,d:null,g:"m"}, p6009:{n:"Sara Lauren Gavaga",b:1985,d:null,g:"f"},
+p6010:{n:"Alexa Mary Claire Gavaga",b:1988,d:null,g:"f"}, p6011:{n:"Maylee Alana Jacob",b:1987,d:null,g:"f"},
+p6012:{n:"Rory Fraser Jacob",b:1989,d:null,g:"m"}, p6013:{n:"Jordy Evan Jacob",b:1994,d:null,g:"m"},
+p6014:{n:"Justin Siegel",b:1981,d:null,g:"m"}, p6015:{n:"Aaron Siegel",b:1983,d:null,g:"m"},
+p6016:{n:"Rachael Siegel",b:1986,d:null,g:"f"}, p6017:{n:"Benjamin Pitt",b:1983,d:null,g:"m"},
+p6018:{n:"Hannah Pitt",b:1994,d:null,g:"f"}, p6019:{n:"Jared Peter Bloomfield",b:1992,d:null,g:"m"},
+p6020:{n:"Samuel Aaron Bloomfield",b:1995,d:null,g:"m"},
+p6021:{n:"Yuval Rishu Poton Sanders",b:1987,d:null,g:"m"}, p6022:{n:"Sapna Lailah Sanders",b:1988,d:null,g:"f"},
+p6023:{n:"Anna Marilka Sanders",b:2004,d:null,g:"f"}, p6024:{n:"Jonas Sanders",b:null,d:null,g:"m"},
+p6025:{n:"Benjamin Thomson",b:1996,d:null,g:"m"}, p6026:{n:"Sarah Thomson",b:1999,d:null,g:"f"},
+p6027:{n:"Time Stephen Freedman",b:1997,d:null,g:"m"}, p6028:{n:"Mattias Freedman",b:1998,d:null,g:"m"},
+p6029:{n:"Minaelle Freedman",b:2000,d:null,g:"f"}, p6030:{n:"Rachel Edythe Karp",b:1989,d:null,g:"f"},
+p6030s1:{n:"James Finkle",b:null,d:null,g:"m"},
+p6031:{n:"Hadassah Leah Karp",b:1996,d:null,g:"f"}, p6031s1:{n:"Aryeh Zapinsky",b:null,d:null,g:"m"},
+p6032:{n:"Adina Sara Karp",b:1998,d:null,g:"f"}, p6033:{n:"Jacob Benzion Karp",b:2000,d:null,g:"m"},
+p6034:{n:"Ephraim Jedidiah Karp",b:2002,d:null,g:"m"},
+p6035:{n:"Ariel Yosef Lasry",b:1990,d:null,g:"m"}, p6035s1:{n:"Leivana Lasry",b:1989,d:null,g:"f"},
+p6036:{n:"Elie Nechemia Lasry",b:1993,d:null,g:"m"}, p6037:{n:"Yoel Lasry",b:1997,d:null,g:"m"},
+p6038:{n:"Nethanel Lasry",b:2005,d:null,g:"m"},
+p6039:{n:"Daniel Zucker",b:null,d:null,g:"m"}, p6040:{n:"Roni Zucker",b:null,d:null,g:"f"},
+p6041:{n:"Michael Cornell",b:null,d:null,g:"m"}, p6042:{n:"Lauren Cornell",b:1977,d:null,g:"f"},
+p6043:{n:"Jacob Goldstein",b:1985,d:null,g:"m"}, p6044:{n:"Jonathan Goldstein",b:1987,d:null,g:"m"},
+p6045:{n:"Lisa Goldschmidt",b:null,d:null,g:"f"}, p6046:{n:"Jenna Goldschmidt",b:null,d:null,g:"f"},
+p6047:{n:"Doron Goldschmidt",b:null,d:null,g:"m"}, p6047s1:{n:"Shira Herrmann",b:null,d:null,g:"f"},
+p6048:{n:"Judah Goldschmidt",b:1978,d:null,g:"m"}, p6049:{n:"Daniella Goldschmidt",b:1979,d:null,g:"f"},
+p6050:{n:"Elisha Blechner",b:1978,d:null,g:"m"}, p6051:{n:"Joshua Blechner",b:1981,d:null,g:"m"},
+p6052:{n:"Michelle Blechner",b:1984,d:null,g:"f"}, p6053:{n:"Joseph Blechner",b:1991,d:null,g:"m"},
+p6054:{n:"David Spitz",b:1978,d:null,g:"m"}, p6055:{n:"Talia Spitz",b:1978,d:null,g:"f"},
+p6056:{n:"Simone Spitz",b:1980,d:null,g:"f"}, p6057:{n:"Lindsey Spitz",b:1986,d:null,g:"f"},
+p6058:{n:"Liat Altholz",b:1983,d:null,g:"f"}, p6059:{n:"Shira Altholz",b:1985,d:null,g:"f"},
+p6060:{n:"Paul Altholz",b:1991,d:null,g:"m"},
+p6061:{n:"Uriel Flus",b:1992,d:null,g:"m"}, p6062:{n:"Efrat Flus",b:1994,d:null,g:"f"},
+p6063:{n:"Noa Flus",b:1997,d:null,g:"f"},
+p6064:{n:"Nadav Flus",b:1994,d:null,g:"m"}, p6065:{n:"Itamar Flus",b:1996,d:null,g:"m"},
+p6066:{n:"Assaf Flus",b:1998,d:null,g:"m"},
+p7001:{n:"Zachary Joseph Kaltenbacher",b:2011,d:null,g:"m"}, p7002:{n:"Mitchell Joseph Kaltenbacher",b:2015,d:null,g:"m"},
+p7003:{n:"Estelle Jeanne Avivya Meyer",b:2014,d:null,g:"f"}, p7004:{n:"Nolin Edmond Adar Meyer",b:2016,d:null,g:"m"},
+p7005:{n:"Carmen Alma Odette Meyer",b:2020,d:null,g:"f"}, p7006:{n:"Ezra Louis Xavier Meyer",b:2020,d:null,g:"m"},
+p7007:{n:"Zara Leeba Finkle",b:2018,d:null,g:"f"}, p7008:{n:"Jonathan Solomon Finkle",b:2020,d:null,g:"m"},
+p7009:{n:"Talia Lasry",b:2010,d:null,g:"f"}, p7010:{n:"Eliav Lasry",b:null,d:null,g:"m"},
+p7011:{n:"Hallel Lasry",b:null,d:null,g:"f"}, p7012:{n:"Orla Lasry",b:2020,d:null,g:"f"}
+};
+
+const SP=[
+["p1001","p1001s1"],["p2001","p2001s1"],["p2003","p2003s1"],["p2003","p2003s2"],
+["p3001","p3001s1"],["p3002","p3002s1"],["p3003","p3003s1"],["p3004","p3004s1"],
+["p3005","p3005s1"],["p3006","p3006s1"],["p3007","p3007s1"],["p3007","p3007s2"],
+["p3008","p3008s1"],["p3009","p3009s1"],["p3010","p3010s1"],["p3011","p3011s1"],
+["p3012","p3012s1"],["p3013","p3013s1"],
+["p4002","p4002s1"],["p4005","p4005s1"],["p4006","p4006s1"],["p4007","p4007s1"],
+["p4009","p4009s1"],["p4010","p4010s1"],["p4011","p4011s1"],["p4012","p4012s1"],
+["p4013","p4013s1"],["p4015","p4015s1"],["p4016","p4016s1"],["p4017","p4017s1"],
+["p4018","p4018s1"],["p4019","p4019s1"],["p4021","p4021s1"],
+["p5015","p5015s1"],["p5017","p5017s1"],["p5018","p5018s1"],["p5020","p5020s1"],
+["p5021","p5021s1"],["p5021","p5021s2"],["p5022","p5022s1"],["p5023","p5023s1"],
+["p5026","p5026s1"],["p5027","p5027s1"],["p5028","p5028s1"],["p5029","p5029s1"],
+["p5029","p5029s2"],["p5030","p5030s1"],["p5031","p5031s1"],["p5032","p5032s1"],
+["p5033","p5033s1"],["p5039","p5039s1"],["p5040","p5040s1"],
+["p5001","p5034"],["p5002","p5002s1"],["p5003","p5003s1"],["p5006","p5006s1"],
+["p5007","p5007s1"],["p5008","p5008s1"],["p5009","p5009s1"],["p5009","p5009s2"],
+["p5010","p5010s1"],["p5013","p5013s1"],
+["p6001","p6001s1"],["p6002","p6067"],["p6003","p6003s1"],["p6030","p6030s1"],
+["p6031","p6031s1"],["p6035","p6035s1"],["p6047","p6047s1"]
+];
+
+// Parent relationships
+const PR=[
+["p1001","p2001"],["p1001s1","p2001"],["p1001","p2002"],["p1001s1","p2002"],["p1001","p2003"],["p1001s1","p2003"],
+["p2001","p3001"],["p2001s1","p3001"],["p2001","p3002"],["p2001s1","p3002"],
+["p2001","p3003"],["p2001s1","p3003"],["p2001","p3004"],["p2001s1","p3004"],
+["p2001","p3005"],["p2001s1","p3005"],["p2001","p3006"],["p2001s1","p3006"],
+["p2001","p3007"],["p2001s1","p3007"],
+["p2003","p3008"],["p2003s1","p3008"],["p2003","p3009"],["p2003s1","p3009"],
+["p2003","p3010"],["p2003s1","p3010"],["p2003","p3011"],["p2003s1","p3011"],
+["p2003","p3012"],["p2003s1","p3012"],["p2003","p3013"],["p2003s2","p3013"],
+
+["p3001s1","p4001"],["p3001","p4001"],
+["p3003s1","p4002"],["p3003","p4002"],
+["p3003s1","p4003"],["p3003","p4003"],
+
+["p3004s1","p4004"],["p3004","p4004"],
+["p3004s1","p4005"],["p3004","p4005"],
+
+["p3005s1","p4006"],["p3005","p4006"],
+["p3005s1","p4007"],["p3005","p4007"],
+
+["p3005s1","p4008"],["p3005","p4008"],
+
+["p3006s1","p4009"],["p3006","p4009"],
+["p3006s1","p4010"],["p3006","p4010"],
+
+["p3007s1","p4011"],["p3007","p4011"],
+["p3007s1","p4012"],["p3007","p4012"],
+
+["p3009s1","p4013"],["p3009","p4013"],
+["p3009s1","p4014"],["p3009","p4014"],
+
+["p3010","p4015"],["p3010s1","p4015"],
+["p3010","p4016"],["p3010s1","p4016"],
+["p3010","p4017"],["p3010s1","p4017"],
+
+["p3011","p4018"],["p3011s1","p4018"],
+["p3011","p4019"],["p3011s1","p4019"],
+["p3011","p4020"],["p3011s1","p4020"],
+["p3011","p4021"],["p3011s1","p4021"],
+
+["p3012","p4022"],["p3012s1","p4022"],
+
+["p3013","p4023"],["p3013s1","p4023"],
+["p3013","p4024"],["p3013s1","p4024"],
+
+["p4002","p5001"],["p4002s1","p5001"],
+
+["p4005","p5002"],["p4005s1","p5002"],
+["p4005","p5003"],["p4005s1","p5003"],
+["p4005","p5004"],["p4005s1","p5004"],
+["p4005","p5005"],["p4005s1","p5005"],
+
+["p4006","p5006"],["p4006s1","p5006"],
+["p4006","p5007"],["p4006s1","p5007"],
+["p4006","p5008"],["p4006s1","p5008"],
+
+["p4007","p5009"],["p4007s1","p5009"],
+["p4007","p5010"],["p4007s1","p5010"],
+["p4007","p5011"],["p4007s1","p5011"],
+["p4007","p5012"],["p4007s1","p5012"],
+["p4007","p5013"],["p4007s1","p5013"],
+
+["p4009","p5014"],["p4009s1","p5014"],
+["p4009","p5015"],["p4009s1","p5015"],
+["p4009","p5016"],["p4009s1","p5016"],
+["p4009","p5017"],["p4009s1","p5017"],
+
+["p4010","p5018"],["p4010s1","p5018"],
+["p4010","p5019"],["p4010s1","p5019"],
+["p4010","p5020"],["p4010s1","p5020"],
+
+["p4011","p5021"],["p4011s1","p5021"],
+["p4011","p5022"],["p4011s1","p5022"],
+["p4011","p5023"],["p4011s1","p5023"],
+
+["p4012","p5024"],["p4012s1","p5024"],
+["p4012","p5025"],["p4012s1","p5025"],
+
+["p4013","p5026"],["p4013s1","p5026"],
+
+["p4015","p5027"],["p4015s1","p5027"],
+["p4015","p5028"],["p4015s1","p5028"],
+
+["p4016","p5029"],["p4016s1","p5029"],
+["p4016","p5030"],["p4016s1","p5030"],
+["p4016","p5031"],["p4016s1","p5031"],
+
+["p4017","p5032"],["p4017s1","p5032"],
+["p4017","p5033"],["p4017s1","p5033"],
+
+["p4018","p5042"],["p4018s1","p5042"],
+
+["p4019","p5035"],["p4019s1","p5035"],
+["p4019","p5036"],["p4019s1","p5036"],
+["p4019","p5037"],["p4019s1","p5037"],
+
+["p4021","p5038"],["p4021s1","p5038"],
+["p4021","p5039"],["p4021s1","p5039"],
+["p4021","p5040"],["p4021s1","p5040"],
+["p4021","p5041"],["p4021s1","p5041"],
+
+["p5001","p6001"],["p5034","p6001"],
+["p5001","p6002"],["p5034","p6002"],
+
+["p5002","p6003"],["p5002s1","p6003"],
+["p5002","p6004"],["p5002s1","p6004"],
+["p5002","p6005"],["p5002s1","p6005"],
+
+["p5003","p6006"],["p5003s1","p6006"],
+
+["p5006","p6007"],["p5006s1","p6007"],
+["p5006","p6008"],["p5006s1","p6008"],
+
+["p5007","p6009"],["p5007s1","p6009"],
+["p5007","p6010"],["p5007s1","p6010"],
+
+["p5008","p6011"],["p5008s1","p6011"],
+["p5008","p6012"],["p5008s1","p6012"],
+["p5008","p6013"],["p5008s1","p6013"],
+
+["p5009","p6014"],["p5009s2","p6014"],
+["p5009","p6015"],["p5009s2","p6015"],
+["p5009","p6016"],["p5009s2","p6016"],
+
+["p5010","p6017"],["p5010s1","p6017"],
+["p5010","p6018"],["p5010s1","p6018"],
+
+["p5013","p6019"],["p5013s1","p6019"],
+["p5013","p6020"],["p5013s1","p6020"],
+
+["p5015","p6021"],["p5015s1","p6021"],
+["p5015","p6022"],["p5015s1","p6022"],
+
+["p5017","p6023"],["p5017s1","p6023"],
+["p5017","p6024"],["p5017s1","p6024"],
+
+["p5018","p6025"],["p5018s1","p6025"],
+["p5018","p6026"],["p5018s1","p6026"],
+
+["p5020","p6027"],["p5020s1","p6027"],
+["p5020","p6028"],["p5020s1","p6028"],
+["p5020","p6029"],["p5020s1","p6029"],
+
+["p5021","p6030"],["p5021s1","p6030"],
+
+["p5022","p6031"],["p5022s1","p6031"],
+["p5022","p6032"],["p5022s1","p6032"],
+["p5022","p6033"],["p5022s1","p6033"],
+["p5022","p6034"],["p5022s1","p6034"],
+
+["p5023","p6035"],["p5023s1","p6035"],
+["p5023","p6036"],["p5023s1","p6036"],
+["p5023","p6037"],["p5023s1","p6037"],
+["p5023","p6038"],["p5023s1","p6038"],
+
+["p5026","p6039"],["p5026s1","p6039"],
+["p5026","p6040"],["p5026s1","p6040"],
+
+["p5027","p6041"],["p5027s1","p6041"],
+["p5027","p6042"],["p5027s1","p6042"],
+
+["p5028","p6043"],["p5028s1","p6043"],
+["p5028","p6044"],["p5028s1","p6044"],
+
+["p5029","p6045"],["p5029s1","p6045"],
+["p5029","p6046"],["p5029s1","p6046"],
+
+["p5030","p6047"],["p5030s1","p6047"],
+["p5030","p6048"],["p5030s1","p6048"],
+["p5030","p6049"],["p5030s1","p6049"],
+
+["p5031","p6050"],["p5031s1","p6050"],
+["p5031","p6051"],["p5031s1","p6051"],
+["p5031","p6052"],["p5031s1","p6052"],
+["p5031","p6053"],["p5031s1","p6053"],
+
+["p5032","p6054"],["p5032s1","p6054"],
+["p5032","p6055"],["p5032s1","p6055"],
+["p5032","p6056"],["p5032s1","p6056"],
+["p5032","p6057"],["p5032s1","p6057"],
+
+["p5033","p6058"],["p5033s1","p6058"],
+["p5033","p6059"],["p5033s1","p6059"],
+["p5033","p6060"],["p5033s1","p6060"],
+
+["p5039","p6061"],["p5039s1","p6061"],
+["p5039","p6062"],["p5039s1","p6062"],
+["p5039","p6063"],["p5039s1","p6063"],
+
+["p5040","p6064"],["p5040s1","p6064"],
+["p5040","p6065"],["p5040s1","p6065"],
+["p5040","p6066"],["p5040s1","p6066"],
+
+["p6001","p7001"],["p6001s1","p7001"],
+["p6001","p7002"],["p6001s1","p7002"],
+
+["p6002","p7003"],["p6067","p7003"],
+["p6002","p7004"],["p6067","p7004"],
+["p6002","p7005"],["p6067","p7005"],
+["p6002","p7006"],["p6067","p7006"],
+
+["p6030","p7007"],["p6030s1","p7007"],
+["p6030","p7008"],["p6030s1","p7008"],
+
+["p6035","p7009"],["p6035s1","p7009"],
+["p6035","p7010"],["p6035s1","p7010"],
+["p6035","p7011"],["p6035s1","p7011"],
+["p6035","p7012"],["p6035s1","p7012"]
+];
+
+// --------- Tree Rendering Logic (same as working version) ---------
+
+let N={}; for(let id in P) N[id]={id,p:P[id],sp:[],ch:[],x:0,y:0,d:0};
+SP.forEach(([a,b])=>{N[a].sp.push(N[b]);N[b].sp.push(N[a]);});
+let par={},chi={}; PR.forEach(([p,c])=>{(par[p]=par[p]||[]).push(c);(chi[c]=chi[c]||[]).push(p);});
+
+// Function to rebuild N object and relationships (needed after filtering)
+function rebuildN(){
+  N={}; 
+  for(let id in P) N[id]={id,p:P[id],sp:[],ch:[],x:0,y:0,d:0};
+  SP.forEach(([a,b])=>{N[a].sp.push(N[b]);N[b].sp.push(N[a]);});
+}
+
+function dad(id){let ps=chi[id]||[];return ps.find(x=>P[x].g==="m")||null;}
+
+// Determine if person is a blood descendant of Avigdor (has Karp ancestors)
+function isBloodDescendant(id){
+  // If they have parents in the tree, they're a blood descendant
+  if(chi[id] && chi[id].length > 0) return true;
+  // If they're Avigdor or Sarah (the roots), they're blood descendants
+  if(id === "p1001" || id === "p1hw") return true;
+  return false;
+}
+
+function tint(id){
+ if(id==="p2003s1"||dad(id)==="p2003s1") return "rgba(80,120,255,0.35)";
+ if(id==="p2003s2"||dad(id)==="p2003s2") return "rgba(80,220,140,0.35)";
+ return "#e2e8f0";}
+
+function dateStr(p){
+ if(p.b&&p.d)return `${p.b}–${p.d}`;
+ if(p.b)return`b. ${p.b}`;
+ if(p.d)return`d. ${p.d}`;
+ return"";}
+
+// Initialize relationship calculator from existing data
+function initializeRelationshipCalculator() {
+  try {
+    const personsData = Object.keys(P).map(id => ({
+      person_id: id,
+      name: P[id].n,
+      gender: P[id].g === '?' ? 'u' : P[id].g
+    }));
+    
+    const ancestorData = [];
+    Object.keys(P).forEach(personId => {
+      const isDescendant = personId === 'p1001' || (chi[personId] && chi[personId].length > 0);
+      if (!isDescendant) return;
+      
+      const ancestorRow = { Gen0_ID: personId };
+      
+      if (N[personId] && N[personId].sp) {
+        const spouses = N[personId].sp;
+        if (spouses.length > 0) ancestorRow.Gen0_Spouse1_ID = spouses[0].id;
+        if (spouses.length > 1) ancestorRow.Gen0_Spouse2_ID = spouses[1].id;
+      }
+      
+      let currentId = personId;
+      for (let gen = 1; gen <= 6; gen++) {
+        if (!chi[currentId] || chi[currentId].length === 0) break;
+        
+        const parents = chi[currentId];
+        let bloodParent = null;
+        let spouseParent = null;
+        
+        for (let parentId of parents) {
+          const isBlood = parentId === 'p1001' || (chi[parentId] && chi[parentId].length > 0);
+          if (isBlood) {
+            bloodParent = parentId;
+          } else {
+            spouseParent = parentId;
+          }
+        }
+        
+        if (!bloodParent) break;
+        
+        ancestorRow['Gen' + gen + '_ID'] = bloodParent;
+        if (spouseParent) ancestorRow['Gen' + gen + '_Spouse_ID'] = spouseParent;
+        
+        currentId = bloodParent;
+      }
+      
+      ancestorData.push(ancestorRow);
+    });
+    
+    relationshipCalc = new RelationshipCalculator();
+    relationshipCalc.loadData(personsData, ancestorData);
+    
+    console.log('Relationship calculator initialized: ' + personsData.length + ' persons, ' + ancestorData.length + ' descendants');
+  } catch (error) {
+    console.error('Failed to initialize relationship calculator:', error);
+  }
+}
+
+function build(root,maxDepth=999){
+ // Clear all children first
+ for(let id in N) N[id].ch=[];
+ 
+ let q=[[root,0]],seen=new Set([root]);
+ while(q.length){
+  let [a,d]=q.shift();
+  if(d>=maxDepth)continue; // Don't add children beyond max depth
+  
+  let kids=par[a]||[];
+  // Only include blood descendants as children
+  // If a person has two parents and one is not a blood descendant (married in),
+  // we only want to show the structure through blood descendants
+  let bloodKids = kids.filter(k => isBloodDescendant(k));
+  
+  bloodKids.sort();
+  N[a].ch=bloodKids.map(x=>N[x]);
+  bloodKids.forEach(k=>{if(!seen.has(k)){seen.add(k);q.push([k,d+1]);}});
+ }
+}
+build("p1001");
+
+// Build tree showing only people in the specified set (for relationship visualization)
+function buildFilteredTree(root, peopleToShow, maxDepth=999){
+ // Clear all children first
+ for(let id in N) N[id].ch=[];
+ 
+ let q=[[root,0]],seen=new Set([root]);
+ while(q.length){
+  let [a,d]=q.shift();
+  if(d>=maxDepth)continue;
+  
+  let kids=par[a]||[];
+  // Filter to only children that are in peopleToShow
+  let filteredKids = kids.filter(k => peopleToShow.has(k) && isBloodDescendant(k));
+  
+  filteredKids.sort();
+  N[a].ch=filteredKids.map(x=>N[x]);
+  filteredKids.forEach(k=>{if(!seen.has(k)){seen.add(k);q.push([k,d+1]);}});
+ }
+}
+
+function depth(n,d){n.d=d;n.ch.forEach(c=>depth(c,d+1));}
+
+function layout(root){
+ depth(N[root],0);
+ 
+ // Constants for new layout
+ const PERSON_WIDTH = 240;
+ const SPOUSE_WIDTH = 200;
+ const SPOUSE_OFFSET = 300;
+ const MIN_GAP = 150; // Increased from 120 to prevent overlaps
+ const GENERATION_HEIGHT = 270;
+ 
+ let x = 0;
+ 
+ // First pass: assign X positions accounting for spouse widths
+ function assignX(n){
+   if(!n.ch.length){
+     // Leaf node - calculate total width this person+spouses needs
+     let leftExtent = 0;
+     let rightExtent = 0;
+     
+     if(n.sp.length === 0){
+       leftExtent = PERSON_WIDTH / 2;
+       rightExtent = PERSON_WIDTH / 2;
+     } else if(n.sp.length === 1){
+       leftExtent = PERSON_WIDTH / 2;
+       rightExtent = SPOUSE_OFFSET + SPOUSE_WIDTH / 2;
+     } else if(n.sp.length === 2){
+       leftExtent = SPOUSE_OFFSET + SPOUSE_WIDTH / 2;
+       rightExtent = SPOUSE_OFFSET + SPOUSE_WIDTH / 2;
+     }
+     
+     n.x = x + leftExtent;
+     let totalWidth = leftExtent + rightExtent;
+     x += totalWidth + MIN_GAP;
+     
+   } else {
+     // Interior node - GROUP children by which spouse they came from
+     
+     // Group children by their other parent (spouse)
+     let childrenBySpouse = {};
+     n.ch.forEach(c => {
+       let parents = chi[c.id] || [];
+       let otherParent = parents.find(pid => pid !== n.id);
+       let key = otherParent || 'none';
+       if(!childrenBySpouse[key]) childrenBySpouse[key] = [];
+       childrenBySpouse[key].push(c);
+     });
+     
+     // Layout each group separately
+     let groups = Object.keys(childrenBySpouse);
+     
+     // Store starting X to calculate how much space children took
+     let childrenStartX = x;
+     
+     if(groups.length === 1){
+       // All children from one spouse (or no spouse info)
+       n.ch.forEach(assignX);
+       n.x = (n.ch[0].x + n.ch[n.ch.length-1].x) / 2;
+     } else {
+       // Multiple groups - position groups under their respective spouses
+       
+       // Sort groups: left spouse first, then right spouse
+       let leftSpouseId = n.sp.length > 0 && n.sp[0].side === 'left' ? n.sp[0].id : null;
+       let rightSpouseId = n.sp.length > 0 ? (n.sp.find(s => s.side === 'right') || n.sp[0]).id : null;
+       
+       let sortedGroups = [];
+       if(leftSpouseId && childrenBySpouse[leftSpouseId]) sortedGroups.push(leftSpouseId);
+       if(rightSpouseId && childrenBySpouse[rightSpouseId]) sortedGroups.push(rightSpouseId);
+       // Add any other groups
+       groups.forEach(g => {
+         if(g !== leftSpouseId && g !== rightSpouseId) sortedGroups.push(g);
+       });
+       
+       // Layout each group
+       sortedGroups.forEach((spouseId, idx) => {
+         childrenBySpouse[spouseId].forEach(assignX);
+         if(idx < sortedGroups.length - 1){
+           // Add extra gap between groups
+           x += MIN_GAP;
+         }
+       });
+       
+       // Position parent centered over ALL children
+       n.x = (n.ch[0].x + n.ch[n.ch.length-1].x) / 2;
+     }
+     
+     // Add extra spacing after this node to account for its width + spouse
+     // This prevents the NEXT sibling from overlapping with this one
+     let nodeWidth = 0;
+     if(n.sp.length === 0){
+       nodeWidth = PERSON_WIDTH;
+     } else if(n.sp.length === 1){
+       nodeWidth = PERSON_WIDTH / 2 + SPOUSE_OFFSET + SPOUSE_WIDTH / 2;
+     } else if(n.sp.length === 2){
+       nodeWidth = SPOUSE_OFFSET * 2;
+     }
+     
+     // Ensure X advances past this node's right edge
+     let nodeRightEdge = n.x + nodeWidth / 2;
+     if(x < nodeRightEdge + MIN_GAP){
+       x = nodeRightEdge + MIN_GAP;
+     }
+   }
+ }
+ assignX(N[root]);
+ 
+ // Second pass: assign Y positions based on generation
+ function assignY(n){
+   n.y = 150 + n.d * GENERATION_HEIGHT;
+   n.ch.forEach(assignY);
+ }
+ assignY(N[root]);
+ 
+ // Third pass: position spouses horizontally beside blood relatives
+ function positionSpouses(n){
+   if(n.sp.length === 1){
+     n.sp[0].x = n.x + SPOUSE_OFFSET;
+     n.sp[0].y = n.y;
+     n.sp[0].side = 'right';
+   } else if(n.sp.length === 2){
+     n.sp[0].x = n.x - SPOUSE_OFFSET;
+     n.sp[0].y = n.y;
+     n.sp[0].side = 'left';
+     n.sp[1].x = n.x + SPOUSE_OFFSET;
+     n.sp[1].y = n.y;
+     n.sp[1].side = 'right';
+   }
+   n.ch.forEach(positionSpouses);
+ }
+ positionSpouses(N[root]);
+ 
+ // Shift everything to ensure nothing goes off left edge
+ // First find the leftmost X coordinate
+ let minX = Infinity;
+ function findMinX(n){
+   // Check person's left edge (including left spouse if any)
+   let leftEdge = n.x - 120; // Half person width
+   if(n.sp.length > 0){
+     n.sp.forEach(s => {
+       if(s.side === 'left'){
+         leftEdge = Math.min(leftEdge, s.x - 100); // Half spouse width
+       }
+     });
+   }
+   minX = Math.min(minX, leftEdge);
+   n.ch.forEach(findMinX);
+ }
+ findMinX(N[root]);
+ 
+ // Shift so leftmost element is at x=500 (safe margin)
+ let shift = 500 - minX;
+ function shiftAll(n){
+   n.x += shift;
+   n.sp.forEach(s => s.x += shift);
+   n.ch.forEach(shiftAll);
+ }
+ shiftAll(N[root]);
+}
+
+// Simplified layout for relationship path view
+// Just spaces people evenly left-to-right without complex child-based positioning
+function layoutPathView(root){
+  depth(N[root], 0);
+  
+  const PERSON_WIDTH = 240;
+  const SPOUSE_WIDTH = 200;
+  const SPOUSE_OFFSET = 300;
+  const PERSON_SPACING = 1000; // Spacing between individuals
+  const FAMILY_GAP = 1500; // Extra spacing between different family branches
+  const GENERATION_HEIGHT = 270;
+  
+  // Collect all visible people by generation
+  let byGeneration = {};
+  function collect(n){
+    if(!byGeneration[n.d]) byGeneration[n.d] = [];
+    byGeneration[n.d].push(n);
+    n.ch.forEach(collect);
+  }
+  collect(N[root]);
+  
+  // Position each generation left-to-right, with gaps between family branches
+  Object.keys(byGeneration).forEach(gen => {
+    let people = byGeneration[gen];
+    
+    // Group people by their parents (to identify family branches)
+    let groupedByParents = {};
+    people.forEach(person => {
+      let parents = chi[person.id] || [];
+      let parentKey = parents.sort().join('-'); // Create unique key for parent pair
+      if(!groupedByParents[parentKey]) groupedByParents[parentKey] = [];
+      groupedByParents[parentKey].push(person);
+    });
+    
+    // Calculate positions with gaps between branches
+    let currentX = 15000;
+    let groups = Object.values(groupedByParents);
+    let totalWidth = 0;
+    
+    // Calculate total width needed
+    groups.forEach((group, groupIdx) => {
+      totalWidth += group.length * PERSON_SPACING;
+      if(groupIdx < groups.length - 1) totalWidth += FAMILY_GAP;
+    });
+    
+    // Start from center
+    currentX = 15000 - totalWidth / 2;
+    
+    // Position each family branch
+    groups.forEach((group, groupIdx) => {
+      group.forEach((person, idx) => {
+        person.x = currentX + idx * PERSON_SPACING;
+        person.y = 150 + person.d * GENERATION_HEIGHT;
+        
+        // Position spouses
+        if(person.sp.length === 1){
+          person.sp[0].x = person.x + SPOUSE_OFFSET;
+          person.sp[0].y = person.y;
+          person.sp[0].side = 'right';
+        } else if(person.sp.length === 2){
+          person.sp[0].x = person.x - SPOUSE_OFFSET;
+          person.sp[0].y = person.y;
+          person.sp[0].side = 'left';
+          person.sp[1].x = person.x + SPOUSE_OFFSET;
+          person.sp[1].y = person.y;
+          person.sp[1].side = 'right';
+        }
+      });
+      
+      currentX += group.length * PERSON_SPACING;
+      if(groupIdx < groups.length - 1) currentX += FAMILY_GAP;
+    });
+  });
+}
+
+layout("p1001");
+
+// Filter variables
+let currentRoot="p1001";
+let maxGen=7;
+
+// Photo manifest system
+let photoFolders = new Map(); // Keep for compatibility
+let photoManifest = new Map(); // person_id -> array of {folder, filename}
+
+function hasPhotos(personId) {
+  return photoManifest.has(personId);
+}
+
+function draw(rootId=currentRoot,maxDepth=maxGen){
+ let svg=document.getElementById("svg"); while(svg.firstChild)svg.removeChild(svg.firstChild);
+
+ // Draw white background first
+ let bg=document.createElementNS("http://www.w3.org/2000/svg","rect");
+ bg.setAttribute("x",0);
+ bg.setAttribute("y",0);
+ bg.setAttribute("width",50000);  // Increased width for wider tree
+ bg.setAttribute("height",10000);
+ bg.setAttribute("fill","white");
+ svg.appendChild(bg);
+
+ // Draw generation bands (so they appear behind everything)
+ for(let gen=0;gen<maxDepth;gen++){
+   let band=document.createElementNS("http://www.w3.org/2000/svg","rect");
+   band.setAttribute("x",0);
+   band.setAttribute("y",150+gen*270-100);
+   band.setAttribute("width",50000);  // Increased width to cover wider tree
+   band.setAttribute("height",270);
+   band.setAttribute("fill",gen%2===0?"rgba(200,220,255,0.4)":"rgba(255,245,220,0.4)");
+   svg.appendChild(band);
+   
+   // Add generation label on left side
+   let label=document.createElementNS("http://www.w3.org/2000/svg","text");
+   label.setAttribute("x",100);
+   label.setAttribute("y",150+gen*270);
+   label.setAttribute("font-size","14");
+   label.setAttribute("font-weight","bold");
+   label.setAttribute("fill","#666");
+   label.textContent="Gen "+(gen+1);
+   svg.appendChild(label);
+ }
+
+ function R(x,y,w,h,f,b){
+  let r=document.createElementNS("http://www.w3.org/2000/svg","rect");
+  r.setAttribute("x",x);r.setAttribute("y",y);
+  r.setAttribute("width",w);r.setAttribute("height",h);
+  r.setAttribute("rx",10);r.setAttribute("fill",f);
+  r.setAttribute("stroke",b);r.setAttribute("stroke-width","2");
+  svg.appendChild(r);}
+
+ function T(x,y,t,cls){
+  let tt=document.createElementNS("http://www.w3.org/2000/svg","text");
+  tt.setAttribute("x",x);tt.setAttribute("y",y);
+  tt.setAttribute("class",cls);tt.textContent=t;svg.appendChild(tt);}
+
+ function L(x1,y1,x2,y2){
+  let p=document.createElementNS("http://www.w3.org/2000/svg","path");
+  p.setAttribute("d",`M ${x1} ${y1} L ${x2} ${y2}`);p.setAttribute("class","l");
+  svg.appendChild(p);}
+
+ function genderBorder(g){return g==="m"?"#337BFF":g==="f"?"#FF69B4":"#000000";}
+
+ function node(n,depth=0){
+  if(depth>=maxDepth)return; // Stop at max generation
+  
+  const W=240, H=75; // Blood relative box dimensions
+  const SW=200, SH=65; // Spouse box dimensions (smaller)
+  const BLOOD_COLOR = "rgba(220,235,255,1.0)"; // Slightly darker for blood relatives
+  const SPOUSE_COLOR = "rgba(240,245,255,0.8)"; // Lighter for spouses
+  
+  // Draw blood relative (main person) - centered
+  let bx = n.x - W/2;
+  let by = n.y - H/2;
+  
+  // Create clickable group for main person
+  let g = document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.style.cursor = "pointer";
+  g.onclick = () => showPhotoPopup(n.id);
+  
+  let r = document.createElementNS("http://www.w3.org/2000/svg","rect");
+  r.setAttribute("x", bx);
+  r.setAttribute("y", by);
+  r.setAttribute("width", W);
+  r.setAttribute("height", H);
+  r.setAttribute("rx", 10);
+  r.setAttribute("fill", BLOOD_COLOR);
+  r.setAttribute("stroke", genderBorder(n.p.g));
+  r.setAttribute("stroke-width", "2");
+  g.appendChild(r);
+  
+  // Add photo icon if person has photo folder
+  if(hasPhotos(n.id)){
+    let icon = document.createElementNS("http://www.w3.org/2000/svg","text");
+    icon.setAttribute("x", bx + W - 20);
+    icon.setAttribute("y", by + 20);
+    icon.setAttribute("font-size", "16");
+    icon.setAttribute("class", "photo-icon");
+    icon.textContent = "📷";
+    g.appendChild(icon);
+  }
+  
+  svg.appendChild(g);
+  T(n.x, n.y - 12, n.p.n, "n");
+  let ds = dateStr(n.p);
+  if(ds) T(n.x, n.y + 8, ds, "d");
+  
+  // Draw spouses horizontally beside blood relative
+  let spouseConnectionPoints = {}; // Track where children should connect
+  
+  n.sp.forEach((s, idx) => {
+    let sx = s.x - SW/2; // Use smaller width
+    let sy = s.y - SH/2; // Use smaller height
+    
+    // Create clickable group for spouse
+    let sg = document.createElementNS("http://www.w3.org/2000/svg","g");
+    sg.style.cursor = "pointer";
+    sg.onclick = () => showPhotoPopup(s.id);
+    
+    let sr = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    sr.setAttribute("x", sx);
+    sr.setAttribute("y", sy);
+    sr.setAttribute("width", SW); // Smaller
+    sr.setAttribute("height", SH); // Smaller
+    sr.setAttribute("rx", 10);
+    sr.setAttribute("fill", SPOUSE_COLOR);
+    sr.setAttribute("stroke", genderBorder(s.p.g));
+    sr.setAttribute("stroke-width", "2");
+    sg.appendChild(sr);
+    
+    // Add photo icon if spouse has photos
+    if(hasPhotos(s.id)){
+      let sicon = document.createElementNS("http://www.w3.org/2000/svg","text");
+      sicon.setAttribute("x", sx + SW - 20);
+      sicon.setAttribute("y", sy + 18);
+      sicon.setAttribute("font-size", "14");
+      sicon.setAttribute("class", "photo-icon");
+      sicon.textContent = "📷";
+      sg.appendChild(sicon);
+    }
+    
+    svg.appendChild(sg);
+    T(s.x, s.y - 10, s.p.n, "n");
+    let ds2 = dateStr(s.p);
+    if(ds2) T(s.x, s.y + 8, ds2, "d");
+    
+    // Draw horizontal === line between blood relative and spouse
+    // Stagger Y position if multiple spouses (left higher, right lower)
+    let lineYOffset = s.side === 'left' ? -15 : 15;
+    let lineY = n.y + lineYOffset;
+    let startX = s.side === 'left' ? s.x + SW/2 : n.x + W/2;
+    let endX = s.side === 'left' ? n.x - W/2 : s.x - SW/2;
+    
+    // Draw three parallel lines for === effect
+    for(let i = -1; i <= 1; i++){
+      let line = document.createElementNS("http://www.w3.org/2000/svg","line");
+      line.setAttribute("x1", startX);
+      line.setAttribute("y1", lineY + i * 6);
+      line.setAttribute("x2", endX);
+      line.setAttribute("y2", lineY + i * 6);
+      line.setAttribute("stroke", "#444");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+    }
+    
+    // Store connection point for children (middle of === line)
+    let connectionX = (startX + endX) / 2;
+    spouseConnectionPoints[s.id] = {x: connectionX, y: lineY};
+  });
+  
+  // Draw ORTHOGONAL lines to children (vertical then horizontal)
+  n.ch.forEach(c => {
+    if(depth + 1 < maxDepth){ // Only draw lines to children we'll show
+      // Find which parent this child came from
+      let parents = chi[c.id] || [];
+      let otherParent = parents.find(x => x !== n.id);
+      
+      let connectionPoint;
+      let isLeftSpouse = false;
+      let isRightSpouse = false;
+      
+      if(otherParent && spouseConnectionPoints[otherParent]){
+        // Child comes from a specific spouse
+        connectionPoint = spouseConnectionPoints[otherParent];
+        // Determine if this is left or right spouse
+        let spouse = n.sp.find(s => s.id === otherParent);
+        if(spouse){
+          isLeftSpouse = spouse.side === 'left';
+          isRightSpouse = spouse.side === 'right';
+        }
+      } else {
+        // No spouse info, connect from blood relative
+        connectionPoint = {x: n.x, y: n.y + H/2};
+      }
+      
+      // Draw orthogonal line: vertical down, then horizontal to child
+      // STAGGER the horizontal line Y level based on which spouse
+      let midY;
+      if(isLeftSpouse){
+        midY = n.y + 80; // Left spouse children: higher horizontal line
+      } else if(isRightSpouse){
+        midY = n.y + 120; // Right spouse children: lower horizontal line
+      } else {
+        midY = n.y + 100; // Default: middle
+      }
+      
+      // Vertical segment from parent connection point
+      let vLine = document.createElementNS("http://www.w3.org/2000/svg","line");
+      vLine.setAttribute("x1", connectionPoint.x);
+      vLine.setAttribute("y1", connectionPoint.y);
+      vLine.setAttribute("x2", connectionPoint.x);
+      vLine.setAttribute("y2", midY);
+      vLine.setAttribute("stroke", "#444");
+      vLine.setAttribute("stroke-width", "1.5");
+      svg.appendChild(vLine);
+      
+      // Horizontal segment to child's X position
+      let hLine = document.createElementNS("http://www.w3.org/2000/svg","line");
+      hLine.setAttribute("x1", connectionPoint.x);
+      hLine.setAttribute("y1", midY);
+      hLine.setAttribute("x2", c.x);
+      hLine.setAttribute("y2", midY);
+      hLine.setAttribute("stroke", "#444");
+      hLine.setAttribute("stroke-width", "1.5");
+      svg.appendChild(hLine);
+      
+      // Final vertical segment down to child
+      let vLine2 = document.createElementNS("http://www.w3.org/2000/svg","line");
+      vLine2.setAttribute("x1", c.x);
+      vLine2.setAttribute("y1", midY);
+      vLine2.setAttribute("x2", c.x);
+      vLine2.setAttribute("y2", c.y - H/2);
+      vLine2.setAttribute("stroke", "#444");
+      vLine2.setAttribute("stroke-width", "1.5");
+      svg.appendChild(vLine2);
+    }
+  });
+  
+  // Recursively draw children
+  n.ch.forEach(c => node(c, depth + 1));
+ }
+
+ node(N[rootId]);
+}
+
+// Draw tree with highlighted paths for relationship visualization
+function drawWithHighlightedPaths(rootId, maxDepth, path1, path2, person1Id, person2Id){
+  // Create sets for quick lookup
+  let path1Set = new Set(path1);
+  let path2Set = new Set(path2);
+  
+  // Draw the tree, but we'll modify how we draw lines in the path
+  let svg=document.getElementById("svg"); while(svg.firstChild)svg.removeChild(svg.firstChild);
+
+  // ... (rest of draw logic, but need to pass path info to the node drawing)
+  // Actually this is getting complicated. Let me take a different approach:
+  // Draw normally, then overlay thick colored lines on top
+  
+  draw(rootId, maxDepth);
+  let svgEl = document.getElementById("svg");
+  
+  // Now overlay thick colored connection lines for the paths
+  // The connections should follow the parent→child routing
+  
+  function highlightConnection(parentId, childId, color){
+    if(!N[parentId] || !N[childId]) return;
+    
+    let parent = N[parentId];
+    let child = N[childId];
+    
+    // Find which spouse this child comes from
+    let parents = chi[childId] || [];
+    let otherParent = parents.find(x => x !== parentId);
+    
+    let connectionPoint;
+    let isLeftSpouse = false;
+    let isRightSpouse = false;
+    
+    if(otherParent){
+      // Find the spouse
+      let spouse = parent.sp.find(s => s.id === otherParent);
+      if(spouse){
+        isLeftSpouse = spouse.side === 'left';
+        isRightSpouse = spouse.side === 'right';
+        // Connection point is on the === line
+        let lineYOffset = spouse.side === 'left' ? -15 : 15;
+        let lineY = parent.y + lineYOffset;
+        let startX = spouse.side === 'left' ? spouse.x + 100 : parent.x + 120;
+        let endX = spouse.side === 'left' ? parent.x - 120 : spouse.x - 100;
+        connectionPoint = {x: (startX + endX) / 2, y: lineY};
+      }
+    }
+    
+    if(!connectionPoint){
+      connectionPoint = {x: parent.x, y: parent.y + 37.5};
+    }
+    
+    // Determine midY based on spouse side
+    const H = 75;
+    let midY;
+    if(isLeftSpouse){
+      midY = parent.y + 80;
+    } else if(isRightSpouse){
+      midY = parent.y + 120;
+    } else {
+      midY = parent.y + 100;
+    }
+    
+    // Draw thick colored orthogonal path following the existing routing
+    let pathStr = `M ${connectionPoint.x} ${connectionPoint.y} L ${connectionPoint.x} ${midY} L ${child.x} ${midY} L ${child.x} ${child.y - H/2}`;
+    
+    let line = document.createElementNS("http://www.w3.org/2000/svg","path");
+    line.setAttribute("d", pathStr);
+    line.setAttribute("stroke", color);
+    line.setAttribute("stroke-width", "10");
+    line.setAttribute("fill", "none");
+    line.setAttribute("opacity", "0.5");
+    line.setAttribute("stroke-linecap", "round");
+    line.setAttribute("stroke-linejoin", "round");
+    svgEl.appendChild(line);
+  }
+  
+  // Highlight path 1 in orange
+  for(let i = 0; i < path1.length - 1; i++){
+    highlightConnection(path1[i], path1[i+1], "#FF6B35");
+  }
+  
+  // Highlight path 2 in yellow
+  for(let i = 0; i < path2.length - 1; i++){
+    highlightConnection(path2[i], path2[i+1], "#FFD93D");
+  }
+  
+  // Highlight the two people themselves with colored borders
+  if(N[person1Id]){
+    let rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    rect.setAttribute("x", N[person1Id].x - 125);
+    rect.setAttribute("y", N[person1Id].y - 42);
+    rect.setAttribute("width", 250);
+    rect.setAttribute("height", 85);
+    rect.setAttribute("rx", 12);
+    rect.setAttribute("fill", "none");
+    rect.setAttribute("stroke", "#FF6B35");
+    rect.setAttribute("stroke-width", "4");
+    svgEl.appendChild(rect);
+  }
+  
+  if(N[person2Id]){
+    let rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    rect.setAttribute("x", N[person2Id].x - 125);
+    rect.setAttribute("y", N[person2Id].y - 42);
+    rect.setAttribute("width", 250);
+    rect.setAttribute("height", 85);
+    rect.setAttribute("rx", 12);
+    rect.setAttribute("fill", "none");
+    rect.setAttribute("stroke", "#FFD93D");
+    rect.setAttribute("stroke-width", "4");
+    svgEl.appendChild(rect);
+  }
+}
+
+draw();
+
+// Initialize relationship calculator
+initializeRelationshipCalculator();
+
+// Load photo manifest from CSV
+loadPhotoManifest();
+
+let sc=1;document.getElementById("zoomDisplay").textContent="1.0x";
+function Z(k){
+  let wrap=document.getElementById("wrap");
+  let zoom=document.getElementById("zoom");
+  
+  // Get center point of current view in viewport coordinates
+  let viewCenterX=wrap.scrollLeft+wrap.clientWidth/2;
+  let viewCenterY=wrap.scrollTop+wrap.clientHeight/2;
+  
+  // Calculate center point in content coordinates (before zoom)
+  let contentCenterX=viewCenterX/sc;
+  let contentCenterY=viewCenterY/sc;
+  
+  // Apply new scale
+  let oldScale=sc;
+  sc*=k;
+  zoom.style.transform=`scale(${sc})`;
+  
+  // Update zoom display
+  document.getElementById("zoomDisplay").textContent=sc.toFixed(1)+"x";
+  
+  // Calculate where the center point is now (after zoom)
+  let newViewCenterX=contentCenterX*sc;
+  let newViewCenterY=contentCenterY*sc;
+  
+  // Adjust scroll to keep the center point in the same viewport position
+  wrap.scrollLeft=newViewCenterX-wrap.clientWidth/2;
+  wrap.scrollTop=newViewCenterY-wrap.clientHeight/2;
+}
+
+document.getElementById("wrap").addEventListener("wheel",e=>{
+ e.preventDefault();Z(e.deltaY<0?1.1:0.9);
+},{passive:false});
+
+setTimeout(()=>{
+ let wrap=document.getElementById("wrap");
+ wrap.scrollLeft=N["p1001"].x-wrap.clientWidth/2;
+ wrap.scrollTop=N["p1001"].y-140;
+},150);
+
+// Populate autocomplete datalists
+let dl1=document.getElementById("people1");
+let dl2=document.getElementById("people2");
+let dlSubtree=document.getElementById("peopleSubtree");
+let dlCousin=document.getElementById("peopleCousin");
+// Sort people alphabetically by name
+let sortedPeople=Object.keys(P).sort((a,b)=>P[a].n.localeCompare(P[b].n));
+sortedPeople.forEach(id=>{
+  let opt1=document.createElement("option");
+  opt1.value=P[id].n;
+  dl1.appendChild(opt1);
+  let opt2=document.createElement("option");
+  opt2.value=P[id].n;
+  dl2.appendChild(opt2);
+  let opt3=document.createElement("option");
+  opt3.value=P[id].n;
+  dlSubtree.appendChild(opt3);
+  let opt4=document.createElement("option");
+  opt4.value=P[id].n;
+  dlCousin.appendChild(opt4);
+});
+
+// Filter functions
+function filterByGeneration(gen){
+  document.getElementById("genLabel").textContent=gen;
+  maxGen=parseInt(gen);
+  
+  // Rebuild tree with filtered depth for horizontal condensing
+  build(currentRoot,maxGen-1); // maxGen-1 because we count from 0
+  layout(currentRoot);
+  draw(currentRoot,maxGen);
+  
+  // Recenter view
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      let wrap=document.getElementById("wrap");
+      let node=N[currentRoot];
+      if(node){
+        wrap.scrollLeft=node.x-wrap.clientWidth/2;
+        wrap.scrollTop=Math.max(0,node.y-200);
+      }
+    });
+  });
+}
+
+function showSubtree(){
+  let name=document.getElementById("subtreeRoot").value.trim();
+  if(!name){
+    alert("Please enter a person's name");
+    return;
+  }
+  
+  let id=Object.keys(P).find(id=>P[id].n.toLowerCase()===name.toLowerCase());
+  if(!id){
+    alert("Person not found");
+    return;
+  }
+  
+  // If this person is a spouse (not a blood descendant), use their blood spouse as root
+  const isBloodDescendant = id === 'p1001' || (chi[id] && chi[id].length > 0);
+  if (!isBloodDescendant && N[id]) {
+    // This is a spouse - find their blood descendant spouse
+    let bloodSpouseId = null;
+    // Check all blood descendants to find one married to this spouse
+    for (let personId in N) {
+      if (N[personId].sp) {
+        const hasThisSpouse = N[personId].sp.some(s => s.id === id);
+        if (hasThisSpouse) {
+          bloodSpouseId = personId;
+          break;
+        }
+      }
+    }
+    if (bloodSpouseId) {
+      id = bloodSpouseId;
+    }
+  }
+  
+  // Rebuild tree from this person as root
+  currentRoot=id;
+  build(currentRoot,maxGen-1);
+  layout(currentRoot);
+  draw(currentRoot,maxGen);
+  
+  // Reset zoom for better viewing
+  sc=1;document.getElementById("zoomDisplay").textContent="1.0x";
+  document.getElementById("zoom").style.transform=`scale(${sc})`;
+  
+  // Center on new root with better timing
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      let wrap=document.getElementById("wrap");
+      let node=N[currentRoot];
+      if(node){
+        wrap.scrollLeft=node.x-wrap.clientWidth/2;
+        wrap.scrollTop=Math.max(0,node.y-200);
+      }
+    });
+  });
+}
+
+function resetView(){
+  currentRoot="p1001";
+  maxGen=7;
+  document.getElementById("genSlider").value=7;
+  document.getElementById("genLabel").textContent=7;
+  document.getElementById("subtreeRoot").value="";
+  build("p1001",999); // Full tree
+  layout("p1001");
+  draw("p1001",7);
+  
+  // Reset zoom
+  sc=1;document.getElementById("zoomDisplay").textContent="1.0x";
+  document.getElementById("zoom").style.transform=`scale(${sc})`;
+  
+  // Center on root with better timing
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      let wrap=document.getElementById("wrap");
+      wrap.scrollLeft=N["p1001"].x-wrap.clientWidth/2;
+      wrap.scrollTop=N["p1001"].y-140;
+    });
+  });
+}
+
+// Clear all - reset tree and clear all inputs/highlights
+function openUserGuide(){
+  document.getElementById('userGuideModal').style.display = 'block';
+}
+
+function closeUserGuide(){
+  document.getElementById('userGuideModal').style.display = 'none';
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    closeUserGuide();
+  }
+});
+
+function clearAll(){
+  // Rebuild N object to restore all spouse relationships
+  rebuildN();
+  
+  // Reset view
+  currentRoot="p1001";
+  maxGen=7;
+  document.getElementById("genSlider").value=7;
+  document.getElementById("genLabel").textContent=7;
+  document.getElementById("subtreeRoot").value="";
+  build("p1001",999);
+  layout("p1001");
+  draw("p1001",7);
+  
+  // Reset zoom
+  sc=1;document.getElementById("zoomDisplay").textContent="1.0x";
+  document.getElementById("zoom").style.transform=`scale(${sc})`;
+  
+  // Clear all input fields
+  document.getElementById("person1").value="";
+  document.getElementById("person2").value="";
+  document.getElementById("result").innerHTML="";
+  document.getElementById("cousinPerson").value="";
+  document.getElementById("cousinResult").innerHTML="";
+  
+  // Remove all highlights
+  document.querySelectorAll(".highlight").forEach(el=>el.remove());
+  
+  // Close all menus
+  let menus=['genMenu','focusMenu','relMenu','cousinMenu'];
+  menus.forEach(id=>document.getElementById(id).style.display='none');
+  
+  // Recenter
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      let wrap=document.getElementById("wrap");
+      wrap.scrollLeft=N["p1001"].x-wrap.clientWidth/2;
+      wrap.scrollTop=N["p1001"].y-140;
+    });
+  });
+}
+
+// Find all ancestors (BFS to get all paths)
+function getAncestors(id){
+  let ancestors=new Set();
+  let queue=[id];
+  let visited=new Set();
+  
+  while(queue.length>0){
+    let current=queue.shift();
+    if(visited.has(current))continue;
+    visited.add(current);
+    ancestors.add(current);
+    
+    let parents=chi[current]||[];
+    parents.forEach(p=>queue.push(p));
+  }
+  
+  return Array.from(ancestors);
+}
+
+// Find most recent common ancestor
+function findMRCA(id1,id2){
+  let anc1=getAncestors(id1);
+  let anc2=getAncestors(id2);
+  
+  // Find all common ancestors
+  let common=anc1.filter(a=>anc2.includes(a));
+  if(common.length===0)return null;
+  
+  // Find the "closest" one (minimum generation distance)
+  let best=null;
+  let minDist=Infinity;
+  for(let c of common){
+    let dist=getGenerationDistance(id1,c)+getGenerationDistance(id2,c);
+    if(dist<minDist){
+      minDist=dist;
+      best=c;
+    }
+  }
+  return best;
+}
+
+// Get generation distance between two people (assumes ancestor relationship)
+function getGenerationDistance(from,to){
+  let queue=[[from,0]];
+  let visited=new Set();
+  
+  while(queue.length>0){
+    let [current,dist]=queue.shift();
+    if(current===to)return dist;
+    if(visited.has(current))continue;
+    visited.add(current);
+    
+    let parents=chi[current]||[];
+    parents.forEach(p=>queue.push([p,dist+1]));
+  }
+  return Infinity;
+}
+
+// Get basic relationship type (without names) from distances
+function getRelationType(dist1,dist2,gender1,gender2){
+  // Direct ancestor/descendant
+  if(dist1===0){
+    if(dist2===1)return "parent";
+    if(dist2===2)return "grandparent";
+    let greats="great-".repeat(dist2-2);
+    return greats+"grandparent";
+  }
+  if(dist2===0){
+    if(dist1===1)return "child";
+    if(dist1===2)return "grandchild";
+    let greats="great-".repeat(dist1-2);
+    return greats+"grandchild";
+  }
+  
+  // Siblings
+  if(dist1===1&&dist2===1)return "sibling";
+  
+  // Aunt/Uncle - Niece/Nephew
+  if(dist1===2&&dist2===1){
+    return gender1==="f"?"niece":(gender1==="m"?"nephew":"niece/nephew");
+  }
+  if(dist1===1&&dist2===2){
+    return gender1==="f"?"aunt":(gender1==="m"?"uncle":"aunt/uncle");
+  }
+  
+  // Cousins
+  if(dist1===2&&dist2===2)return "1st cousin";
+  if(dist1===3&&dist2===3)return "2nd cousin";
+  if(dist1===4&&dist2===4)return "3rd cousin";
+  
+  // Removed cousins
+  let minDist=Math.min(dist1,dist2);
+  let maxDist=Math.max(dist1,dist2);
+  let removed=maxDist-minDist;
+  if(minDist>=2){
+    let cousinDegree=minDist-1;
+    let degreeNames=["","1st","2nd","3rd","4th","5th"];
+    return (degreeNames[cousinDegree]||cousinDegree+"th")+" cousin "+removed+" removed";
+  }
+  
+  // Grand-aunt/uncle, grand-niece/nephew
+  if(dist1===1&&dist2>2){
+    let greats="great-".repeat(dist2-3);
+    return gender1==="f"?greats+"grand-aunt":(gender1==="m"?greats+"grand-uncle":greats+"grand-aunt/uncle");
+  }
+  if(dist2===1&&dist1>2){
+    let greats="great-".repeat(dist1-3);
+    return gender1==="f"?greats+"grand-niece":(gender1==="m"?greats+"grand-nephew":greats+"grand-niece/nephew");
+  }
+  
+  return null;
+}
+
+// Describe relationship with proper formatting
+function describeRelationship(id1,id2,mrca){
+  if(id1===id2)return "Same person";
+  
+  let dist1=getGenerationDistance(id1,mrca);
+  let dist2=getGenerationDistance(id2,mrca);
+  
+  let relType=getRelationType(dist1,dist2,P[id1].g,P[id2].g);
+  
+  if(!relType){
+    return "Related through "+P[mrca].n+" ("+dist1+" generations from "+P[id1].n.split(' ')[0]+", "+dist2+" generations from "+P[id2].n.split(' ')[0]+")";
+  }
+  
+  // Symmetric relationships (siblings, cousins)
+  if(relType.includes("sibling") || relType.includes("cousin")){
+    return P[id1].n+" and "+P[id2].n+" are "+relType+"s";
+  }
+  
+  // Directional relationships
+  return P[id1].n+" is "+relType+" of "+P[id2].n;
+}
+
+// Get just the relationship word for use in spouse descriptions
+function getRelationshipWord(id1,id2,mrca){
+  let dist1=getGenerationDistance(id1,mrca);
+  let dist2=getGenerationDistance(id2,mrca);
+  return getRelationType(dist1,dist2,P[id1].g,P[id2].g);
+}
+
+// Convert relationship to in-law equivalent (gender-specific if possible)
+function toInLaw(relWord, gender){
+  if(!relWord)return null;
+  
+  // Gender-specific conversions
+  if(relWord==="parent"){
+    if(gender==="f")return "mother-in-law";
+    if(gender==="m")return "father-in-law";
+    return "parent-in-law";
+  }
+  if(relWord==="child"){
+    if(gender==="f")return "daughter-in-law";
+    if(gender==="m")return "son-in-law";
+    return "child-in-law";
+  }
+  if(relWord==="sibling"){
+    if(gender==="f")return "sister-in-law";
+    if(gender==="m")return "brother-in-law";
+    return "sibling-in-law";
+  }
+  
+  // Aunt/uncle, niece/nephew (already gender-specific)
+  if(relWord==="aunt")return "aunt-in-law";
+  if(relWord==="uncle")return "uncle-in-law";
+  if(relWord==="niece")return "niece-in-law";
+  if(relWord==="nephew")return "nephew-in-law";
+  if(relWord==="aunt/uncle")return "aunt/uncle-in-law";
+  if(relWord==="niece/nephew")return "niece/nephew-in-law";
+  
+  // For complex relationships, don't convert
+  return null;
+}
+
+// Reverse a relationship word (parent ↔ child, aunt ↔ niece, etc)
+function reverseRelWord(relWord){
+  if(!relWord)return null;
+  
+  // Direct reversals
+  if(relWord==="parent")return "child";
+  if(relWord==="child")return "parent";
+  if(relWord==="grandparent")return "grandchild";
+  if(relWord==="grandchild")return "grandparent";
+  if(relWord==="aunt")return "niece";
+  if(relWord==="uncle")return "nephew";
+  if(relWord==="niece")return "aunt";
+  if(relWord==="nephew")return "uncle";
+  if(relWord==="aunt/uncle")return "niece/nephew";
+  if(relWord==="niece/nephew")return "aunt/uncle";
+  
+  // Great-grandparents/grandchildren
+  if(relWord.includes("grandparent"))return relWord.replace("grandparent","grandchild");
+  if(relWord.includes("grandchild"))return relWord.replace("grandchild","grandparent");
+  
+  // Grand-aunt/uncle ↔ grand-niece/nephew
+  if(relWord.includes("grand-aunt"))return relWord.replace("grand-aunt","grand-niece");
+  if(relWord.includes("grand-uncle"))return relWord.replace("grand-uncle","grand-nephew");
+  if(relWord.includes("grand-niece"))return relWord.replace("grand-niece","grand-aunt");
+  if(relWord.includes("grand-nephew"))return relWord.replace("grand-nephew","grand-uncle");
+  if(relWord.includes("grand-aunt/uncle"))return relWord.replace("grand-aunt/uncle","grand-niece/nephew");
+  if(relWord.includes("grand-niece/nephew"))return relWord.replace("grand-niece/nephew","grand-aunt/uncle");
+  
+  // Symmetric relationships (no reversal needed)
+  if(relWord==="sibling")return "sibling";
+  if(relWord.includes("cousin"))return relWord;
+  
+  return null;
+}
+
+// Get path between two people through MRCA (BFS shortest path)
+function getPath(id1,id2,mrca){
+  // Get path from id1 to mrca
+  let path1=[];
+  let queue=[[id1,[id1]]];
+  let visited=new Set();
+  
+  while(queue.length>0){
+    let [current,path]=queue.shift();
+    if(current===mrca){path1=path;break;}
+    if(visited.has(current))continue;
+    visited.add(current);
+    
+    let parents=chi[current]||[];
+    parents.forEach(p=>queue.push([p,[...path,p]]));
+  }
+  
+  // Get path from id2 to mrca
+  let path2=[];
+  queue=[[id2,[id2]]];
+  visited=new Set();
+  
+  while(queue.length>0){
+    let [current,path]=queue.shift();
+    if(current===mrca){path2=path;break;}
+    if(visited.has(current))continue;
+    visited.add(current);
+    
+    let parents=chi[current]||[];
+    parents.forEach(p=>queue.push([p,[...path,p]]));
+  }
+  
+  // Combine paths (remove duplicate mrca)
+  path2.pop();
+  return [...path1,...path2.reverse()];
+}
+
+// Highlight path on the tree
+function highlightPath(pathIds){
+  // Remove previous highlights
+  document.querySelectorAll(".highlight").forEach(el=>el.remove());
+  
+  // Add highlights to nodes in path
+  let svg=document.getElementById("svg");
+  pathIds.forEach(id=>{
+    if(!N[id])return;
+    let n=N[id];
+    let h=document.createElementNS("http://www.w3.org/2000/svg","rect");
+    h.setAttribute("x",n.x-125);
+    h.setAttribute("y",n.y-40);
+    h.setAttribute("width",250);
+    h.setAttribute("height",85);
+    h.setAttribute("rx",12);
+    h.setAttribute("fill","none");
+    h.setAttribute("stroke","#FF6B00");
+    h.setAttribute("stroke-width","4");
+    h.setAttribute("class","highlight");
+    svg.appendChild(h);
+  });
+}
+
+function findRelationship(){
+  let name1=document.getElementById("person1").value.trim();
+  let name2=document.getElementById("person2").value.trim();
+  let result=document.getElementById("result");
+  
+  if(!relationshipCalc){
+    result.innerHTML="<span style='color:red;'>Relationship calculator not initialized</span>";
+    return;
+  }
+  
+  // Find IDs by name
+  let id1=Object.keys(P).find(id=>P[id].n.toLowerCase()===name1.toLowerCase());
+  let id2=Object.keys(P).find(id=>P[id].n.toLowerCase()===name2.toLowerCase());
+  
+  if(!id1||!id2){
+    result.innerHTML="<span style='color:red;'>Person not found</span>";
+    return;
+  }
+  
+  if(id1===id2){
+    result.innerHTML="<span style='color:blue;'>Same person</span>";
+    return;
+  }
+  
+  // Use the calculator
+  const rel = relationshipCalc.getRelationship(id1, id2);
+  
+  if(rel.relationship === 'Unknown' || rel.relationship === 'Unrelated'){
+    result.innerHTML="<span style='color:red;'>"+rel.relationship+"</span>";
+    return;
+  }
+  
+  // Format output
+  let displayHtml = "<strong>" + P[id1].n + " is the " + rel.relationship.toLowerCase() + " of " + P[id2].n + "</strong>";
+  if(rel.lca){
+    displayHtml += "<br><small>Common ancestor: " + rel.lca + "</small>";
+  }
+  
+  result.innerHTML = displayHtml;
+  
+  // Show filtered subtree with only the two paths
+  if(rel.lca_id){
+    currentRoot = rel.lca_id;
+    rebuildN();
+    
+    // Build paths from LCA to both people for highlighting
+    let path1 = rel.path1 || [];  // Path from LCA to person 1
+    let path2 = rel.path2 || [];  // Path from LCA to person 2
+    
+    console.log('=== RELATIONSHIP PATH DEBUG ===');
+    console.log('Person 1:', id1, P[id1]?.n);
+    console.log('Person 2:', id2, P[id2]?.n);
+    console.log('LCA:', rel.lca_id, P[rel.lca_id]?.n);
+    console.log('Path 1:', path1.map(id => `${id}(${P[id]?.n})`));
+    console.log('Path 2:', path2.map(id => `${id}(${P[id]?.n})`));
+    
+    // Combine paths into a set of people to show
+    let peopleToShow = new Set([...path1, ...path2]);
+    console.log('People to show:', Array.from(peopleToShow).map(id => `${id}(${P[id]?.n})`));
+    
+    // Build filtered tree with only people in paths (plus their spouses)
+    buildFilteredTree(rel.lca_id, peopleToShow, 7);
+    
+    // Check what actually got built
+    console.log('After filtered build:');
+    console.log('Root children:', N[rel.lca_id]?.ch.map(c => `${c.id}(${c.p.n})`));
+    
+    // Use simplified layout for path view (avoids overlaps)
+    layoutPathView(rel.lca_id);
+    
+    // Draw with highlighted paths
+    drawWithHighlightedPaths(rel.lca_id, 7, path1, path2, id1, id2);
+    
+    // Reset zoom and center
+    sc=1;
+    document.getElementById("zoomDisplay").textContent="1.0x";
+    document.getElementById("zoom").style.transform=`scale(${sc})`;
+    
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        let wrap=document.getElementById("wrap");
+        wrap.scrollLeft=N[rel.lca_id].x-wrap.clientWidth/2;
+        wrap.scrollTop=N[rel.lca_id].y-200;
+      });
+    });
+  }
+}
+
+
+// Helper: Convert spouse's relationship to in-law (only for parent/child/sibling)
+function convertToInLaw(spouseRel,personGender){
+  if(!spouseRel) return null;
+  
+  // ONLY parent, child, sibling get -in-law
+  // NOT grandparent, aunt, uncle, cousin, etc.
+  
+  if(spouseRel==='mother'||spouseRel==='father'||spouseRel==='parent'){
+    if(personGender==='f') return 'mother-in-law';
+    if(personGender==='m') return 'father-in-law';
+    return 'parent-in-law';
+  }
+  
+  if(spouseRel==='daughter'||spouseRel==='son'||spouseRel==='child'){
+    if(personGender==='f') return 'daughter-in-law';
+    if(personGender==='m') return 'son-in-law';
+    return 'child-in-law';
+  }
+  
+  if(spouseRel==='sister'||spouseRel==='brother'||spouseRel==='sibling'){
+    if(personGender==='f') return 'sister-in-law';
+    if(personGender==='m') return 'brother-in-law';
+    return 'sibling-in-law';
+  }
+  
+  // For everything else (aunt, uncle, cousin, grandparent, etc.), return null
+  // This signals to describe via blood spouse instead
+  return null;
+}
+
+// Helper function to filter tree to show only the path
+function showPathOnly(mrca,path,additionalSpouses=[]){
+  // Rebuild N to restore any filtered relationships
+  rebuildN();
+  
+  currentRoot=mrca;
+  build(mrca,999);
+  
+  // Add spouses of everyone in the path
+  let pathWithSpouses=new Set(path);
+  path.forEach(id=>{
+    if(N[id]){
+      N[id].sp.forEach(spouse=>{
+        pathWithSpouses.add(spouse.id);
+      });
+    }
+  });
+  
+  // Add any additional spouses (for spouse-spouse relationships)
+  additionalSpouses.forEach(id=>pathWithSpouses.add(id));
+  
+  function filterNode(node){
+    if(!pathWithSpouses.has(node.id)){
+      node.ch=[];
+      node.sp=[];
+    }else{
+      // Filter children to only include those in pathWithSpouses AND are blood descendants
+      node.ch=node.ch.filter(c=>pathWithSpouses.has(c.id) && isBloodDescendant(c.id));
+      node.sp=node.sp.filter(s=>pathWithSpouses.has(s.id));
+      node.ch.forEach(filterNode);
+    }
+  }
+  filterNode(N[mrca]);
+  
+  // Extra defensive step: ensure non-blood-descendants are ONLY in .sp arrays, never in .ch
+  function ensureSpousesOnly(node){
+    node.ch = node.ch.filter(c => isBloodDescendant(c.id));
+    node.ch.forEach(ensureSpousesOnly);
+  }
+  ensureSpousesOnly(N[mrca]);
+  
+  layout(mrca);
+  draw(mrca,7);
+  
+  // Reset zoom and center
+  sc=1;
+  document.getElementById("zoomDisplay").textContent="1.0x";
+  document.getElementById("zoom").style.transform=`scale(${sc})`;
+  
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      let wrap=document.getElementById("wrap");
+      wrap.scrollLeft=N[mrca].x-wrap.clientWidth/2;
+      wrap.scrollTop=N[mrca].y-200;
+    });
+  });
+  
+  // Highlight the path
+  highlightPath(path);
+}
+
+// Clear relationship finder
+function clearRelationship(){
+  document.getElementById("person1").value="";
+  document.getElementById("person2").value="";
+  document.getElementById("result").innerHTML="";
+  document.querySelectorAll(".highlight").forEach(el=>el.remove());
+}
+
+// Show only the subtree connecting two people
+function showRelationshipPath(){
+  let name1=document.getElementById("person1").value.trim();
+  let name2=document.getElementById("person2").value.trim();
+  let result=document.getElementById("result");
+  
+  if(!name1||!name2){
+    result.innerHTML="<span style='color:red;'>Please enter both names</span>";
+    return;
+  }
+  
+  // Find IDs
+  let id1=null,id2=null;
+  for(let id in P){
+    if(P[id].n.toLowerCase()===name1.toLowerCase())id1=id;
+    if(P[id].n.toLowerCase()===name2.toLowerCase())id2=id;
+  }
+  
+  if(!id1||!id2){
+    result.innerHTML="<span style='color:red;'>Person not found</span>";
+    return;
+  }
+  
+  // Keep track of original IDs for spouse handling
+  let origId1=id1, origId2=id2;
+  let id1IsSpouse=false, id2IsSpouse=false;
+  
+  let mrca=findMRCA(id1,id2);
+  
+  // If no blood relationship, check spouses (same logic as findRelationship)
+  if(!mrca){
+    let id1Spouses=N[id1].sp.map(s=>s.id);
+    for(let spouseId of id1Spouses){
+      mrca=findMRCA(spouseId,id2);
+      if(mrca){
+        id1=spouseId; // Use the blood relative instead
+        id1IsSpouse=true;
+        break;
+      }
+    }
+    
+    if(!mrca){
+      let id2Spouses=N[id2].sp.map(s=>s.id);
+      for(let spouseId of id2Spouses){
+        mrca=findMRCA(id1,spouseId);
+        if(mrca){
+          id2=spouseId; // Use the blood relative instead
+          id2IsSpouse=true;
+          break;
+        }
+      }
+    }
+    
+    if(!mrca){
+      result.innerHTML="<span style='color:red;'>No relationship found</span>";
+      return;
+    }
+  }
+  
+  // Get the full path from id1 to id2 through MRCA
+  let path=getPath(id1,id2,mrca);
+  
+  // Build a minimal tree containing only people in the path
+  // We need to include the MRCA as root and build down to both people
+  currentRoot=mrca;
+  
+  // Rebuild with only path nodes
+  build(mrca,999);
+  
+  // Filter to only show path nodes AND their spouses
+  let pathSet=new Set(path);
+  // Add spouses of everyone in the path
+  let pathWithSpouses=new Set(path);
+  path.forEach(id=>{
+    N[id].sp.forEach(spouse=>{
+      pathWithSpouses.add(spouse.id);
+    });
+  });
+  
+  function filterNode(node){
+    if(!pathWithSpouses.has(node.id)){
+      node.ch=[];
+      node.sp=[];
+    }else{
+      node.ch=node.ch.filter(c=>pathWithSpouses.has(c.id));
+      node.sp=node.sp.filter(s=>pathWithSpouses.has(s.id));
+      node.ch.forEach(filterNode);
+    }
+  }
+  filterNode(N[mrca]);
+  
+  layout(mrca);
+  draw(mrca,7);
+  
+  // Reset zoom and center
+  sc=1;document.getElementById("zoomDisplay").textContent="1.0x";
+  document.getElementById("zoom").style.transform=`scale(${sc})`;
+  
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      let wrap=document.getElementById("wrap");
+      wrap.scrollLeft=N[mrca].x-wrap.clientWidth/2;
+      wrap.scrollTop=N[mrca].y-200;
+    });
+  });
+  
+  // Highlight the path
+  highlightPath(path);
+  
+  // Build relationship message (handle spouse cases)
+  let relMessage;
+  
+  if(id1IsSpouse){
+    let relWord=getRelationshipWord(id1,id2,mrca);
+    let inLawWord=toInLaw(relWord,P[origId1].g);
+    
+    if(inLawWord){
+      relMessage=P[origId1].n+" is "+inLawWord+" of "+P[id2].n;
+    }else{
+      relMessage=P[origId1].n+" is spouse of "+P[id1].n+" who is "+relWord+" of "+P[id2].n;
+    }
+  }else if(id2IsSpouse){
+    let relWord=getRelationshipWord(id1,id2,mrca);
+    let reversedRelWord=reverseRelWord(relWord);
+    
+    if(reversedRelWord){
+      let inLawWord=toInLaw(reversedRelWord,P[origId2].g);
+      
+      if(inLawWord){
+        relMessage=P[origId2].n+" is "+inLawWord+" of "+P[id1].n;
+      }else{
+        relMessage=P[origId2].n+" is spouse of "+P[id2].n+" who is "+reversedRelWord+" of "+P[id1].n;
+      }
+    }else{
+      relMessage=P[origId2].n+" is spouse of "+P[id2].n+" who is "+relWord+" of "+P[id1].n;
+    }
+  }else{
+    relMessage=describeRelationship(id1,id2,mrca);
+  }
+  
+  result.innerHTML="<strong>"+relMessage+"</strong><br><small>Showing path only. Click 'Clear All' to restore full tree.</small>";
+}
+
+// Find all cousins of a specific degree
+function findCousins(){
+  let personName=document.getElementById("cousinPerson").value.trim();
+  let degree=parseInt(document.getElementById("cousinDegree").value);
+  let result=document.getElementById("cousinResult");
+  
+  if(!personName){
+    result.innerHTML="<span style='color:red;'>Please enter your name</span>";
+    return;
+  }
+  
+  // Find person ID
+  let personId=null;
+  for(let id in P){
+    if(P[id].n.toLowerCase()===personName.toLowerCase()){
+      personId=id;
+      break;
+    }
+  }
+  
+  if(!personId){
+    result.innerHTML="<span style='color:red;'>Person not found</span>";
+    return;
+  }
+  
+  // Find all people and check if they are nth cousins
+  let cousins=[];
+  for(let id in P){
+    if(id===personId)continue; // Skip self
+    
+    let mrca=findMRCA(personId,id);
+    if(!mrca)continue;
+    
+    let dist1=getGenerationDistance(personId,mrca);
+    let dist2=getGenerationDistance(id,mrca);
+    
+    // Check if they are exact nth cousins (not removed)
+    if(dist1===degree+1 && dist2===degree+1){
+      cousins.push({id:id,name:P[id].n});
+    }
+  }
+  
+  // Display results
+  if(cousins.length===0){
+    let degreeText=["","1st","2nd","3rd","4th"][degree]||degree+"th";
+    result.innerHTML="<span style='color:#666;'>No "+degreeText+" cousins found</span>";
+    return;
+  }
+  
+  cousins.sort((a,b)=>a.name.localeCompare(b.name));
+  
+  let degreeText=["","1st","2nd","3rd","4th"][degree]||degree+"th";
+  let html="<strong>"+degreeText+" cousins ("+cousins.length+"):</strong><ul style='margin:8px 0;padding-left:20px;'>";
+  cousins.forEach(c=>{
+    html+="<li style='margin:4px 0;cursor:pointer;' onclick='highlightPerson(\""+c.id+"\")'>"+c.name+"</li>";
+  });
+  html+="</ul>";
+  result.innerHTML=html;
+  
+  // Automatically show cousin subtree with highlighted paths
+  showCousinSubtree(personId, cousins);
+}
+
+// Show cousin subtree with diverging paths from LCA to cousin branches
+function showCousinSubtree(selectedPersonId, cousins){
+  if(cousins.length === 0) return;
+  
+  // Get relationship from selected person to first cousin to find LCA
+  let rel = relationshipCalc.getRelationship(selectedPersonId, cousins[0].id);
+  if(!rel.lca_id){
+    console.log("Could not find LCA");
+    return;
+  }
+  
+  let lca = rel.lca_id;
+  
+  // Collect all people needed for the paths
+  let peopleToShow = new Set();
+  peopleToShow.add(selectedPersonId);
+  peopleToShow.add(lca);
+  
+  // Get path from selected person to LCA
+  let selectedPersonPath = rel.path1; // Should be [LCA → selectedPerson]
+  if(selectedPersonPath){
+    selectedPersonPath.forEach(id => peopleToShow.add(id));
+  }
+  
+  // For each cousin, get their full path from LCA
+  let allCousinPaths = [];
+  cousins.forEach(cousin => {
+    let cousinRel = relationshipCalc.getRelationship(selectedPersonId, cousin.id);
+    if(cousinRel.path2){
+      allCousinPaths.push({
+        cousinId: cousin.id,
+        fullPath: cousinRel.path2 // [LCA → ... → cousin]
+      });
+      cousinRel.path2.forEach(id => peopleToShow.add(id));
+    }
+    peopleToShow.add(cousin.id);
+  });
+  
+  // Find the divergence point: the deepest level where all cousins still share the same ancestor
+  let divergenceLevel = 0;
+  if(allCousinPaths.length > 0){
+    let minPathLength = Math.min(...allCousinPaths.map(p => p.fullPath.length));
+    
+    // Check each level to see if all cousins share the same ancestor at that level
+    for(let level = 0; level < minPathLength; level++){
+      let ancestorAtLevel = allCousinPaths[0].fullPath[level];
+      let allShareAncestor = allCousinPaths.every(p => p.fullPath[level] === ancestorAtLevel);
+      
+      if(allShareAncestor){
+        divergenceLevel = level;
+      } else {
+        break; // Found where they diverge
+      }
+    }
+  }
+  
+  // Build branch paths - each goes from LCA to where it diverges from siblings
+  let cousinBranches = [];
+  allCousinPaths.forEach(pathObj => {
+    // Branch path goes from LCA (index 0) to the divergence point (inclusive)
+    let branchPath = pathObj.fullPath.slice(0, divergenceLevel + 2); // +2 to include the divergence point
+    
+    cousinBranches.push({
+      cousinId: pathObj.cousinId,
+      branchPath: branchPath
+    });
+  });
+  
+  // Rebuild N and build filtered tree
+  rebuildN();
+  currentRoot = lca;
+  buildFilteredTree(lca, peopleToShow, 7);
+  
+  // Use standard layout (respects parent-child structure naturally)
+  layout(lca);
+  
+  // Draw with diverging paths
+  drawDivergingCousinPaths(lca, 7, selectedPersonId, cousins, selectedPersonPath, cousinBranches);
+  
+  // Reset zoom to 1.0 and center on LCA
+  sc = 1;
+  document.getElementById("zoomDisplay").textContent = "1.0x";
+  document.getElementById("zoom").style.transform = `scale(${sc})`;
+  
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      let wrap = document.getElementById("wrap");
+      wrap.scrollLeft = N[lca].x - wrap.clientWidth/2;
+      wrap.scrollTop = N[lca].y - 200;
+    });
+  });
+}
+
+// Draw diverging paths from LCA to cousin branches
+function drawDivergingCousinPaths(rootId, maxDepth, selectedPersonId, cousins, selectedPersonPath, cousinBranches){
+  let svgEl = document.getElementById("svg");
+  
+  // Draw the full tree first
+  draw(rootId, maxDepth);
+  
+  // Helper to highlight a connection between parent and child
+  function highlightConnection(parentId, childId, color){
+    if(!N[parentId] || !N[childId]) return;
+    
+    let parent = N[parentId];
+    let child = N[childId];
+    
+    // Find which spouse this child comes from
+    let parents = chi[childId] || [];
+    let otherParent = parents.find(x => x !== parentId);
+    
+    let connectionPoint;
+    let isLeftSpouse = false;
+    let isRightSpouse = false;
+    
+    if(otherParent){
+      let spouse = parent.sp.find(s => s.id === otherParent);
+      if(spouse){
+        isLeftSpouse = spouse.side === 'left';
+        isRightSpouse = spouse.side === 'right';
+        let lineYOffset = spouse.side === 'left' ? -15 : 15;
+        let lineY = parent.y + lineYOffset;
+        let startX = spouse.side === 'left' ? spouse.x + 100 : parent.x + 120;
+        let endX = spouse.side === 'left' ? parent.x - 120 : spouse.x - 100;
+        connectionPoint = {x: (startX + endX) / 2, y: lineY};
+      }
+    }
+    
+    if(!connectionPoint){
+      connectionPoint = {x: parent.x, y: parent.y + 37.5};
+    }
+    
+    const H = 75;
+    let midY;
+    if(isLeftSpouse){
+      midY = parent.y + 80;
+    } else if(isRightSpouse){
+      midY = parent.y + 120;
+    } else {
+      midY = parent.y + 100;
+    }
+    
+    let pathStr = `M ${connectionPoint.x} ${connectionPoint.y} L ${connectionPoint.x} ${midY} L ${child.x} ${midY} L ${child.x} ${child.y - H/2}`;
+    
+    let line = document.createElementNS("http://www.w3.org/2000/svg","path");
+    line.setAttribute("d", pathStr);
+    line.setAttribute("stroke", color);
+    line.setAttribute("stroke-width", "10");
+    line.setAttribute("fill", "none");
+    line.setAttribute("opacity", "0.5");
+    line.setAttribute("stroke-linecap", "round");
+    line.setAttribute("stroke-linejoin", "round");
+    svgEl.appendChild(line);
+  }
+  
+  // Draw yellow path from selected person to LCA
+  if(selectedPersonPath){
+    for(let i = 0; i < selectedPersonPath.length - 1; i++){
+      highlightConnection(selectedPersonPath[i], selectedPersonPath[i+1], "#FFD700");
+    }
+  }
+  
+  // Draw reddish-orange paths to each cousin branch divergence point
+  // Use a set to avoid drawing the same path twice if multiple cousins share it
+  let drawnBranches = new Set();
+  cousinBranches.forEach(branch => {
+    for(let i = 0; i < branch.branchPath.length - 1; i++){
+      let edgeKey = `${branch.branchPath[i]}-${branch.branchPath[i+1]}`;
+      if(!drawnBranches.has(edgeKey)){
+        highlightConnection(branch.branchPath[i], branch.branchPath[i+1], "#E97451");
+        drawnBranches.add(edgeKey);
+      }
+    }
+  });
+  
+  // Highlight selected person in yellow
+  if(N[selectedPersonId]){
+    let rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    rect.setAttribute("x", N[selectedPersonId].x - 125);
+    rect.setAttribute("y", N[selectedPersonId].y - 42);
+    rect.setAttribute("width", 250);
+    rect.setAttribute("height", 85);
+    rect.setAttribute("rx", 12);
+    rect.setAttribute("fill", "none");
+    rect.setAttribute("stroke", "#FFD700");
+    rect.setAttribute("stroke-width", "4");
+    svgEl.appendChild(rect);
+  }
+  
+  // Highlight all cousins in reddish-orange (without individual connecting lines)
+  cousins.forEach(cousin => {
+    if(N[cousin.id]){
+      let rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+      rect.setAttribute("x", N[cousin.id].x - 125);
+      rect.setAttribute("y", N[cousin.id].y - 42);
+      rect.setAttribute("width", 250);
+      rect.setAttribute("height", 85);
+      rect.setAttribute("rx", 12);
+      rect.setAttribute("fill", "none");
+      rect.setAttribute("stroke", "#E97451");
+      rect.setAttribute("stroke-width", "4");
+      svgEl.appendChild(rect);
+    }
+  });
+}
+function highlightPerson(id){
+  document.querySelectorAll(".highlight").forEach(el=>el.remove());
+  
+  if(!N[id])return;
+  let n=N[id];
+  let svg=document.getElementById("svg");
+  let h=document.createElementNS("http://www.w3.org/2000/svg","rect");
+  h.setAttribute("class","highlight");
+  h.setAttribute("x",n.x-65);
+  h.setAttribute("y",n.y-50);
+  h.setAttribute("width",130);
+  h.setAttribute("height",90);
+  h.setAttribute("fill","none");
+  h.setAttribute("stroke","orange");
+  h.setAttribute("stroke-width","3");
+  h.setAttribute("rx","10");
+  svg.appendChild(h);
+  
+  // Scroll to person
+  let wrap=document.getElementById("wrap");
+  wrap.scrollLeft=n.x-wrap.clientWidth/2;
+  wrap.scrollTop=n.y-wrap.clientHeight/2;
+}
+
+// Tree panning with mouse drag
+let wrap=document.getElementById("wrap");
+let svg=document.getElementById("svg");
+let isPanning=false;
+let startX,startY,scrollLeft,scrollTop;
+
+wrap.addEventListener("mousedown",e=>{
+  // Pan if: (1) Shift key is held, OR (2) clicking on background (SVG, white rect, or generation bands)
+  let isBackground = e.target.tagName==="svg" || 
+                     (e.target.tagName==="rect" && e.target.getAttribute("fill")==="white") ||
+                     (e.target.tagName==="rect" && e.target.getAttribute("fill") && e.target.getAttribute("fill").includes("rgba")) ||
+                     e.target.tagName==="text"; // Generation labels
+  if(!e.shiftKey && !isBackground)return;
+  isPanning=true;
+  startX=e.pageX;
+  startY=e.pageY;
+  scrollLeft=wrap.scrollLeft;
+  scrollTop=wrap.scrollTop;
+  wrap.style.cursor="grabbing";
+  e.preventDefault();
+});
+
+document.addEventListener("mousemove",e=>{
+  if(!isPanning)return;
+  e.preventDefault();
+  let walkX=startX-e.pageX;
+  let walkY=startY-e.pageY;
+  wrap.scrollLeft=scrollLeft+walkX;
+  wrap.scrollTop=scrollTop+walkY;
+});
+
+document.addEventListener("mouseup",()=>{
+  isPanning=false;
+  wrap.style.cursor="default";
+});
+
+wrap.addEventListener("mouseleave",()=>{
+  isPanning=false;
+  wrap.style.cursor="default";
+});
+
+
+
+// Photo & Document Manifest-Based System
+let currentGallery = [];
+let currentPhotoIndex = 0;
+let currentPersonId = null;
+
+// Load photo manifest from embedded data (no file reading needed!)
+function loadPhotoManifest() {
+  photoManifestData.forEach(entry => {
+    if (!photoManifest.has(entry.personId)) {
+      photoManifest.set(entry.personId, []);
+    }
+    photoManifest.get(entry.personId).push({
+      folder: entry.folder,
+      filename: entry.filename
+    });
+  });
+  
+  console.log(`Loaded photo manifest: ${photoManifest.size} people with photos`);
+  photoManifest.forEach((photos, personId) => {
+    console.log(`  ${personId}: ${photos.length} photo(s)`);
+  });
+  
+  // Redraw tree to show photo icons
+  draw(currentRoot, maxGen);
+}
+
+// Load all photos from manifest for a person
+function loadPersonPhotos(personId) {
+  const photos = photoManifest.get(personId);
+  if (!photos) return [];
+  
+  // Convert manifest entries to photo objects with paths
+  return photos.map(photo => ({
+    path: `photos/${photo.folder}/${photo.filename}`,
+    filename: photo.filename
+  }));
+}
+
+function showPhotoPopup(personId) {
+  const person = P[personId];
+  if (!person) return;
+  
+  currentPersonId = personId;
+  const popup = document.getElementById('photoPopup');
+  const popupName = document.getElementById('popupName');
+  const popupDates = document.getElementById('popupDates');
+  
+  // Set name and dates
+  popupName.textContent = person.n;
+  let dateText = '';
+  if (person.b) dateText += `Born: ${person.b}`;
+  if (person.d) dateText += (dateText ? ' • ' : '') + `Died: ${person.d}`;
+  popupDates.textContent = dateText || 'Dates unknown';
+  
+  // Load photos from manifest
+  const photos = loadPersonPhotos(personId);
+  
+  if (photos.length > 0) {
+    currentGallery = photos;
+    currentPhotoIndex = 0;
+    showPhoto(0);
+  } else {
+    // No photos found
+    document.getElementById('popupPhoto').style.display = 'none';
+    document.getElementById('prevBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('galleryCounter').textContent = 'No photos found in folder';
+    document.getElementById('photoFilename').textContent = '';
+  }
+  
+  // Load documents (from documents folder)
+  loadDocuments(personId);
+  
+  popup.classList.add('show');
+}
+
+function showPhoto(index) {
+  if (currentGallery.length === 0) return;
+  
+  currentPhotoIndex = index;
+  const photo = currentGallery[index];
+  
+  const popupPhoto = document.getElementById('popupPhoto');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counter = document.getElementById('galleryCounter');
+  const filename = document.getElementById('photoFilename');
+  
+  popupPhoto.src = photo.path;
+  popupPhoto.style.display = 'block';
+  popupPhoto.onerror = function() {
+    this.style.display = 'none';
+    counter.textContent = 'Photo failed to load';
+  };
+  
+  // Show/hide navigation buttons
+  prevBtn.style.display = currentGallery.length > 1 ? 'block' : 'none';
+  nextBtn.style.display = currentGallery.length > 1 ? 'block' : 'none';
+  
+  // Update counter and filename
+  if (currentGallery.length > 1) {
+    counter.textContent = `Photo ${index + 1} of ${currentGallery.length}`;
+  } else {
+    counter.textContent = '';
+  }
+  filename.textContent = photo.filename;
+}
+
+function prevPhoto() {
+  if (currentPhotoIndex > 0) {
+    showPhoto(currentPhotoIndex - 1);
+  } else {
+    showPhoto(currentGallery.length - 1); // Wrap to end
+  }
+}
+
+function nextPhoto() {
+  if (currentPhotoIndex < currentGallery.length - 1) {
+    showPhoto(currentPhotoIndex + 1);
+  } else {
+    showPhoto(0); // Wrap to beginning
+  }
+}
+
+async function loadDocuments(personId) {
+  const popupDocs = document.getElementById('popupDocs');
+  const popupDocList = document.getElementById('popupDocList');
+  
+  // Try to find documents for this person
+  const docPatterns = ['birth', 'death', 'marriage', 'obit', 'obituary', 'certificate', 'photo', 'document'];
+  const docExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'PDF', 'JPG', 'JPEG', 'PNG'];
+  const docs = [];
+  
+  for (const pattern of docPatterns) {
+    for (const ext of docExtensions) {
+      const filename = `${personId}_${pattern}.${ext}`;
+      const path = `documents/${filename}`;
+      
+      try {
+        const response = await fetch(path, { method: 'HEAD' });
+        if (response.ok) {
+          docs.push({ path, filename });
+        }
+      } catch (e) {
+        // Document doesn't exist
+      }
+    }
+  }
+  
+  if (docs.length > 0) {
+    popupDocList.innerHTML = '';
+    docs.forEach(doc => {
+      const div = document.createElement('div');
+      div.className = 'doc-item';
+      const link = document.createElement('a');
+      link.href = doc.path;
+      link.textContent = doc.filename;
+      link.target = '_blank';
+      div.appendChild(link);
+      popupDocList.appendChild(div);
+    });
+    popupDocs.style.display = 'block';
+  } else {
+    popupDocs.style.display = 'none';
+  }
+}
+
+function closePhotoPopup() {
+  document.getElementById('photoPopup').classList.remove('show');
+  currentGallery = [];
+  currentPhotoIndex = 0;
+  currentPersonId = null;
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('photoPopup').classList.contains('show')) {
+    if (e.key === 'ArrowLeft') prevPhoto();
+    if (e.key === 'ArrowRight') nextPhoto();
+    if (e.key === 'Escape') closePhotoPopup();
+  }
+});
+
+</script>
+
+<!-- Photo Popup -->
+<div id="photoPopup" onclick="if(event.target===this)closePhotoPopup()">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closePhotoPopup()">&times;</button>
+    <div class="popup-name" id="popupName"></div>
+    <div class="popup-dates" id="popupDates"></div>
+    <div class="gallery-container">
+      <button class="gallery-nav gallery-prev" onclick="event.stopPropagation();prevPhoto()" id="prevBtn" style="display:none;">&lt;</button>
+      <img class="popup-photo" id="popupPhoto" src="" alt="Photo">
+      <button class="gallery-nav gallery-next" onclick="event.stopPropagation();nextPhoto()" id="nextBtn" style="display:none;">&gt;</button>
+      <div class="gallery-counter" id="galleryCounter"></div>
+      <div class="photo-filename" id="photoFilename"></div>
+    </div>
+    <div class="doc-list" id="popupDocs" style="display:none;">
+      <div style="font-weight:bold;margin-bottom:10px;">Documents</div>
+      <div id="popupDocList"></div>
+    </div>
+  </div>
+</div>
+
+</body></html>

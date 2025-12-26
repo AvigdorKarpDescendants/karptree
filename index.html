@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree096 - Use Standard Layout</title>
+<title>KarpTree098 - Fixed Clear All and Updated Guide</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -144,6 +144,7 @@ svg{background:transparent;}
 <body>
 <!-- Menu Bar -->
 <div style='position:fixed;top:0;left:0;right:0;height:40px;background:#2c3e50;z-index:30;display:flex;align-items:center;padding:0 10px;box-shadow:0 2px 5px rgba(0,0,0,0.2);'>
+<button onclick='toggleMenu("findMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Find Person</button>
 <button onclick='toggleMenu("genMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Generations</button>
 <button onclick='toggleMenu("focusMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Focus</button>
 <button onclick='toggleMenu("relMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Find Relationship</button>
@@ -160,6 +161,16 @@ svg{background:transparent;}
 <div style='font-weight:bold;margin-bottom:8px;'>Generation Filter</div>
 <label style='font-size:12px;display:block;margin-bottom:4px;'>Show Generations: 1 to <span id='genLabel'>7</span></label>
 <input id='genSlider' type='range' min='1' max='7' value='7' style='width:100%;' oninput='filterByGeneration(this.value)'>
+</div>
+
+<!-- Find Person Menu (hidden by default) -->
+<div id='findMenu' style='display:none;position:fixed;top:50px;left:10px;z-index:25;background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);min-width:220px;'>
+<div style='font-weight:bold;margin-bottom:8px;'>Find Person</div>
+<label style='font-size:12px;display:block;margin-bottom:4px;'>Enter name:</label>
+<input id='findPersonInput' type='text' placeholder='Enter person name' style='width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;font-size:12px;margin-bottom:8px;' list='peopleFindList'>
+<datalist id='peopleFindList'></datalist>
+<button onclick='findAndHighlightPerson()' style='width:100%;padding:8px;background:#337BFF;color:white;border:none;border-radius:4px;cursor:pointer;margin-bottom:8px;'>Find</button>
+<button onclick='clearFindHighlight()' style='width:100%;padding:8px;background:#999;color:white;border:none;border-radius:4px;cursor:pointer;'>Clear</button>
 </div>
 
 <!-- Focus Menu (hidden by default) -->
@@ -217,6 +228,7 @@ svg{background:transparent;}
       <h3>Toolbar Buttons</h3>
       <table>
         <tr><th>Button</th><th>Function</th></tr>
+        <tr><td><strong>Find Person</strong></td><td>Search for and highlight a person</td></tr>
         <tr><td><strong>Generations</strong></td><td>Show/hide generations (1-7)</td></tr>
         <tr><td><strong>Focus</strong></td><td>Select a person to show as root of subtree</td></tr>
         <tr><td><strong>Find Relationship</strong></td><td>Find relationship between two people</td></tr>
@@ -228,6 +240,15 @@ svg{background:transparent;}
       <div class='tip'>
         <strong>💡 Zoom Tip:</strong> Use your mouse wheel to zoom in/out. Click and drag to pan around!
       </div>
+      
+      <h2>🔍 Find Person</h2>
+      <p>Quickly locate and highlight a person in the tree:</p>
+      <ol style='margin-left:40px;'>
+        <li>Click <strong>Find Person</strong> button</li>
+        <li>Type or select a person's name from the dropdown (searches all 229 people)</li>
+        <li>Click <strong>Find</strong></li>
+      </ol>
+      <p>The tree will center on that person with a distinctive red and yellow border highlight. Click <strong>Clear</strong> to remove the highlight.</p>
       
       <h2>📷 Photo Galleries</h2>
       <p>Look for the 📷 icon in the top-right corner of a person's box. Click the box to open their photo gallery.</p>
@@ -800,7 +821,7 @@ let relationshipCalc = null;
 
 // Menu toggle function
 function toggleMenu(menuId){
-  let menus=['genMenu','focusMenu','relMenu','cousinMenu'];
+  let menus=['findMenu','genMenu','focusMenu','relMenu','cousinMenu'];
   menus.forEach(id=>{
     if(id===menuId){
       let menu=document.getElementById(id);
@@ -813,7 +834,7 @@ function toggleMenu(menuId){
 
 // Close menus when clicking outside
 document.addEventListener('click',function(e){
-  let menus=['genMenu','focusMenu','relMenu','cousinMenu'];
+  let menus=['findMenu','genMenu','focusMenu','relMenu','cousinMenu'];
   let clickedInside=false;
   
   // Check if click was inside any menu or on a menu button
@@ -1977,6 +1998,7 @@ let dl1=document.getElementById("people1");
 let dl2=document.getElementById("people2");
 let dlSubtree=document.getElementById("peopleSubtree");
 let dlCousin=document.getElementById("peopleCousin");
+let dlFind=document.getElementById("peopleFindList");
 // Sort people alphabetically by name
 let sortedPeople=Object.keys(P).sort((a,b)=>P[a].n.localeCompare(P[b].n));
 sortedPeople.forEach(id=>{
@@ -1992,6 +2014,9 @@ sortedPeople.forEach(id=>{
   let opt4=document.createElement("option");
   opt4.value=P[id].n;
   dlCousin.appendChild(opt4);
+  let opt5=document.createElement("option");
+  opt5.value=P[id].n;
+  dlFind.appendChild(opt5);
 });
 
 // Filter functions
@@ -2137,12 +2162,14 @@ function clearAll(){
   document.getElementById("result").innerHTML="";
   document.getElementById("cousinPerson").value="";
   document.getElementById("cousinResult").innerHTML="";
+  document.getElementById("findPersonInput").value="";
   
-  // Remove all highlights
+  // Remove all highlights (both regular and find highlights)
   document.querySelectorAll(".highlight").forEach(el=>el.remove());
+  document.querySelectorAll(".findHighlight").forEach(el=>el.remove());
   
   // Close all menus
-  let menus=['genMenu','focusMenu','relMenu','cousinMenu'];
+  let menus=['findMenu','genMenu','focusMenu','relMenu','cousinMenu'];
   menus.forEach(id=>document.getElementById(id).style.display='none');
   
   // Recenter
@@ -3047,6 +3074,83 @@ function highlightPerson(id){
   let wrap=document.getElementById("wrap");
   wrap.scrollLeft=n.x-wrap.clientWidth/2;
   wrap.scrollTop=n.y-wrap.clientHeight/2;
+}
+
+// Find and highlight a person by name
+function findAndHighlightPerson(){
+  let personName = document.getElementById("findPersonInput").value.trim();
+  
+  if(!personName){
+    alert("Please enter a name");
+    return;
+  }
+  
+  // Find person ID by name
+  let personId = null;
+  for(let id in P){
+    if(P[id].n.toLowerCase() === personName.toLowerCase()){
+      personId = id;
+      break;
+    }
+  }
+  
+  if(!personId){
+    alert("Person not found: " + personName);
+    return;
+  }
+  
+  // Clear any previous highlights
+  document.querySelectorAll(".findHighlight").forEach(el => el.remove());
+  
+  // Make sure person is in current view
+  if(!N[personId]){
+    // Rebuild to include this person
+    rebuildN();
+    draw(currentRoot, maxGen);
+  }
+  
+  // Add red/yellow highlight
+  if(N[personId]){
+    let n = N[personId];
+    let svg = document.getElementById("svg");
+    
+    // Red border
+    let rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    rect.setAttribute("class","findHighlight");
+    rect.setAttribute("x", n.x - 125);
+    rect.setAttribute("y", n.y - 42);
+    rect.setAttribute("width", 250);
+    rect.setAttribute("height", 85);
+    rect.setAttribute("rx", 12);
+    rect.setAttribute("fill", "none");
+    rect.setAttribute("stroke", "#FF0000"); // Red
+    rect.setAttribute("stroke-width", "5");
+    svg.appendChild(rect);
+    
+    // Yellow border inside
+    let rect2 = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    rect2.setAttribute("class","findHighlight");
+    rect2.setAttribute("x", n.x - 120);
+    rect2.setAttribute("y", n.y - 37);
+    rect2.setAttribute("width", 240);
+    rect2.setAttribute("height", 75);
+    rect2.setAttribute("rx", 10);
+    rect2.setAttribute("fill", "none");
+    rect2.setAttribute("stroke", "#FFD700"); // Yellow
+    rect2.setAttribute("stroke-width", "3");
+    svg.appendChild(rect2);
+    
+    // Center on person
+    let wrap = document.getElementById("wrap");
+    wrap.scrollLeft = n.x - wrap.clientWidth/2;
+    wrap.scrollTop = n.y - wrap.clientHeight/2;
+  }
+}
+
+// Clear find highlight
+function clearFindHighlight(){
+  document.querySelectorAll(".findHighlight").forEach(el => el.remove());
+  document.getElementById("findPersonInput").value = "";
 }
 
 // Tree panning with mouse drag

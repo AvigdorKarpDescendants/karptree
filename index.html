@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree099 - Photos from GitHub</title>
+<title>KarpTree103 - Photos from GitHub</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -219,7 +219,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v102</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v103</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3328,8 +3328,8 @@ function showPhotoPopup(personId) {
     document.getElementById('photoFilename').textContent = '';
   }
   
-  // Load documents (from documents folder)
-  loadDocuments(personId);
+  // Load documents (from documents folder) - disabled, folder doesn't exist
+  // loadDocuments(personId);
   
   popup.classList.add('show');
 }

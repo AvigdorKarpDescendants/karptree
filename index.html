@@ -1,11 +1,12 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree110 - Photos from GitHub</title>
+<title>KarpTree111 - Photos from GitHub</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
 svg{background:transparent;}
 .n{text-anchor:middle;font-size:12px;font-weight:bold;}
 .d{text-anchor:middle;font-size:11px;}
+.bp{text-anchor:middle;font-size:9px;color:#666;font-style:italic;}
 .l{stroke:#444;stroke-width:1.1;fill:none;}
 
 /* Photo & Document Styles */
@@ -268,7 +269,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v110 (December 29, 2025)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v111 (December 29, 2025)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1913,6 +1914,11 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   let ds = dateStr(n.p);
   if(ds) T(n.x, n.y + 8, ds, "d");
   
+  // Add birthplace if available
+  if(n.p.bp){
+    T(n.x, n.y + 23, n.p.bp, "bp");
+  }
+  
   // Draw spouses horizontally beside blood relative
   let spouseConnectionPoints = {}; // Track where children should connect
   
@@ -3310,6 +3316,9 @@ function highlightPerson(id){
 
 // Find and highlight a person by name
 function findAndHighlightPerson(){
+  // Reset zoom to 1.0 for proper centering
+  document.body.style.zoom = "1.0";
+  
   // Clear all previous highlights/selections first (but NOT the input field)
   document.querySelectorAll(".findHighlight").forEach(el => el.remove());
   

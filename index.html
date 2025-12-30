@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree109 - Photos from GitHub</title>
+<title>KarpTree110 - Photos from GitHub</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -108,6 +108,54 @@ svg{background:transparent;}
 .modal-body p, .modal-body li {
   line-height: 1.6;
   margin-bottom: 10px;
+  color: #333;
+  font-family: 'Cambria', 'Georgia', serif;
+  text-align: justify;
+}
+.modal-body .pronunciation {
+  font-style: italic;
+  color: #666;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+}
+.modal-body .map-section {
+  text-align: center;
+  margin: 30px 0;
+}
+.modal-body .map-container {
+  display: inline-block;
+  background: white;
+  padding: 15px;
+  border: 2px solid #8b4513;
+  border-radius: 8px;
+}
+.modal-body .map-container img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ccc;
+}
+.modal-body .map-label {
+  margin-top: 15px;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #8b4513;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.modal-body .quote {
+  margin: 25px 0;
+  padding: 15px;
+  background-color: #e8dcc8;
+  border-left: 4px solid #8b4513;
+  font-style: italic;
+  font-size: 0.95em;
+  color: #555;
+}
+.modal-body .footnote {
+  font-size: 0.9em;
+  color: #888;
+  margin-top: 5px;
+}
 }
 .modal-body ul {
   margin-left: 40px;
@@ -220,7 +268,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v109 (December 29, 2025)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v110 (December 29, 2025)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1068,7 +1116,7 @@ p5007:{n:"Vivian Lorraine Jacob",b:1953,d:null,g:"f",bp:null}, p5008:{n:"Lanny M
 p5009:{n:"Catherine Sandra Bloomfield",b:1950,d:null,g:"f",bp:null}, p5010:{n:"Laura Joan Bloomfield",b:1953,d:null,g:"f",bp:null},
 p5011:{n:"Leon Michael Bloomfield",b:1958,d:null,g:"m",bp:null}, p5011s:{n:"Judith David",b:null,d:null,g:"f",bp:null}, p5012:{n:"Diane Bloomfield",b:1960,d:null,g:"f",bp:null},
 p5013:{n:"Richard David Bloomfield",b:1962,d:null,g:"m",bp:null},
-p5034:{n:"Lawrence Saper Meyer",b:1949,d:null,g:"m"}, p5002s1:{n:"Rachelle Sapoznikow",b:1947,d:null,g:"f",bp:null},
+p5002s1:{n:"Rachelle Sapoznikow",b:1947,d:null,g:"f",bp:null},
 p5003s1:{n:"Debra Ann Lander",b:null,d:null,g:"f",bp:null}, p5006s1:{n:"Gary Hayes",b:1950,d:null,g:"m",bp:null},
 p5007s1:{n:"Conrad Gavaga",b:null,d:null,g:"m",bp:null}, p5008s1:{n:"Marni Cheryl Guttman",b:null,d:null,g:"f",bp:null},
 p5009s1:{n:"Samuel Medal",b:null,d:null,g:"m",bp:null}, p5009s2:{n:"Brock Siegel",b:1947,d:null,g:"m",bp:null},
@@ -3327,13 +3375,20 @@ function findAndHighlightPerson(){
     rect2.setAttribute("stroke-width", "3");
     svg.appendChild(rect2);
     
-    // Center on person (same as Avigdor centering)
+    // Center on person with zoom compensation
     let wrap = document.getElementById("wrap");
     if(wrap && N[personId]){
+      // Get zoom level (default 1.0)
+      let zoomLevel = document.body.style.zoom ? parseFloat(document.body.style.zoom) : 1.0;
+      
       setTimeout(() => {
-        wrap.scrollLeft = N[personId].x - wrap.clientWidth/2;
-        wrap.scrollTop = N[personId].y - 140;  // Account for toolbar
-      }, 100);
+        // Adjust centering based on zoom
+        let adjustedX = (N[personId].x / zoomLevel) - (wrap.clientWidth / (2 * zoomLevel));
+        let adjustedY = (N[personId].y / zoomLevel) - (wrap.clientHeight / (2 * zoomLevel)) - 70;
+        
+        wrap.scrollLeft = adjustedX;
+        wrap.scrollTop = adjustedY;
+      }, 50);
     }
   }
 }

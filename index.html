@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree105 - Photos from GitHub</title>
+<title>KarpTree106 - Photos from GitHub</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -150,6 +150,7 @@ svg{background:transparent;}
 <button onclick='toggleMenu("relMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Find Relationship</button>
 <button onclick='toggleMenu("cousinMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Find Cousins</button>
 <button onclick='openUserGuide()' style='margin-right:10px;padding:8px 16px;background:#27ae60;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>📖 User Guide</button>
+<button onclick='openRozwadow()' style='margin-right:10px;padding:8px 16px;background:#8b4513;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>🏘️ Rozwadów</button>
 <div style='flex:1;'></div>
 <div id='zoomDisplay' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border-radius:4px;font-size:14px;min-width:60px;text-align:center;'>1.0x</div>
 <button onclick='clearAll()' style='margin-right:10px;padding:8px 16px;background:#c0392b;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Clear All</button>
@@ -219,7 +220,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v105</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v106 (December 29, 2025)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1648,6 +1649,9 @@ function layoutPathView(root){
 
 layout("p1001");
 
+// Set zoom to 80% on page load
+document.body.style.zoom = "80%";
+
 // Filter variables
 let currentRoot="p1001";
 let maxGen=7;
@@ -2196,6 +2200,11 @@ function openUserGuide(){
 
 function closeUserGuide(){
   document.getElementById('userGuideModal').style.display = 'none';
+}
+
+function openRozwadow(){
+  // Open Rozwadów article in new tab
+  window.open('rozwadow.html', 'Rozwadow');
 }
 
 // Close modal on Escape key
@@ -3145,6 +3154,9 @@ function highlightPerson(id){
 
 // Find and highlight a person by name
 function findAndHighlightPerson(){
+  // Clear all previous highlights/selections first
+  clearFindHighlight();
+  
   let personName = document.getElementById("findPersonInput").value.trim();
   
   if(!personName){

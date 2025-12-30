@@ -1674,14 +1674,6 @@ function layoutPathView(root){
 
 layout("p1001");
 
-// Set zoom on SVG canvas only (not entire page)
-let svgElement = document.getElementById('svg');
-if(svgElement) {
-  svgElement.style.transform = 'scale(0.8)';
-  svgElement.style.transformOrigin = '0 0';
-  svgElement.parentElement.style.overflow = 'auto';
-}
-
 // Filter variables
 let currentRoot="p1001";
 let maxGen=7;

@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree106 - Photos from GitHub</title>
+<title>KarpTree108 - Photos from GitHub</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -220,7 +220,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v106 (December 29, 2025)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v108 (December 29, 2025)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -303,6 +303,31 @@ svg{background:transparent;}
       <h2>ℹ️ About</h2>
       <p><strong>Total People:</strong> 229 | <strong>Generations:</strong> 7 | <strong>Photos:</strong> 109</p>
       <p style='margin-top:20px;text-align:center;color:#999;'>Click the ✕ button or press Escape to close this guide</p>
+    </div>
+  </div>
+</div>
+
+<!-- Rozwadów Article Modal -->
+<div id='rozwadowModal' class='modal-overlay' onclick='if(event.target===this) closeRozwadow()'>
+  <div class='modal-content'>
+    <button class='modal-close' onclick='closeRozwadow()'>✕</button>
+    <div class='modal-body'>
+      <h1>Rozwadów</h1>
+      <div class="pronunciation" style="font-size: 1.1em; color: #666; font-style: italic; margin-bottom: 10px;">(Roz-VAH-doof)</div>
+      <p style='font-size:0.9em;color:#999;margin-bottom:20px;'>A Karp Family Ancestral Town</p>
+      
+      <h2 style="font-size: 1.3em; color: #8b4513; border-bottom: 2px solid #d4a574; padding-bottom: 8px; margin-top: 30px; margin-bottom: 15px;">Geography</h2>
+      <p style="text-align: justify; margin-bottom: 15px;">From the first partition of Poland in 1772 until its reconstitution as an independent country in 1918, Rozwadów on the left bank of the San River served as the northernmost town in Galicia, positioned on the border between Galicia and "Congress Poland."</p>
+      <p style="text-align: justify; margin-bottom: 15px;">Here, at the broadest section of the San River, the water flows slowly, flooding the low-lying left bank in the late winter months. Consequently, the town was frequently surrounded by a belt of marshlands to the east and north. The soil was poor, and the melting of snows or sudden summer rains from upstream frequently caused the river to rise and inundate the fields, destroying the peasants' scanty harvests. In 1911, to protect the town against these ravages, the Austrians built dykes on the lower parts of the left shore and reinforced the river banks by planting willow trees along their edges.</p>
+      
+      <h2 style="font-size: 1.3em; color: #8b4513; border-bottom: 2px solid #d4a574; padding-bottom: 8px; margin-top: 30px; margin-bottom: 15px;">History</h2>
+      <p style="text-align: justify; margin-bottom: 15px;">The early origins of Rozwadów are difficult to trace due to the scarcity of historical source materials. However, it appears certain that the town grew from the adjacent village of Charzewice (Har-zheh-VEET-seh). For many years, the land on which the town was built belonged to a family of nobles named Roiewski. In the sixteenth and seventeenth centuries, the area between the Vistula and San rivers passed into the hands of the Princes Lubomirski and Tarnowski.</p>
+      
+      <h2 style="font-size: 1.3em; color: #8b4513; border-bottom: 2px solid #d4a574; padding-bottom: 8px; margin-top: 30px; margin-bottom: 15px;">The Jews of Rozwadów</h2>
+      <p style="text-align: justify; margin-bottom: 15px;">The Rozwadów suburb of Stalowa Wola (Stah-LO-vah VO-lah) was a thriving Jewish shtetl prior to World War II. It was closely associated with Tarnobrzeg and other nearby shtetls including Ulanów, Mielec, and Dzikow. These communities, infused with vitality before 1939, were utterly destroyed during the Holocaust.</p>
+      
+      <p style='margin-top:20px;text-align:center;color:#999;font-size:0.9em;'><em>This article is under development. More sections coming soon.</em></p>
+      <p style='margin-top:10px;text-align:center;color:#999;'>Click the ✕ button or press Escape to close</p>
     </div>
   </div>
 </div>
@@ -1649,8 +1674,13 @@ function layoutPathView(root){
 
 layout("p1001");
 
-// Set zoom to 80% on page load
-document.body.style.zoom = "80%";
+// Set zoom on SVG canvas only (not entire page)
+let svgElement = document.getElementById('svg');
+if(svgElement) {
+  svgElement.style.transform = 'scale(0.8)';
+  svgElement.style.transformOrigin = '0 0';
+  svgElement.parentElement.style.overflow = 'auto';
+}
 
 // Filter variables
 let currentRoot="p1001";
@@ -2203,14 +2233,18 @@ function closeUserGuide(){
 }
 
 function openRozwadow(){
-  // Open Rozwadów article in new tab
-  window.open('rozwadow.html', 'Rozwadow');
+  document.getElementById('rozwadowModal').style.display = 'block';
+}
+
+function closeRozwadow(){
+  document.getElementById('rozwadowModal').style.display = 'none';
 }
 
 // Close modal on Escape key
 document.addEventListener('keydown', function(e){
   if(e.key === 'Escape'){
     closeUserGuide();
+    closeRozwadow();
   }
 });
 
@@ -3154,8 +3188,8 @@ function highlightPerson(id){
 
 // Find and highlight a person by name
 function findAndHighlightPerson(){
-  // Clear all previous highlights/selections first
-  clearFindHighlight();
+  // Clear all previous highlights/selections first (but NOT the input field)
+  document.querySelectorAll(".findHighlight").forEach(el => el.remove());
   
   let personName = document.getElementById("findPersonInput").value.trim();
   

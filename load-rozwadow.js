@@ -280,3 +280,4 @@ function closeRozwadow() {
   
   window.scrollTo(0, 0);
 }
+

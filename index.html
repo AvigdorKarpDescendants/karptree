@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree110 - Photos from GitHub</title>
+<title>KarpTree117 - Photos from GitHub</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -719,39 +719,50 @@ async function loadPhotosFromSheet() {
     const csvText = await response.text();
     
     const lines = csvText.split('\n');
-    const header = lines[0].split(',');
+    const header = lines[0].split(',').map(h => h.trim());
     
-    let personIdIdx = -1;
+    let personIdIdx = header.indexOf('Person ID');
     let photoColumns = [];
     
+    // Find all Photo columns
     for (let i = 0; i < header.length; i++) {
-      if (header[i].trim() === 'Person ID') {
-        personIdIdx = i;
-      } else if (header[i].match(/Photo\d+/)) {
+      if (header[i].match(/^Photo\d+$/)) {
         photoColumns.push(i);
       }
     }
     
+    console.log('CSV Header:', header);
+    console.log('Person ID Index:', personIdIdx);
+    console.log('Photo Columns:', photoColumns);
+    
+    // Parse data rows
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
       
-      const parts = line.split(',');
-      const personId = parts[personIdIdx]?.trim().replace(/"/g, '');
+      const parts = line.split(',').map(p => p.trim());
+      const personId = parts[personIdIdx];
       
       if (!personId) continue;
       
+      // Collect all photo numbers for this person
+      const photoNums = [];
       for (let colIdx of photoColumns) {
-        const photoNum = parts[colIdx]?.trim().replace(/"/g, '');
-        if (photoNum) {
-          const filename = `4400_Karp_Asher_P_${String(photoNum).padStart(7, '0')}A.jpg`;
-          const url = `https://raw.githubusercontent.com/avigdorkarpdescendants/karptree/main/photos/${filename}`;
-          photoManifestData.push({
-            personId: personId,
-            url: url,
-            filename: filename
-          });
+        const photoNum = parts[colIdx];
+        if (photoNum && photoNum !== '') {
+          photoNums.push(photoNum);
         }
+      }
+      
+      // Create photo entries
+      for (let photoNum of photoNums) {
+        const filename = `4400_Karp_Asher_P_${String(photoNum).padStart(7, '0')}A.jpg`;
+        const url = `https://raw.githubusercontent.com/avigdorkarpdescendants/karptree/main/photos/${filename}`;
+        photoManifestData.push({
+          personId: personId,
+          url: url,
+          filename: filename
+        });
       }
     }
     

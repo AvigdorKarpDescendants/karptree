@@ -1,5 +1,5 @@
-!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v121 - Photos from Google Sheet</title>
+<!DOCTYPE html><html><head><meta charset='UTF-8'>
+<title>KarpTree v122 - Photos from Google Sheet</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -268,7 +268,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v121 (December 31, 2025)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v122 (December 31, 2025)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -2304,11 +2304,14 @@ function closeUserGuide(){
 }
 
 function openRozwadow(){
-  document.getElementById('rozwadowModal').style.display = 'block';
+  // This gets overridden by load-rozwadow.js
+  // If it's still being called, load-rozwadow.js hasn't loaded yet
+  console.error('openRozwadow called before load-rozwadow.js loaded');
 }
 
 function closeRozwadow(){
-  document.getElementById('rozwadowModal').style.display = 'none';
+  // This gets overridden by load-rozwadow.js
+  console.log('closeRozwadow called');
 }
 
 // Close modal on Escape key

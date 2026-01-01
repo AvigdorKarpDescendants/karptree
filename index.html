@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v139 - Photos from Google Sheet</title>
+<title>KarpTree v140 - Photos from Google Sheet</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -190,10 +190,11 @@ svg{background:transparent;}
 }
 </style></head>
 <body>
-<!-- Welcome Banner -->
+<!-- Welcome Banner - COMMENTED OUT
 <div id='welcomeBanner' style='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:150px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;z-index:500;opacity:1;transition:opacity 0.5s ease;border-radius:15px;box-shadow:0 10px 40px rgba(0,0,0,0.3);'>
   Descendants of Avigdor and Sarah Karp
 </div>
+-->
 
 <!-- Menu Bar -->
 <div style='position:fixed;top:0;left:0;right:0;height:40px;background:#2c3e50;z-index:30;display:flex;align-items:center;padding:0 10px;box-shadow:0 2px 5px rgba(0,0,0,0.2);'>
@@ -279,7 +280,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v139 (December 31, 2025)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v140 (December 31, 2025)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3458,7 +3459,8 @@ document.addEventListener('keydown', (e) => {
 </div>
 
 <script>
-// Hide welcome banner after 2 seconds
+// Hide welcome banner after 2 seconds - COMMENTED OUT
+/*
 setTimeout(() => {
   let banner = document.getElementById('welcomeBanner');
   if(banner) {
@@ -3468,6 +3470,7 @@ setTimeout(() => {
     }, 500);
   }
 }, 2000);
+*/
 </script>
 
 

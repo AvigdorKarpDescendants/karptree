@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v133 - Photos from Google Sheet</title>
+<title>KarpTree v135 - Photos from Google Sheet</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -202,6 +202,7 @@ svg{background:transparent;}
 <button onclick='toggleMenu("focusMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Focus</button>
 <button onclick='toggleMenu("relMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Find Relationship</button>
 <button onclick='toggleMenu("cousinMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Find Cousins</button>
+<button onclick='toggleMenu("videoMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Videos</button>
 <button onclick='openUserGuide()' style='margin-right:10px;padding:8px 16px;background:#27ae60;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>📖 User Guide</button>
 <button onclick='openRozwadow()' style='margin-right:10px;padding:8px 16px;background:#8b4513;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>🏘️ Rozwadów</button>
 <div style='flex:1;'></div>
@@ -253,6 +254,12 @@ svg{background:transparent;}
 <div id='cousinResult' style='font-size:12px;'></div>
 </div>
 
+<!-- Videos Menu (hidden by default) -->
+<div id='videoMenu' style='display:none;position:fixed;top:50px;left:10px;z-index:25;background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);min-width:250px;'>
+<div style='font-weight:bold;margin-bottom:8px;'>Videos</div>
+<button onclick='openVideo("1iJn7sF6A8dRIlAT_UonG2FqnuM7WSlZz", "Norman Stone Bar Mitzvah 1960 Winnipeg")' style='width:100%;padding:8px;background:#337BFF;color:white;border:none;border-radius:4px;cursor:pointer;margin-bottom:4px;text-align:left;'>Arnold Stone Bar Mitzvah 1972 Winnipeg</button>
+</div>
+
 <!-- Relationship Finder Menu (hidden by default) -->
 <div id='relMenu' style='display:none;position:fixed;top:50px;left:10px;z-index:25;background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);min-width:220px;'>
 <div style='font-weight:bold;margin-bottom:8px;'>Find Relationship</div>
@@ -272,11 +279,11 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v133 (December 31, 2025)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v135 (December 31, 2025)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
-      <p>KarpTree is an interactive family tree visualization featuring 229 people across 7 generations. The tree uses a horizontal spouse layout where married couples are shown side-by-side with connecting lines.</p>
+      <p>KarpTree is an interactive family tree visualization featuring 234 people across 7 generations. The tree uses a horizontal spouse layout where married couples are shown side-by-side with connecting lines.</p>
       
       <h2>🧭 Navigation & Controls</h2>
       <h3>Toolbar Buttons</h3>
@@ -299,7 +306,7 @@ svg{background:transparent;}
       <p>Quickly locate and highlight a person in the tree:</p>
       <ol style='margin-left:40px;'>
         <li>Click <strong>Find Person</strong> button</li>
-        <li>Type or select a person's name from the dropdown (searches all 229 people)</li>
+        <li>Type or select a person's name from the dropdown (searches all 234 people)</li>
         <li>Click <strong>Find</strong></li>
       </ol>
       <p>The tree will center on that person with a distinctive red and yellow border highlight. Click <strong>Clear</strong> to remove the highlight.</p>
@@ -353,7 +360,7 @@ svg{background:transparent;}
       </div>
       
       <h2>ℹ️ About</h2>
-      <p><strong>Total People:</strong> 229 | <strong>Generations:</strong> 7 | <strong>Photos:</strong> 109</p>
+      <p><strong>Total People:</strong> 234 | <strong>Generations:</strong> 7 | <strong>Photos:</strong> 109</p>
       <p style='margin-top:20px;text-align:center;color:#999;'>Click the ✕ button or press Escape to close this guide</p>
     </div>
   </div>
@@ -3432,7 +3439,33 @@ document.addEventListener('keydown', (e) => {
   </div>
 </div>
 
+<!-- Video Modal -->
+<div id='videoModal' style='display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;' onclick='if(event.target===this) closeVideo()'>
+  <div style='position:relative;background:white;padding:20px;border-radius:12px;max-width:900px;max-height:90vh;overflow:auto;box-shadow:0 5px 40px rgba(0,0,0,0.3);'>
+    <button onclick='closeVideo()' style='position:absolute;top:10px;right:10px;background:none;border:none;font-size:28px;cursor:pointer;color:#666;'>✕</button>
+    <h2 id='videoTitle' style='margin-top:0;margin-bottom:20px;color:#333;'></h2>
+    <iframe id='videoPlayer' width='800' height='450' style='max-width:100%;height:auto;border:none;border-radius:8px;' allow='autoplay' src=''></iframe>
+  </div>
+</div>
+
 <script>
+function openVideo(fileId, title) {
+  document.getElementById('videoTitle').textContent = title;
+  document.getElementById('videoPlayer').src = 'https://drive.google.com/file/d/' + fileId + '/preview';
+  document.getElementById('videoModal').style.display = 'flex';
+  toggleMenu('videoMenu');
+}
+
+function closeVideo() {
+  document.getElementById('videoModal').style.display = 'none';
+  document.getElementById('videoPlayer').src = '';
+}
+
+// Close video on Escape key
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') closeVideo();
+});
+</script>
 // Hide welcome banner after 2 seconds
 setTimeout(() => {
   let banner = document.getElementById('welcomeBanner');

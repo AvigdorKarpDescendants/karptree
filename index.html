@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v155 - Photos from Google Sheet</title>
+<title>KarpTree v156 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -288,7 +288,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v155 (January 3, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v156 (January 3, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3516,7 +3516,7 @@ async function renderPdfInModal(pdfUrl) {
     const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
     const page = await pdf.getPage(1);
     
-    const scale = 2;
+    const scale = 3;
     const viewport = page.getViewport({scale: scale});
     
     canvas.width = viewport.width;
@@ -3596,7 +3596,7 @@ document.addEventListener('keydown', (e) => {
     <button class="popup-close" onclick="closePdfPopup()" style="position:absolute;top:15px;right:15px;font-size:28px;background:none;border:none;cursor:pointer;color:#666;">×</button>
     <div class="popup-name" id="pdfPopupName" style="margin-bottom:10px;"></div>
     <div class="popup-dates" id="pdfPopupDates" style="margin-bottom:15px;font-size:0.9em;color:#666;"></div>
-    <canvas id="pdfCanvas" style="width:100%;height:calc(100% - 100px);border:1px solid #ddd;border-radius:4px;background:#f5f5f5;"></canvas>
+    <canvas id="pdfCanvas" style="display:block;margin:10px auto;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;max-width:100%;"></canvas>
   </div>
 </div>
 

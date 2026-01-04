@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v148 - Photos from Google Sheet</title>
+<title>KarpTree v149 - Photos from Google Sheet</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -280,7 +280,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v148 (December 31, 2025)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v149 (January 3, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1734,6 +1734,20 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
     g.appendChild(icon);
   }
   
+  // Add narrative icon if person has narrative
+  if(narrativeData[n.id]){
+    let narIcon = document.createElementNS("http://www.w3.org/2000/svg","text");
+    narIcon.setAttribute("x", bx + W - 20);
+    narIcon.setAttribute("y", by + 40);
+    narIcon.setAttribute("font-size", "16");
+    narIcon.setAttribute("class", "photo-icon");
+    narIcon.setAttribute("cursor", "pointer");
+    narIcon.textContent = "📄";
+    narIcon.style.cursor = "pointer";
+    narIcon.onclick = () => showPhotoPopup(n.id);
+    g.appendChild(narIcon);
+  }
+  
   svg.appendChild(g);
   T(n.x, n.y - 12, n.p.n, "n");
   let ds = dateStr(n.p);
@@ -1771,6 +1785,19 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       sicon.setAttribute("class", "photo-icon");
       sicon.textContent = "📷";
       sg.appendChild(sicon);
+    }
+    
+    // Add narrative icon if spouse has narrative
+    if(narrativeData[s.id]){
+      let snarIcon = document.createElementNS("http://www.w3.org/2000/svg","text");
+      snarIcon.setAttribute("x", sx + SW - 20);
+      snarIcon.setAttribute("y", sy + 36);
+      snarIcon.setAttribute("font-size", "14");
+      snarIcon.setAttribute("class", "photo-icon");
+      snarIcon.style.cursor = "pointer";
+      snarIcon.textContent = "📄";
+      snarIcon.onclick = () => showPhotoPopup(s.id);
+      sg.appendChild(snarIcon);
     }
     
     svg.appendChild(sg);

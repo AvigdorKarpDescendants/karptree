@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v154 - Photos from Google Sheet</title>
+<title>KarpTree v155 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -20,6 +20,11 @@ svg{background:transparent;}
   background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;
 }
 #photoPopup.show{display:flex;}
+#pdfPopup{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.85);z-index:1001;align-items:center;justify-content:center;
+}
+#pdfPopup.show{display:flex;}
 .popup-content{
   background:white;border-radius:8px;padding:20px;max-width:90%;max-height:90%;
   overflow:auto;position:relative;
@@ -283,7 +288,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v154 (January 3, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v155 (January 3, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>

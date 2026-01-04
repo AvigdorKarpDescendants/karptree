@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v150 - Photos from Google Sheet</title>
+<title>KarpTree v152 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -160,7 +160,6 @@ svg{background:transparent;}
   color: #888;
   margin-top: 5px;
 }
-}
 .modal-body ul {
   margin-left: 40px;
 }
@@ -284,7 +283,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v150 (January 3, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v152 (January 3, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3474,50 +3473,45 @@ function closePhotoPopup() {
   currentPersonId = null;
 }
 
+function closePdfPopup() {
+  document.getElementById('pdfPopup').classList.remove('show');
+}
+
+
 // Narrative popup functions
 function showNarrativePopup(personId) {
   const person = P[personId];
   if (!person || !narrativeData[personId]) return;
   
-  const popupName = document.getElementById('popupName');
-  const popupDates = document.getElementById('popupDates');
+  const pdfPopupName = document.getElementById('pdfPopupName');
+  const pdfPopupDates = document.getElementById('pdfPopupDates');
   
   // Set name and dates
-  popupName.textContent = person.n;
+  pdfPopupName.textContent = person.n;
   let dateText = '';
   if (person.b) dateText += `Born: ${person.b}`;
   if (person.d) dateText += (dateText ? ' • ' : '') + `Died: ${person.d}`;
-  popupDates.textContent = dateText || 'Dates unknown';
-  
-  // Hide photo elements
-  document.getElementById('popupPhoto').style.display = 'none';
-  document.getElementById('prevBtn').style.display = 'none';
-  document.getElementById('nextBtn').style.display = 'none';
-  document.getElementById('galleryCounter').textContent = '';
-  document.getElementById('photoFilename').textContent = '';
+  pdfPopupDates.textContent = dateText || 'Dates unknown';
   
   // Load and display narrative PDF
   getNarrativePdfUrl(personId).then(url => {
     if (url) {
       renderPdfInModal(url);
-      document.getElementById('popupNarrative').style.display = 'block';
+      document.getElementById('pdfPopup').classList.add('show');
     }
   });
-  
-  const popup = document.getElementById('photoPopup');
-  popup.classList.add('show');
 }
 
 // Render PDF using PDF.js
 async function renderPdfInModal(pdfUrl) {
-  const canvas = document.getElementById('narrativeCanvas');
+  const canvas = document.getElementById('pdfCanvas');
   if (!canvas) return;
   
   try {
     const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
     const page = await pdf.getPage(1);
     
-    const scale = 1.5;
+    const scale = 2;
     const viewport = page.getViewport({scale: scale});
     
     canvas.width = viewport.width;
@@ -3589,14 +3583,20 @@ document.addEventListener('keydown', (e) => {
       <div style="font-weight:bold;margin-bottom:10px;">Documents</div>
       <div id="popupDocList"></div>
     </div>
-    <div class="narrative-container" id="popupNarrative" style="display:none;">
-      <div style="font-weight:bold;margin-bottom:10px;">Narrative</div>
-      <canvas id="narrativeCanvas" style="border:1px solid #ccc;border-radius:4px;max-width:100%;max-height:500px;"></canvas>
-    </div>
+  </div>
+</div>
+
+<div id="pdfPopup" onclick="if(event.target===this)closePdfPopup()">
+  <div class="popup-content" style="width:90vw;height:90vh;padding:20px;background:white;border-radius:12px;position:relative;">
+    <button class="popup-close" onclick="closePdfPopup()" style="position:absolute;top:15px;right:15px;font-size:28px;background:none;border:none;cursor:pointer;color:#666;">×</button>
+    <div class="popup-name" id="pdfPopupName" style="margin-bottom:10px;"></div>
+    <div class="popup-dates" id="pdfPopupDates" style="margin-bottom:15px;font-size:0.9em;color:#666;"></div>
+    <canvas id="pdfCanvas" style="width:100%;height:calc(100% - 100px);border:1px solid #ddd;border-radius:4px;background:#f5f5f5;"></canvas>
   </div>
 </div>
 
 <script>
+
 // Hide welcome banner after 3 seconds
 setTimeout(() => {
   let banner = document.getElementById('welcomeBanner');

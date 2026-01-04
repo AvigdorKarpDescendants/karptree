@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v146 - Photos from Google Sheet</title>
+<title>KarpTree v148 - Photos from Google Sheet</title>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #zoom{transform-origin:0 0;}
@@ -280,11 +280,11 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v146 (December 31, 2025)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v148 (December 31, 2025)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
-      <p>KarpTree is an interactive family tree visualization featuring 229 people across 7 generations. The tree uses a horizontal spouse layout where married couples are shown side-by-side with connecting lines.</p>
+      <p>KarpTree is an interactive family tree visualization featuring 234 people across 7 generations. The tree uses a horizontal spouse layout where married couples are shown side-by-side with connecting lines.</p>
       
       <h2>🧭 Navigation & Controls</h2>
       <h3>Toolbar Buttons</h3>
@@ -361,7 +361,7 @@ svg{background:transparent;}
       </div>
       
       <h2>ℹ️ About</h2>
-      <p><strong>Total People:</strong> 229 | <strong>Generations:</strong> 7 | <strong>Photos:</strong> 109</p>
+      <p><strong>Total People:</strong> 234 | <strong>Generations:</strong> 7 | <strong>Photos:</strong> 109</p>
       <p style='margin-top:20px;text-align:center;color:#999;'>Click the ✕ button or press Escape to close this guide</p>
     </div>
   </div>
@@ -378,8 +378,9 @@ svg{background:transparent;}
 // Auto-generated photo manifest - embedded from photo_manifest.csv
 // 87 photos hosted on GitHub
 
-// Google Sheet Photo Loader
+// Google Sheet Photo and Narrative Loader
 let photoManifestData = [];
+let narrativeData = {};
 
 async function loadPhotosFromSheet() {
   const csvUrl = 'https://docs.google.com/spreadsheets/d/1SYRi2W7QxZvlOzIz0uGZfjW3SlohDHQtpHzLE5DA98s/export?format=csv';
@@ -391,9 +392,11 @@ async function loadPhotosFromSheet() {
     const header = lines[0].split(',').map(h => h.trim());
     
     const personIdCol = header.indexOf('Person ID');
+    const narrativeCol = 2; // Column C (0-indexed: A=0, B=1, C=2)
     
     console.log('CSV Header:', header);
     console.log('Person ID Index:', personIdCol);
+    console.log('Narrative Column Index:', narrativeCol);
     console.log('Photo Columns:', header.map((h, i) => h.match(/^Photo/) ? i : null).filter(x => x !== null));
     
     for (let i = 1; i < lines.length; i++) {
@@ -402,6 +405,14 @@ async function loadPhotosFromSheet() {
       
       const personId = row[personIdCol];
       
+      // Check for narrative flag in column C
+      const narrativeFlag = row[narrativeCol] ? row[narrativeCol].toLowerCase() : '';
+      if (narrativeFlag === 'x') {
+        narrativeData[personId] = true;
+        console.log(`Person ${personId} has narrative`);
+      }
+      
+      // Load photos
       for (let j = 0; j < row.length; j++) {
         if (header[j].match(/^Photo/) && row[j]) {
           const num = row[j];
@@ -416,14 +427,37 @@ async function loadPhotosFromSheet() {
     }
     
     console.log('Loaded ' + photoManifestData.length + ' photos from Google Sheet');
+    console.log('Loaded ' + Object.keys(narrativeData).length + ' narratives from Google Sheet');
     return true;
   } catch(e) {
-    console.error('Photo load error:', e);
+    console.error('Photo/Narrative load error:', e);
     return false;
   }
 }
 
-// Load photos BEFORE initializing the tree
+// Function to get narrative PDF URL for a person
+async function getNarrativePdfUrl(personId) {
+  if (!narrativeData[personId]) return null;
+  
+  try {
+    // GitHub API to list files in narratives folder
+    const apiUrl = 'https://api.github.com/repos/avigdorkarpdescendants/karptree/contents/narratives';
+    const response = await fetch(apiUrl);
+    const files = await response.json();
+    
+    // Find file matching pattern: p[personId]_*.pdf
+    const pattern = new RegExp(`^${personId}_.*\\.pdf$`);
+    const narrativeFile = files.find(f => pattern.test(f.name));
+    
+    if (narrativeFile) {
+      return `https://raw.githubusercontent.com/avigdorkarpdescendants/karptree/main/narratives/${narrativeFile.name}`;
+    }
+    return null;
+  } catch(e) {
+    console.error(`Error fetching narrative for ${personId}:`, e);
+    return null;
+  }
+}
 loadPhotosFromSheet().then(() => {
   loadPhotoManifest();  // Process photos into manifest
   initializeRelationshipCalculator();
@@ -1367,7 +1401,7 @@ function layout(root){
  // Constants for new layout
  const PERSON_WIDTH = 240;
  const SPOUSE_WIDTH = 200;
- const SPOUSE_OFFSET = 300;
+ const SPOUSE_OFFSET = 280;
  const MIN_GAP = 150; // Increased from 120 to prevent overlaps
  const GENERATION_HEIGHT = 270;
  
@@ -1526,7 +1560,7 @@ function layoutPathView(root){
   
   const PERSON_WIDTH = 240;
   const SPOUSE_WIDTH = 200;
-  const SPOUSE_OFFSET = 300;
+  const SPOUSE_OFFSET = 280;
   const PERSON_SPACING = 1000; // Spacing between individuals
   const FAMILY_GAP = 1500; // Extra spacing between different family branches
   const GENERATION_HEIGHT = 270;
@@ -3307,6 +3341,20 @@ function showPhotoPopup(personId) {
   // Load documents (from documents folder) - disabled, folder doesn't exist
   // loadDocuments(personId);
   
+  // Load narrative if it exists
+  if (narrativeData[personId]) {
+    getNarrativePdfUrl(personId).then(url => {
+      if (url) {
+        document.getElementById('narrativeFrame').src = url;
+        document.getElementById('popupNarrative').style.display = 'block';
+      } else {
+        document.getElementById('popupNarrative').style.display = 'none';
+      }
+    });
+  } else {
+    document.getElementById('popupNarrative').style.display = 'none';
+  }
+  
   popup.classList.add('show');
 }
 
@@ -3462,6 +3510,10 @@ document.addEventListener('keydown', (e) => {
     <div class="doc-list" id="popupDocs" style="display:none;">
       <div style="font-weight:bold;margin-bottom:10px;">Documents</div>
       <div id="popupDocList"></div>
+    </div>
+    <div class="narrative-container" id="popupNarrative" style="display:none;">
+      <div style="font-weight:bold;margin-bottom:10px;">Narrative</div>
+      <iframe id="narrativeFrame" style="width:100%;height:500px;border:1px solid #ccc;border-radius:4px;" frameborder="0"></iframe>
     </div>
   </div>
 </div>

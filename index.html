@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v156 - Photos from Google Sheet</title>
+<title>KarpTree v158 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -288,7 +288,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v156 (January 3, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v158 (January 3, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1760,6 +1760,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   T(n.x, n.y - 12, n.p.n, "n");
   let ds = dateStr(n.p);
   if(ds) T(n.x, n.y + 8, ds, "d");
+  if(n.p.bp) T(n.x, n.y + 28, n.p.bp, "d");
   
   // Draw spouses horizontally beside blood relative
   let spouseConnectionPoints = {}; // Track where children should connect
@@ -1812,6 +1813,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
     T(s.x, s.y - 10, s.p.n, "n");
     let ds2 = dateStr(s.p);
     if(ds2) T(s.x, s.y + 8, ds2, "d");
+    if(s.p.bp) T(s.x, s.y + 24, s.p.bp, "d");
     
     // Draw horizontal === line between blood relative and spouse
     // Stagger Y position if multiple spouses (left higher, right lower)

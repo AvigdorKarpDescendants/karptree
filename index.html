@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v160 - Photos from Google Sheet</title>
+<title>KarpTree v163 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -293,7 +293,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v160 (January 4, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v163 (January 5, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3388,6 +3388,9 @@ function showPhotoPopup(personId) {
     currentGallery = photos;
     currentPhotoIndex = 0;
     showPhoto(0);
+    
+    // Pre-load remaining photos in background (skip first, it's already loading)
+    preLoadPhotos(photos);
   } else {
     // No photos found
     document.getElementById('popupPhoto').style.display = 'none';
@@ -3401,6 +3404,30 @@ function showPhotoPopup(personId) {
   // loadDocuments(personId);
   
   popup.classList.add('show');
+}
+
+// Pre-load all photos for a person in the background
+function preLoadPhotos(photos) {
+  // Create a hidden container for pre-loading images
+  let preloadContainer = document.getElementById('preloadContainer');
+  if (!preloadContainer) {
+    preloadContainer = document.createElement('div');
+    preloadContainer.id = 'preloadContainer';
+    preloadContainer.style.display = 'none';
+    document.body.appendChild(preloadContainer);
+  }
+  
+  // Clear previous pre-loads
+  preloadContainer.innerHTML = '';
+  
+  // Pre-load each photo (skip the first one, it's already loading)
+  photos.forEach((photo, index) => {
+    if (index > 0) { // Skip first photo
+      const img = document.createElement('img');
+      img.src = photo.url || photo.path;
+      preloadContainer.appendChild(img);
+    }
+  });
 }
 
 function showPhoto(index) {

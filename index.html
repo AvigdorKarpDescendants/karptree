@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v158 - Photos from Google Sheet</title>
+<title>KarpTree v160 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -48,6 +48,9 @@ svg{background:transparent;}
 .gallery-next{right:10px;}
 .gallery-counter{margin-top:10px;color:#666;font-size:14px;}
 .photo-filename{margin-top:5px;color:#999;font-size:12px;font-style:italic;}
+.photo-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.spinner{border:4px solid #f3f3f3;border-top:4px solid #3498db;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 10px;}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 .doc-list{margin-top:20px;padding-top:20px;border-top:2px solid #eee;}
 .doc-item{padding:8px;margin:5px 0;background:#f5f5f5;border-radius:4px;display:flex;
   align-items:center;justify-content:space-between;}
@@ -214,6 +217,8 @@ svg{background:transparent;}
 <button onclick='openUserGuide()' style='margin-right:10px;padding:8px 16px;background:#27ae60;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>📖 User Guide</button>
 <button onclick='openRozwadow()' style='margin-right:10px;padding:8px 16px;background:#8b4513;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>🏘️ Rozwadów</button>
 <div style='flex:1;'></div>
+<button onclick='zoomIn()' style='margin-right:5px;padding:8px 12px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:16px;font-weight:bold;'>+</button>
+<button onclick='zoomOut()' style='margin-right:10px;padding:8px 12px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:16px;font-weight:bold;'>−</button>
 <div id='zoomDisplay' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border-radius:4px;font-size:14px;min-width:60px;text-align:center;'>1.0x</div>
 <button onclick='clearAll()' style='margin-right:10px;padding:8px 16px;background:#c0392b;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Clear All</button>
 </div>
@@ -288,7 +293,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v158 (January 3, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v160 (January 4, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -2065,6 +2070,23 @@ function Z(k){
   wrap.scrollTop=newViewCenterY-wrap.clientHeight/2;
 }
 
+// Zoom control functions with 10% increment and 0.1x to 5x limits
+function zoomIn() {
+  if (sc < 5) {
+    let newScale = sc * 1.1;
+    if (newScale > 5) newScale = 5;
+    Z(newScale / sc);
+  }
+}
+
+function zoomOut() {
+  if (sc > 0.1) {
+    let newScale = sc / 1.1;
+    if (newScale < 0.1) newScale = 0.1;
+    Z(newScale / sc);
+  }
+}
+
 document.getElementById("wrap").addEventListener("wheel",e=>{
  e.preventDefault();Z(e.deltaY<0?1.1:0.9);
 },{passive:false});
@@ -3392,26 +3414,57 @@ function showPhoto(index) {
   const nextBtn = document.getElementById('nextBtn');
   const counter = document.getElementById('galleryCounter');
   const filename = document.getElementById('photoFilename');
+  const photoLoading = document.getElementById('photoLoading');
   
-  // Use photo.url (GitHub URL) or photo.path (fallback for local)
-  popupPhoto.src = photo.url || photo.path;
-  popupPhoto.style.display = 'block';
-  popupPhoto.onerror = function() {
-    this.style.display = 'none';
-    counter.textContent = 'Photo not found';
+  // Show loading spinner
+  photoLoading.style.display = 'block';
+  popupPhoto.style.display = 'none';
+  
+  // Disable navigation buttons during loading
+  prevBtn.disabled = true;
+  nextBtn.disabled = true;
+  prevBtn.style.opacity = '0.5';
+  nextBtn.style.opacity = '0.5';
+  
+  // Create a new image element to load the photo
+  const tempImg = new Image();
+  tempImg.onload = function() {
+    // Photo loaded successfully
+    popupPhoto.src = this.src;
+    popupPhoto.style.display = 'block';
+    photoLoading.style.display = 'none';
+    
+    // Re-enable navigation buttons
+    prevBtn.disabled = false;
+    nextBtn.disabled = false;
+    prevBtn.style.opacity = '1';
+    nextBtn.style.opacity = '1';
+    prevBtn.style.display = currentGallery.length > 1 ? 'block' : 'none';
+    nextBtn.style.display = currentGallery.length > 1 ? 'block' : 'none';
+    
+    // Update counter and filename
+    if (currentGallery.length > 1) {
+      counter.textContent = `Photo ${index + 1} of ${currentGallery.length}`;
+    } else {
+      counter.textContent = '';
+    }
+    filename.textContent = photo.filename;
   };
   
-  // Show/hide navigation buttons
-  prevBtn.style.display = currentGallery.length > 1 ? 'block' : 'none';
-  nextBtn.style.display = currentGallery.length > 1 ? 'block' : 'none';
+  tempImg.onerror = function() {
+    popupPhoto.style.display = 'none';
+    photoLoading.style.display = 'none';
+    counter.textContent = 'Photo not found';
+    
+    // Re-enable navigation buttons
+    prevBtn.disabled = false;
+    nextBtn.disabled = false;
+    prevBtn.style.opacity = '1';
+    nextBtn.style.opacity = '1';
+  };
   
-  // Update counter and filename
-  if (currentGallery.length > 1) {
-    counter.textContent = `Photo ${index + 1} of ${currentGallery.length}`;
-  } else {
-    counter.textContent = '';
-  }
-  filename.textContent = photo.filename;
+  // Start loading the photo
+  tempImg.src = photo.url || photo.path;
 }
 
 function prevPhoto() {
@@ -3581,6 +3634,10 @@ document.addEventListener('keydown', (e) => {
     <div class="popup-dates" id="popupDates"></div>
     <div class="gallery-container">
       <button class="gallery-nav gallery-prev" onclick="event.stopPropagation();prevPhoto()" id="prevBtn" style="display:none;">&lt;</button>
+      <div class="photo-loading" id="photoLoading" style="display:none;">
+        <div class="spinner"></div>
+        <div>Loading photo...</div>
+      </div>
       <img class="popup-photo" id="popupPhoto" src="" alt="Photo">
       <button class="gallery-nav gallery-next" onclick="event.stopPropagation();nextPhoto()" id="nextBtn" style="display:none;">&gt;</button>
       <div class="gallery-counter" id="galleryCounter"></div>

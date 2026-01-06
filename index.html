@@ -1,9 +1,10 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v165 - Photos from Google Sheet</title>
+<title>KarpTree v166 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <style>
 html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:100%;}
 #passwordModal{display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:9999;align-items:center;justify-content:center;}
@@ -314,7 +315,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v165 (January 5, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v166 (January 5, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3720,14 +3721,18 @@ document.addEventListener('keydown', (e) => {
 </div> <!-- End mainContent -->
 
 <script>
-// Password protection
-const CORRECT_PASSWORD = 'K@rpTree';
+// Password protection with SHA-256 hashing
+// Hash of K@rpTree
+const HASHED_PASSWORD = '228b22f9d9fb8c823b65e1766b435069816c19874805b3ed29e82739528c3f48';
 
 function checkPassword() {
   const input = document.getElementById('passwordInput').value;
   const errorDiv = document.getElementById('passwordError');
   
-  if (input === CORRECT_PASSWORD) {
+  // Hash the user input
+  const inputHash = CryptoJS.SHA256(input).toString();
+  
+  if (inputHash === HASHED_PASSWORD) {
     // Password correct - show content
     document.getElementById('passwordModal').classList.add('hidden');
     document.getElementById('mainContent').style.display = 'block';

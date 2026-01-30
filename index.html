@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v177 - Photos from Google Sheet</title>
+<title>KarpTree v179 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v177 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v179 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1696,10 +1696,10 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
         sortedAncestors.forEach((ancestor, aidx) => {
           let ay;
           if (aidx === 0) {
-            // Moshe (oldest) - TOP box - one box height above Elimelech
+            // Moshe (oldest) - TOP box - SMALLER Y (higher on screen)
             ay = (s.y - SH_local/2) - ATTACHED_H - ATTACHED_H/2;
           } else {
-            // Elimelech - MIDDLE box (touching Sarah's top)
+            // Elimelech - MIDDLE box (touching Sarah) - LARGER Y (lower on screen)
             ay = (s.y - SH_local/2) - ATTACHED_H/2;
           }
           

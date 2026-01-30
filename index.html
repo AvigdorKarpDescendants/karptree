@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v179 - Photos from Google Sheet</title>
+<title>KarpTree v181 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v179 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v181 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1680,14 +1680,14 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
         const ATTACHED_W = 200;
         const ATTACHED_H = 50;  // Taller boxes
         
-        // Sort ancestors by birth year (oldest first)
+        // Sort ancestors by birth year (oldest first - Moshe first)
         const sortedAncestors = [...attachedAncestors].sort((a, b) => {
           const aYear = a.p.b || 9999;
           const bYear = b.p.b || 9999;
           if (aYear === bYear) {
             return a.id.localeCompare(b.id);
           }
-          return aYear - bYear;
+          return aYear - bYear;  // Oldest first
         });
         
         let attachedX = s.x;

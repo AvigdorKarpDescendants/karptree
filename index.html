@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v172 - Photos from Google Sheet</title>
+<title>KarpTree v173 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v172 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v173 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1599,10 +1599,11 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   // Check for attached ancestors (p0001, p0002 above p1001s1)
   const attachedAncestors = getAttachedAncestors(n.id);
   let attachedBoxHeight = 0;
-  if (attachedAncestors.length > 0) {
+  // Only attach ancestors to Sarah (p1001s1)
+  if (n.id === 'p1001s1' && attachedAncestors.length > 0) {
     const ATTACHED_COLOR = "rgba(180,180,180,0.9)";
     const ATTACHED_W = 200;
-    const ATTACHED_H = 65;
+    const ATTACHED_H = 40;  // Reduced to 3/5 so both fit
     
     // Sort ancestors by birth year (oldest first)
     const sortedAncestors = [...attachedAncestors].sort((a, b) => {
@@ -1618,9 +1619,8 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
     
     // Sarah's box: center at n.y, height H, so top edge at n.y - H/2
     // Elimelech should have bottom edge at n.y - H/2
-    // Elimelech's center: (n.y - H/2) - ATTACHED_H/2 = n.y - H/2 - ATTACHED_H/2
-    // Moshe should have bottom edge at Elimelech's top edge
-    // Moshe's center: (n.y - H/2 - ATTACHED_H) - ATTACHED_H/2 = n.y - H/2 - 3*ATTACHED_H/2
+    // Elimelech's center: n.y - H/2 - ATTACHED_H/2
+    // Moshe's center: n.y - H/2 - 3*ATTACHED_H/2
     
     sortedAncestors.forEach((ancestor, idx) => {
       let ay;
@@ -1652,18 +1652,18 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       
       svg.appendChild(ag);
       
-      // Draw text
-      T(ax, ay - 16, ancestor.p.n, "n");
-      if(ancestor.p.heb) T(ax, ay - 4, ancestor.p.heb, "he");
+      // Draw text (smaller for tighter box)
+      T(ax, ay - 10, ancestor.p.n, "n");
+      if(ancestor.p.heb) T(ax, ay - 1, ancestor.p.heb, "he");
       
       let ancestorDs = dateStr(ancestor.p);
-      if(ancestorDs) T(ax, ay + 10, ancestorDs, "d");
+      if(ancestorDs) T(ax, ay + 8, ancestorDs, "d");
       
       // Draw source
       if(ancestor.p.src && ancestor.p.src !== null) {
         let srcText = document.createElementNS("http://www.w3.org/2000/svg","text");
         srcText.setAttribute("x", ax - ATTACHED_W/2 + 5);
-        srcText.setAttribute("y", ay - ATTACHED_H/2 + 12);
+        srcText.setAttribute("y", ay - ATTACHED_H/2 + 10);
         srcText.setAttribute("font-size", "7");
         srcText.setAttribute("fill", "#666");
         srcText.setAttribute("text-anchor", "start");

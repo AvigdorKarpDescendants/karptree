@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v184 - Photos from Google Sheet</title>
+<title>KarpTree v185 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v184 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v185 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1650,7 +1650,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   T(n.x, n.y - 15, n.p.n, "n");
   
   // Draw Hebrew name below English with more spacing (1/2 as much movement)
-  if(n.p.heb) T(n.x, n.y - 7, n.p.heb, "he");
+  if(n.p.heb) T(n.x, n.y, n.p.heb, "he");
   
   // Draw source reference in upper left corner
   if(n.p.src && n.p.src !== null) {
@@ -1787,7 +1787,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
     
     svg.appendChild(sg);
     T(s.x, s.y - 13, s.p.n, "n");  // English name raised higher
-    if(s.p.heb) T(s.x, s.y - 5, s.p.heb, "he");  // Hebrew name 1/2 as much movement down
+    if(s.p.heb) T(s.x, s.y + 2, s.p.heb, "he");  // Hebrew name lower
     let ds2 = dateStr(s.p);
     if(ds2) T(s.x, s.y + 10, ds2, "d");  // Dates with spacing
     if(s.p.bp) T(s.x, s.y + 24, s.p.bp, "d");

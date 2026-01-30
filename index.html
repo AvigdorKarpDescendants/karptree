@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v167.1 - Photos from Google Sheet</title>
+<title>KarpTree v168 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -210,7 +210,7 @@ svg{background:transparent;}
   background: #f8f9fa;
 }
 
-.he{text-anchor:middle;font-size:11px;fill:#666;font-style:italic;}
+.he{text-anchor:middle;font-size:12px;fill:#666;font-style:italic;}
 </style></head>
 <body>
 <div id="passwordModal">
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v167.1 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v168 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1581,12 +1581,27 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   let attachedBoxHeight = 0;
   if (attachedAncestors.length > 0) {
     const ATTACHED_COLOR = "rgba(180,180,180,0.9)"; // Darker color for attached
-    const ATTACHED_H = 60;
-    let attachedY = n.y - H/2 - 5; // Start just above main box
+    const ATTACHED_W = 140; // Smaller width
+    const ATTACHED_H = 50;  // Smaller height
     
-    attachedAncestors.forEach((ancestor, idx) => {
-      attachedY -= (ATTACHED_H + 3); // Stack upwards
-      let ax = n.x - 100; // Slightly offset
+    // Sort ancestors by birth year (oldest first, unknowns last)
+    const sortedAncestors = [...attachedAncestors].sort((a, b) => {
+      const aYear = a.p.b || 9999; // Unknown births go to end
+      const bYear = b.p.b || 9999;
+      if (aYear === bYear) {
+        // If same birth year (or both unknown), sort by ID
+        return a.id.localeCompare(b.id);
+      }
+      return aYear - bYear;
+    });
+    
+    // Position horizontally above n.y, centered on n.x
+    const totalWidth = sortedAncestors.length * ATTACHED_W + (sortedAncestors.length - 1) * 5;
+    let startX = n.x - totalWidth / 2;
+    let attachedY = n.y - H/2 - ATTACHED_H - 8; // Position above main box
+    
+    sortedAncestors.forEach((ancestor, idx) => {
+      let ax = startX + idx * (ATTACHED_W + 5) + ATTACHED_W/2; // Center of box
       let ay = attachedY;
       
       // Draw attached ancestor box (smaller, darker)
@@ -1595,11 +1610,11 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       ag.onclick = () => showPhotoPopup(ancestor.id);
       
       let ar = document.createElementNS("http://www.w3.org/2000/svg","rect");
-      ar.setAttribute("x", ax - 90);
+      ar.setAttribute("x", ax - ATTACHED_W/2);
       ar.setAttribute("y", ay - ATTACHED_H/2);
-      ar.setAttribute("width", 180);
+      ar.setAttribute("width", ATTACHED_W);
       ar.setAttribute("height", ATTACHED_H);
-      ar.setAttribute("rx", 8);
+      ar.setAttribute("rx", 6);
       ar.setAttribute("fill", ATTACHED_COLOR);
       ar.setAttribute("stroke", genderBorder(ancestor.p.g));
       ar.setAttribute("stroke-width", "1.5");
@@ -1608,14 +1623,14 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       svg.appendChild(ag);
       
       // Draw name and Hebrew name
-      T(ax, ay - 12, ancestor.p.n, "n");
-      if(ancestor.p.heb) T(ax, ay - 2, ancestor.p.heb, "he");
+      T(ax, ay - 8, ancestor.p.n, "n");
+      if(ancestor.p.heb) T(ax, ay + 2, ancestor.p.heb, "he");
       
       // Draw source
       if(ancestor.p.src && ancestor.p.src !== null) {
         let srcText = document.createElementNS("http://www.w3.org/2000/svg","text");
-        srcText.setAttribute("x", ax - 85);
-        srcText.setAttribute("y", ay - 22);
+        srcText.setAttribute("x", ax - ATTACHED_W/2 + 3);
+        srcText.setAttribute("y", ay - ATTACHED_H/2 + 10);
         srcText.setAttribute("font-size", "7");
         srcText.setAttribute("fill", "#666");
         srcText.setAttribute("text-anchor", "start");
@@ -1625,7 +1640,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       
       // Draw dates if available
       let ancestorDs = dateStr(ancestor.p);
-      if(ancestorDs) T(ax, ay + 5, ancestorDs, "d");
+      if(ancestorDs) T(ax, ay + 12, ancestorDs, "d");
     });
   }
   

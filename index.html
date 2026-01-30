@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v167 - Photos from Google Sheet</title>
+<title>KarpTree v167.1 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -210,7 +210,7 @@ svg{background:transparent;}
   background: #f8f9fa;
 }
 
-.he{text-anchor:middle;font-size:9px;fill:#666;font-style:italic;}
+.he{text-anchor:middle;font-size:11px;fill:#666;font-style:italic;}
 </style></head>
 <body>
 <div id="passwordModal">
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v167 (January 5, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v167.1 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1496,14 +1496,12 @@ function hasPhotos(personId) {
 }
 
 
-// Detect attached ancestors (like p0001, p0002 for p1001s1)
+// Detect attached ancestors (like p0001, p0002 for p1001s1 or p1001)
 function getAttachedAncestors(personId) {
-  if (personId !== 'p1001s1') return [];
   const attached = [];
-  // Check if p0001 and p0002 exist and are ancestors of p1001s1
-  if (N['p0001'] && N['p0002']) {
+  // Check if p0001 and p0002 exist and should be attached
+  if ((personId === 'p1001s1' || personId === 'p1001') && N['p0001'] && N['p0002']) {
     // Check parentage: p0001 -> p0002 -> p1001s1
-    let isValidChain = false;
     const pr_list = PR || [];
     const p0001_to_p0002 = pr_list.some(r => r[0] === 'p0001' && r[1] === 'p0002');
     const p0002_to_p1001s1 = pr_list.some(r => r[0] === 'p0002' && r[1] === 'p1001s1');
@@ -1688,7 +1686,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   if(n.p.src && n.p.src !== null) {
     let srcText = document.createElementNS("http://www.w3.org/2000/svg","text");
     srcText.setAttribute("x", n.x - 110);
-    srcText.setAttribute("y", n.y - 32);
+    srcText.setAttribute("y", n.y - 25);
     srcText.setAttribute("font-size", "8");
     srcText.setAttribute("fill", "#999");
     srcText.setAttribute("text-anchor", "start");

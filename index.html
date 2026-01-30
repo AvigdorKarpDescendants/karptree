@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v168 - Photos from Google Sheet</title>
+<title>KarpTree v169 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v168 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v169 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1303,6 +1303,15 @@ function layout(root){
      
      if(groups.length === 1){
        // All children from one spouse (or no spouse info)
+       // Sort by birth year before assigning X
+       n.ch.sort((a, b) => {
+         const aYear = a.p.b || 9999;
+         const bYear = b.p.b || 9999;
+         if (aYear === bYear) {
+           return a.id.localeCompare(b.id);
+         }
+         return aYear - bYear;
+       });
        n.ch.forEach(assignX);
        n.x = (n.ch[0].x + n.ch[n.ch.length-1].x) / 2;
      } else {
@@ -1322,7 +1331,18 @@ function layout(root){
        
        // Layout each group
        sortedGroups.forEach((spouseId, idx) => {
-         childrenBySpouse[spouseId].forEach(assignX);
+         // Sort children by birth year (oldest left, unknowns right)
+         const groupChildren = childrenBySpouse[spouseId];
+         groupChildren.sort((a, b) => {
+           const aYear = a.p.b || 9999;
+           const bYear = b.p.b || 9999;
+           if (aYear === bYear) {
+             return a.id.localeCompare(b.id);
+           }
+           return aYear - bYear;
+         });
+         
+         groupChildren.forEach(assignX);
          if(idx < sortedGroups.length - 1){
            // Add extra gap between groups
            x += MIN_GAP;
@@ -1581,8 +1601,8 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   let attachedBoxHeight = 0;
   if (attachedAncestors.length > 0) {
     const ATTACHED_COLOR = "rgba(180,180,180,0.9)"; // Darker color for attached
-    const ATTACHED_W = 140; // Smaller width
-    const ATTACHED_H = 50;  // Smaller height
+    const ATTACHED_W = 200; // Larger width for spacing
+    const ATTACHED_H = 70;  // Larger height
     
     // Sort ancestors by birth year (oldest first, unknowns last)
     const sortedAncestors = [...attachedAncestors].sort((a, b) => {
@@ -1595,16 +1615,15 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       return aYear - bYear;
     });
     
-    // Position horizontally above n.y, centered on n.x
-    const totalWidth = sortedAncestors.length * ATTACHED_W + (sortedAncestors.length - 1) * 5;
-    let startX = n.x - totalWidth / 2;
-    let attachedY = n.y - H/2 - ATTACHED_H - 8; // Position above main box
+    // Position vertically above n.x (Sarah), stacked on top of each other
+    let attachedX = n.x; // Center on Sarah's x position
+    let attachedY = n.y - H/2 - ATTACHED_H - 10; // Start above main box
     
     sortedAncestors.forEach((ancestor, idx) => {
-      let ax = startX + idx * (ATTACHED_W + 5) + ATTACHED_W/2; // Center of box
-      let ay = attachedY;
+      let ax = attachedX;
+      let ay = attachedY - idx * (ATTACHED_H + 5); // Stack upwards (oldest at top)
       
-      // Draw attached ancestor box (smaller, darker)
+      // Draw attached ancestor box
       let ag = document.createElementNS("http://www.w3.org/2000/svg","g");
       ag.style.cursor = "pointer";
       ag.onclick = () => showPhotoPopup(ancestor.id);
@@ -1622,25 +1641,27 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       
       svg.appendChild(ag);
       
-      // Draw name and Hebrew name
-      T(ax, ay - 8, ancestor.p.n, "n");
-      if(ancestor.p.heb) T(ax, ay + 2, ancestor.p.heb, "he");
+      // Draw English name (top)
+      T(ax, ay - 18, ancestor.p.n, "n");
       
-      // Draw source
+      // Draw Hebrew name (middle)
+      if(ancestor.p.heb) T(ax, ay - 5, ancestor.p.heb, "he");
+      
+      // Draw dates (bottom)
+      let ancestorDs = dateStr(ancestor.p);
+      if(ancestorDs) T(ax, ay + 12, ancestorDs, "d");
+      
+      // Draw source (upper left corner)
       if(ancestor.p.src && ancestor.p.src !== null) {
         let srcText = document.createElementNS("http://www.w3.org/2000/svg","text");
-        srcText.setAttribute("x", ax - ATTACHED_W/2 + 3);
-        srcText.setAttribute("y", ay - ATTACHED_H/2 + 10);
+        srcText.setAttribute("x", ax - ATTACHED_W/2 + 5);
+        srcText.setAttribute("y", ay - ATTACHED_H/2 + 12);
         srcText.setAttribute("font-size", "7");
         srcText.setAttribute("fill", "#666");
         srcText.setAttribute("text-anchor", "start");
         srcText.textContent = ancestor.p.src;
         svg.appendChild(srcText);
       }
-      
-      // Draw dates if available
-      let ancestorDs = dateStr(ancestor.p);
-      if(ancestorDs) T(ax, ay + 12, ancestorDs, "d");
     });
   }
   

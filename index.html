@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v181 - Photos from Google Sheet</title>
+<title>KarpTree v184 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v181 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v184 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1680,26 +1680,23 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
         const ATTACHED_W = 200;
         const ATTACHED_H = 50;  // Taller boxes
         
-        // Sort ancestors by birth year (oldest first - Moshe first)
-        const sortedAncestors = [...attachedAncestors].sort((a, b) => {
-          const aYear = a.p.b || 9999;
-          const bYear = b.p.b || 9999;
-          if (aYear === bYear) {
-            return a.id.localeCompare(b.id);
-          }
-          return aYear - bYear;  // Oldest first
+        // Draw ancestors in lineage order: p0001 (Moshe/grandfather) → p0002 (Elimelech/father) → Sarah (daughter)
+        // They're not siblings - they're a direct line, so order by ID
+        const ancestorOrder = attachedAncestors.sort((a, b) => {
+          // p0001 (Moshe) comes first, then p0002 (Elimelech)
+          return a.id.localeCompare(b.id);
         });
         
         let attachedX = s.x;
         const SH_local = 65; // Spouse height
         
-        sortedAncestors.forEach((ancestor, aidx) => {
+        ancestorOrder.forEach((ancestor, aidx) => {
           let ay;
           if (aidx === 0) {
-            // Moshe (oldest) - TOP box - SMALLER Y (higher on screen)
+            // First in line (Moshe/grandfather) - TOP box - SMALLER Y (higher on screen)
             ay = (s.y - SH_local/2) - ATTACHED_H - ATTACHED_H/2;
           } else {
-            // Elimelech - MIDDLE box (touching Sarah) - LARGER Y (lower on screen)
+            // Second in line (Elimelech/father) - MIDDLE box (touching Sarah) - LARGER Y (lower on screen)
             ay = (s.y - SH_local/2) - ATTACHED_H/2;
           }
           

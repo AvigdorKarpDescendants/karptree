@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v174 - Photos from Google Sheet</title>
+<title>KarpTree v175 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v174 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v175 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1649,8 +1649,8 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   // Draw English name
   T(n.x, n.y - 12, n.p.n, "n");
   
-  // Draw Hebrew name below English (smaller)
-  if(n.p.heb) T(n.x, n.y - 2, n.p.heb, "he");
+  // Draw Hebrew name below English with spacing
+  if(n.p.heb) T(n.x, n.y - 1, n.p.heb, "he");
   
   // Draw source reference in upper left corner
   if(n.p.src && n.p.src !== null) {
@@ -1665,7 +1665,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   }
   
   let ds = dateStr(n.p);
-  if(ds) T(n.x, n.y + 8, ds, "d");
+  if(ds) T(n.x, n.y + 10, ds, "d");  // Dates below with more spacing
   if(n.p.bp) T(n.x, n.y + 28, n.p.bp, "d");
   
   // Draw spouses horizontally beside blood relative
@@ -1678,7 +1678,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       if (attachedAncestors.length > 0) {
         const ATTACHED_COLOR = "rgba(180,180,180,0.9)";
         const ATTACHED_W = 200;
-        const ATTACHED_H = 40;
+        const ATTACHED_H = 50;  // Taller boxes
         
         // Sort ancestors by birth year (oldest first)
         const sortedAncestors = [...attachedAncestors].sort((a, b) => {
@@ -1696,10 +1696,10 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
         sortedAncestors.forEach((ancestor, aidx) => {
           let ay;
           if (aidx === 0) {
-            // Moshe (oldest) - top box
+            // Moshe (oldest) - TOP box
             ay = s.y - SH_local/2 - 3*ATTACHED_H/2;
           } else {
-            // Elimelech - middle box (touching Sarah)
+            // Elimelech - BOTTOM box (touching Sarah)
             ay = s.y - SH_local/2 - ATTACHED_H/2;
           }
           
@@ -1723,12 +1723,12 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
           
           svg.appendChild(ag);
           
-          // Draw text
-          T(ax, ay - 10, ancestor.p.n, "n");
-          if(ancestor.p.heb) T(ax, ay - 1, ancestor.p.heb, "he");
+          // Draw text with more spacing
+          T(ax, ay - 12, ancestor.p.n, "n");  // English name
+          if(ancestor.p.heb) T(ax, ay - 2, ancestor.p.heb, "he");  // Hebrew name (more space)
           
           let ancestorDs = dateStr(ancestor.p);
-          if(ancestorDs) T(ax, ay + 8, ancestorDs, "d");
+          if(ancestorDs) T(ax, ay + 10, ancestorDs, "d");  // Dates (even more space)
           
           // Draw source
           if(ancestor.p.src && ancestor.p.src !== null) {
@@ -1790,8 +1790,9 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
     
     svg.appendChild(sg);
     T(s.x, s.y - 10, s.p.n, "n");
+    if(s.p.heb) T(s.x, s.y + 1, s.p.heb, "he");  // Hebrew name below English with spacing
     let ds2 = dateStr(s.p);
-    if(ds2) T(s.x, s.y + 8, ds2, "d");
+    if(ds2) T(s.x, s.y + 12, ds2, "d");  // Dates below with more spacing
     if(s.p.bp) T(s.x, s.y + 24, s.p.bp, "d");
     
     // Draw horizontal === line between blood relative and spouse

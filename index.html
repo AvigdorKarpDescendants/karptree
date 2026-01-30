@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v170 - Photos from Google Sheet</title>
+<title>KarpTree v171 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v170 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v171 (January 30, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1601,8 +1601,8 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   let attachedBoxHeight = 0;
   if (attachedAncestors.length > 0) {
     const ATTACHED_COLOR = "rgba(180,180,180,0.9)"; // Darker color for attached
-    const ATTACHED_W = 200; // Match width
-    const ATTACHED_H = 65;  // Height for ancestor boxes
+    const ATTACHED_W = 200;
+    const ATTACHED_H = 65;
     
     // Sort ancestors by birth year (oldest first)
     const sortedAncestors = [...attachedAncestors].sort((a, b) => {
@@ -1614,15 +1614,22 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       return aYear - bYear;
     });
     
-    // Position directly above n (Sarah), touching her box
-    let attachedX = n.x; // Center on Sarah's X
+    // Position stacked directly above Sarah (n)
+    let attachedX = n.x;
+    
+    // Start from Sarah's top and work upward
+    // Sarah's top edge is at: n.y - H/2
+    // So Elimelech's bottom should be there
+    // Elimelech's center is at: n.y - H/2 - ATTACHED_H/2
+    // Moshe's center is at: (n.y - H/2 - ATTACHED_H/2) - ATTACHED_H
     
     sortedAncestors.forEach((ancestor, idx) => {
-      // Stack from top: idx=0 (Moshe) highest, idx=1 (Elimelech) just above Sarah
-      let ay = n.y - H/2 - ATTACHED_H - (idx * ATTACHED_H); // NO gaps, boxes touching
+      // idx=0 (Moshe): top position
+      // idx=1 (Elimelech): bottom position (touching Sarah)
+      let ay = (n.y - H/2 - ATTACHED_H/2) - (idx * ATTACHED_H);
       let ax = attachedX;
       
-      // Draw attached ancestor box
+      // Draw box
       let ag = document.createElementNS("http://www.w3.org/2000/svg","g");
       ag.style.cursor = "pointer";
       ag.onclick = () => showPhotoPopup(ancestor.id);
@@ -1640,17 +1647,14 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       
       svg.appendChild(ag);
       
-      // Draw English name (top)
+      // Draw text
       T(ax, ay - 16, ancestor.p.n, "n");
-      
-      // Draw Hebrew name (middle)
       if(ancestor.p.heb) T(ax, ay - 4, ancestor.p.heb, "he");
       
-      // Draw dates (bottom)
       let ancestorDs = dateStr(ancestor.p);
       if(ancestorDs) T(ax, ay + 10, ancestorDs, "d");
       
-      // Draw source (upper left corner)
+      // Draw source
       if(ancestor.p.src && ancestor.p.src !== null) {
         let srcText = document.createElementNS("http://www.w3.org/2000/svg","text");
         srcText.setAttribute("x", ax - ATTACHED_W/2 + 5);

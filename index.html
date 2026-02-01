@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v191 - Photos from Google Sheet</title>
+<title>KarpTree v192 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -231,7 +231,7 @@ svg{background:transparent;}
 </div>
 
 <!-- Intro Continue Button -->
-<div id='introButton' style='position:fixed;top:62%;left:50%;transform:translateX(-50%);width:600px;z-index:500;display:flex;justify-content:center;'>
+<div id='introButton' style='position:fixed;top:70%;left:50%;transform:translateX(-50%);width:600px;z-index:500;display:flex;justify-content:center;'>
   <button onclick='exitIntroMode()' style='padding:16px 40px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:bold;box-shadow:0 4px 15px rgba(0,0,0,0.2);'>
     Click to Continue
   </button>
@@ -324,7 +324,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v191 (February 1, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v192 (February 1, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -2256,6 +2256,19 @@ function exitIntroMode(){
   if(introModeDisabled) return;
   introModeDisabled = true;
   introMode = false;
+  
+  // UNFREEZE the tree - re-enable all interactivity
+  let wrap = document.getElementById('wrap');
+  if(wrap) {
+    wrap.style.pointerEvents = 'auto';  // Re-enable clicks/scrolls
+  }
+  
+  // Re-enable all buttons
+  document.querySelectorAll('button').forEach(btn => {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  });
   
   // Hide button and banner
   document.getElementById('introButton').style.display = 'none';

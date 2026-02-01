@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v186 - Photos from Google Sheet</title>
+<title>KarpTree v187 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v186 (January 30, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v187 (February 1, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -417,7 +417,9 @@ svg{background:transparent;}
 
 // Google Sheet Photo and Narrative Loader
 let photoManifestData = [];
-let narrativeData = {};
+let narrativeData = {
+  'p0001': true  // Rabbi Moshe narrative
+};
 
 async function loadPhotosFromSheet() {
   const csvUrl = 'https://docs.google.com/spreadsheets/d/1SYRi2W7QxZvlOzIz0uGZfjW3SlohDHQtpHzLE5DA98s/export?format=csv';

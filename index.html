@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v187 - Photos from Google Sheet</title>
+<title>KarpTree v188 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -317,7 +317,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v187 (February 1, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v188 (February 1, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1728,6 +1728,19 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
           
           let ancestorDs = dateStr(ancestor.p);
           if(ancestorDs) T(ax, ay + 13, ancestorDs, "d");  // Dates
+          
+          // Draw narrative icon if exists
+          if(narrativeData[ancestor.id]){
+            let narIcon = document.createElementNS("http://www.w3.org/2000/svg","text");
+            narIcon.setAttribute("x", ax + ATTACHED_W/2 - 15);
+            narIcon.setAttribute("y", ay - 10);
+            narIcon.setAttribute("font-size", "14");
+            narIcon.setAttribute("class", "photo-icon");
+            narIcon.style.cursor = "pointer";
+            narIcon.textContent = "📄";
+            narIcon.onclick = () => showNarrativePopup(ancestor.id);
+            svg.appendChild(narIcon);
+          }
           
           // Draw source
           if(ancestor.p.src && ancestor.p.src !== null) {

@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v190 - Photos from Google Sheet</title>
+<title>KarpTree v191 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -324,7 +324,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v190 (February 1, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v191 (February 1, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3727,32 +3727,52 @@ function checkPassword() {
     document.getElementById('passwordModal').classList.add('hidden');
     document.getElementById('mainContent').style.display = 'block';
     
-    // Set up intro mode
+    // Set up intro mode - simple approach
     if(introMode && !introModeDisabled) {
-      // Set zoom to 0.9 for intro
-      sc = 0.9;
+      // Use existing functions to set zoom and generations
+      sc = 0.9;  // Set zoom to 0.9
       document.getElementById("zoomDisplay").textContent = "0.9x";
       document.getElementById("zoom").style.transform = `scale(${sc})`;
       
-      // Center on Avigdor-Sarah (Gen 1/Gen 2 area)
+      // Filter to show only Gen 1-2
+      document.getElementById("genSlider").value = 2;
+      document.getElementById("genLabel").textContent = 2;
+      filterByGeneration(2);
+      
+      // Center the tree properly
       setTimeout(() => {
         let wrap = document.getElementById('wrap');
         if (wrap && N && N['p1001']) {
-          // Adjust center to show Gen 1/Gen 2 nicely
           wrap.scrollLeft = N['p1001'].x - wrap.clientWidth/2;
-          wrap.scrollTop = N['p1001'].y - wrap.clientHeight/3;
+          wrap.scrollTop = N['p1001'].y - 140;
         }
       }, 100);
       
-      // Disable all menus and controls
-      document.querySelectorAll('[onclick*="toggleMenu"]').forEach(btn => btn.disabled = true);
-      document.querySelectorAll('[onclick*="zoomIn"], [onclick*="zoomOut"]').forEach(btn => btn.disabled = true);
-      document.getElementById('genSlider').disabled = true;
+      // Freeze all interactivity
+      let wrap = document.getElementById('wrap');
+      if(wrap) {
+        wrap.style.pointerEvents = 'none';  // Disable all clicks/scrolls on tree
+      }
+      
+      // Disable all buttons
+      document.querySelectorAll('button').forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+      });
+      
+      // Re-enable only the intro button
+      let introBtn = document.getElementById('introButton').querySelector('button');
+      if(introBtn) {
+        introBtn.disabled = false;
+        introBtn.style.opacity = '1';
+        introBtn.style.cursor = 'pointer';
+      }
       
       // Show intro button
       document.getElementById('introButton').style.display = 'flex';
       
-      // Banner disappears after 3 seconds (same as normal mode)
+      // Banner disappears after 3 seconds
       setTimeout(() => {
         let banner = document.getElementById('welcomeBanner');
         if(banner) {

@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v188 - Photos from Google Sheet</title>
+<title>KarpTree v189 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -230,6 +230,13 @@ svg{background:transparent;}
   Descendants of Avigdor and Sarah Karp
 </div>
 
+<!-- Intro Continue Button -->
+<div id='introButton' style='position:fixed;top:62%;left:50%;transform:translateX(-50%);width:600px;z-index:500;display:flex;justify-content:center;'>
+  <button onclick='exitIntroMode()' style='padding:16px 40px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:bold;box-shadow:0 4px 15px rgba(0,0,0,0.2);'>
+    Click to Continue
+  </button>
+</div>
+
 <!-- Menu Bar -->
 <div style='position:fixed;top:0;left:0;right:0;height:40px;background:#2c3e50;z-index:30;display:flex;align-items:center;padding:0 10px;box-shadow:0 2px 5px rgba(0,0,0,0.2);'>
 <button onclick='toggleMenu("findMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Find Person</button>
@@ -317,7 +324,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v188 (February 1, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v189 (February 1, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -420,6 +427,10 @@ let photoManifestData = [];
 let narrativeData = {
   'p0001': true  // Rabbi Moshe narrative
 };
+
+// Intro mode management
+let introMode = true;
+let introModeDisabled = false;
 
 async function loadPhotosFromSheet() {
   const csvUrl = 'https://docs.google.com/spreadsheets/d/1SYRi2W7QxZvlOzIz0uGZfjW3SlohDHQtpHzLE5DA98s/export?format=csv';
@@ -2240,6 +2251,20 @@ document.addEventListener('keydown', function(e){
   }
 });
 
+// Exit intro mode
+function exitIntroMode(){
+  if(introModeDisabled) return;
+  introModeDisabled = true;
+  introMode = false;
+  
+  // Hide button and banner
+  document.getElementById('introButton').style.display = 'none';
+  document.getElementById('welcomeBanner').style.display = 'none';
+  
+  // Call clearAll to reset tree view
+  clearAll();
+}
+
 function clearAll(){
   // Rebuild N object to restore all spouse relationships
   rebuildN();
@@ -3702,25 +3727,52 @@ function checkPassword() {
     document.getElementById('passwordModal').classList.add('hidden');
     document.getElementById('mainContent').style.display = 'block';
     
-    // Center the tree after content is visible
-    setTimeout(() => {
-      let wrap = document.getElementById('wrap');
-      if (wrap && N && N['p1001']) {
-        wrap.scrollLeft = N['p1001'].x - wrap.clientWidth/2;
-        wrap.scrollTop = N['p1001'].y - 140;
-      }
-    }, 100);
-    
-    // Hide welcome banner after 3 seconds
-    setTimeout(() => {
-      let banner = document.getElementById('welcomeBanner');
-      if(banner) {
-        banner.style.opacity = '0';
-        setTimeout(() => {
-          banner.style.display = 'none';
-        }, 500);
-      }
-    }, 3000);
+    // Set up intro mode
+    if(introMode && !introModeDisabled) {
+      // Set zoom to 0.9 for intro
+      sc = 0.9;
+      document.getElementById("zoomDisplay").textContent = "0.9x";
+      document.getElementById("zoom").style.transform = `scale(${sc})`;
+      
+      // Center on Avigdor-Sarah (Gen 1/Gen 2 area)
+      setTimeout(() => {
+        let wrap = document.getElementById('wrap');
+        if (wrap && N && N['p1001']) {
+          // Adjust center to show Gen 1/Gen 2 nicely
+          wrap.scrollLeft = N['p1001'].x - wrap.clientWidth/2;
+          wrap.scrollTop = N['p1001'].y - wrap.clientHeight/3;
+        }
+      }, 100);
+      
+      // Disable all menus and controls
+      document.querySelectorAll('[onclick*="toggleMenu"]').forEach(btn => btn.disabled = true);
+      document.querySelectorAll('[onclick*="zoomIn"], [onclick*="zoomOut"]').forEach(btn => btn.disabled = true);
+      document.getElementById('genSlider').disabled = true;
+      
+      // Show intro button, keep welcome banner
+      document.getElementById('introButton').style.display = 'flex';
+      document.getElementById('welcomeBanner').style.display = 'flex';
+    } else {
+      // Normal mode - hide banner after 3 seconds
+      setTimeout(() => {
+        let banner = document.getElementById('welcomeBanner');
+        if(banner) {
+          banner.style.opacity = '0';
+          setTimeout(() => {
+            banner.style.display = 'none';
+          }, 500);
+        }
+      }, 3000);
+      
+      // Center the tree
+      setTimeout(() => {
+        let wrap = document.getElementById('wrap');
+        if (wrap && N && N['p1001']) {
+          wrap.scrollLeft = N['p1001'].x - wrap.clientWidth/2;
+          wrap.scrollTop = N['p1001'].y - 140;
+        }
+      }, 100);
+    }
   } else {
     // Password wrong - show error
     errorDiv.style.display = 'block';

@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v198 - Photos from Google Sheet</title>
+<title>KarpTree v199 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -324,7 +324,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v198 (February 05, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v199 (February 05, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1452,9 +1452,19 @@ function layoutPathView(root){
   const PERSON_WIDTH = 240;
   const SPOUSE_WIDTH = 200;
   const SPOUSE_OFFSET = 280;
-  const PERSON_SPACING = 600; // Spacing between individuals
-  const FAMILY_GAP = 800; // Extra spacing between different family branches
+  const MIN_PADDING = 20; // Minimum space between boxes
   const GENERATION_HEIGHT = 270;
+  
+  // Calculate width of a person + spouses
+  function getWidth(person) {
+    if(person.sp.length === 0) {
+      return PERSON_WIDTH;
+    } else if(person.sp.length === 1) {
+      return PERSON_WIDTH + SPOUSE_OFFSET + SPOUSE_WIDTH;
+    } else {
+      return SPOUSE_OFFSET + SPOUSE_WIDTH + PERSON_WIDTH + SPOUSE_OFFSET + SPOUSE_WIDTH;
+    }
+  }
   
   // Collect all visible people by generation
   let byGeneration = {};
@@ -1465,56 +1475,41 @@ function layoutPathView(root){
   }
   collect(N[root]);
   
-  // Position each generation left-to-right, with gaps between family branches
+  // Position each generation left-to-right with calculated spacing
   Object.keys(byGeneration).forEach(gen => {
     let people = byGeneration[gen];
     
-    // Group people by their parents (to identify family branches)
-    let groupedByParents = {};
-    people.forEach(person => {
-      let parents = chi[person.id] || [];
-      let parentKey = parents.sort().join('-'); // Create unique key for parent pair
-      if(!groupedByParents[parentKey]) groupedByParents[parentKey] = [];
-      groupedByParents[parentKey].push(person);
-    });
-    
-    // Calculate positions with gaps between branches
-    let currentX = 15000;
-    let groups = Object.values(groupedByParents);
+    // Calculate total width needed for this generation
     let totalWidth = 0;
-    
-    // Calculate total width needed
-    groups.forEach((group, groupIdx) => {
-      totalWidth += group.length * PERSON_SPACING;
-      if(groupIdx < groups.length - 1) totalWidth += FAMILY_GAP;
+    people.forEach(person => {
+      totalWidth += getWidth(person) + MIN_PADDING;
     });
+    totalWidth -= MIN_PADDING; // Remove last padding
     
     // Start from center
-    currentX = 15000 - totalWidth / 2;
+    let currentX = 15000 - totalWidth / 2;
     
-    // Position each family branch
-    groups.forEach((group, groupIdx) => {
-      group.forEach((person, idx) => {
-        person.x = currentX + idx * PERSON_SPACING;
-        person.y = 150 + person.d * GENERATION_HEIGHT;
-        
-        // Position spouses
-        if(person.sp.length === 1){
-          person.sp[0].x = person.x + SPOUSE_OFFSET;
-          person.sp[0].y = person.y;
-          person.sp[0].side = 'right';
-        } else if(person.sp.length === 2){
-          person.sp[0].x = person.x - SPOUSE_OFFSET;
-          person.sp[0].y = person.y;
-          person.sp[0].side = 'left';
-          person.sp[1].x = person.x + SPOUSE_OFFSET;
-          person.sp[1].y = person.y;
-          person.sp[1].side = 'right';
-        }
-      });
+    // Position each person with proper spacing
+    people.forEach(person => {
+      let personWidth = getWidth(person);
+      person.x = currentX + personWidth / 2; // Center of person box
+      person.y = 150 + person.d * GENERATION_HEIGHT;
       
-      currentX += group.length * PERSON_SPACING;
-      if(groupIdx < groups.length - 1) currentX += FAMILY_GAP;
+      // Position spouses relative to person
+      if(person.sp.length === 1){
+        person.sp[0].x = person.x + SPOUSE_OFFSET + SPOUSE_WIDTH / 2;
+        person.sp[0].y = person.y;
+        person.sp[0].side = 'right';
+      } else if(person.sp.length === 2){
+        person.sp[0].x = person.x - SPOUSE_OFFSET - SPOUSE_WIDTH / 2;
+        person.sp[0].y = person.y;
+        person.sp[0].side = 'left';
+        person.sp[1].x = person.x + SPOUSE_OFFSET + SPOUSE_WIDTH / 2;
+        person.sp[1].y = person.y;
+        person.sp[1].side = 'right';
+      }
+      
+      currentX += personWidth + MIN_PADDING;
     });
   });
 }

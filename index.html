@@ -216,7 +216,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v200</p>
+    <p>Family Tree  v200+1</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -1213,7 +1213,16 @@ p4026s1:{n:"Boruch Hersh Dresdner",b:1920,d:2003,g:"m",bp:"Salford, England",heb
 p4027:{n:"Berl Waldman",b:1927,d:2010,g:"m",bp:"Frankfurt Am Main, Germany",heb:"ישכר דוב וואלדמאן",src:null},
 p4027s1:{n:"Sabina Waldman",b:1928,d:2011,g:"f",bp:"Lancut, Poland",heb:"שיינדל מנוחה וואלדמאן (קארנבלוי)",src:null},
 p4028:{n:"Naomi Sigal",b:1919,d:2000,g:"f",bp:"Frankfurt Am Main, Germany",heb:"נעמי בלייך סיגל (וואלדמאן)",src:null},
-p4028s1:{n:"Herschel Sigal",b:1918,d:2009,g:"m",bp:"Vienna, Austria",heb:"ר' צבי סיגל בלייך",src:null}   
+p4028s1:{n:"Herschel Sigal",b:1918,d:2009,g:"m",bp:"Vienna, Austria",heb:"ר' צבי סיגל בלייך",src:null},
+p3018:{n:"Mintche Nacht",b:1878,d:null,g:"f",bp:"",heb:"",src:null},
+p3018s1:{n:"Lezer Nacht",b:1887,d:null,g:"m",bp:"",heb:"",src:null},
+p4025s1:{n:"Aron Iwanier",b:1911,d:1958,g:"m",bp:"Waszkoutz, Hungary",heb:"",src:null},
+p5043:{n:"Batschewa Iwanier",b:1939,d:1941,g:"f",bp:"Frankfurt, Germany",heb:"שבע סאסיל",src:null},
+p5044:{n:"Yechiel Mechel Dresdner",b:1951,d:2024,g:"m",bp:"Salford, England",heb:"יחיאל מיכל דרעזדנער",src:null},
+p5044s1:{n:"Zlatte Dresdner",b:null,d:null,g:"f",bp:"",heb:"",src:null},
+p4029:{n:"Lina Birnbaum",b:1919,d:2008,g:"f",bp:"Frankfurt am Main, Germany",heb:"בירנבאום",src:null},
+p4029s1:{n:"Shiya Birnbaum",b:null,d:null,g:"m",bp:"",heb:"",src:null},
+p4030:{n:"Yehoshua Birnbaum",b:1911,d:1957,g:"m",bp:"Rozwadow, Poland",heb:"בירנבאום",src:null}   
 };
 
 const SP=[
@@ -1299,7 +1308,11 @@ const SP=[
   ["p3017","p3017s1"],
 ["p4026","p4026s1"],
 ["p4027","p4027s1"],
-["p4028","p4028s1"]
+["p4028","p4028s1"],
+  ["p3018","p3018s1"],
+["p4025","p4025s1"],
+["p5044","p5044s1"],
+["p4029","p4030"]
 ];
 
 
@@ -1351,7 +1364,10 @@ const PR=[
   ["p5032s1","p6055"],	["p5032s1","p6056"],	["p5032s1","p6057"],	["p5033","p6058"],	["p5033","p6059"],	["p5033","p6060"],	["p5033s1","p6058"],	
   ["p5033s1","p6059"],	["p5033s1","p6060"],	["p5039","p6061"],	["p5039","p6062"],	["p5039","p6063"],	["p5039s1","p6061"],	["p5039s1","p6062"],	
   ["p5039s1","p6063"],	["p5040","p6064"],	["p5040","p6065"],	["p5040","p6066"],	["p5040s1","p6064"],	["p5040s1","p6065"],	["p5040s1","p6066"],	
-  ["p6001","p7001"],	["p6001","p7002"],	["p6001s1","p7001"],	["p6001s1","p7002"],	["p6002","p7003"],	["p6002","p7004"],	["p6002","p7005"],	["p6002","p7006"],	["p6002s1","p7003"],	["p6002s1","p7004"],	["p6002s1","p7005"],	["p6002s1","p7006"],	["p6030","p7007"],	["p6030","p7008"],	["p6030","p7013"],	["p6030s1","p7007"],	["p6030s1","p7008"],	["p6030s1","p7013"],	["p6035","p7009"],	["p6035","p7010"],	["p6035","p7011"],	["p6035","p7012"],	["p6035s1","p7009"],	["p6035s1","p7010"],	["p6035s1","p7011"],	["p6035s1","p7012"],
+  ["p6001","p7001"],	["p6001","p7002"],	["p6001s1","p7001"],	["p6001s1","p7002"],	["p6002","p7003"],	["p6002","p7004"],	["p6002","p7005"],	["p6002","p7006"],	
+  ["p6002s1","p7003"],	["p6002s1","p7004"],	["p6002s1","p7005"],	["p6002s1","p7006"],	["p6030","p7007"],	["p6030","p7008"],	["p6030","p7013"],	["p6030s1","p7007"],	
+  ["p6030s1","p7008"],	["p6030s1","p7013"],	["p6035","p7009"],	["p6035","p7010"],	["p6035","p7011"],	["p6035","p7012"],	["p6035s1","p7009"],	["p6035s1","p7010"],	
+  ["p6035s1","p7011"],	["p6035s1","p7012"],
 ["p2004","p3015"],
 ["p2004s1","p3015"],
 ["p2004","p3016"],
@@ -1365,7 +1381,17 @@ const PR=[
 ["p3017","p4027"],
 ["p3017s1","p4027"],
 ["p3017","p4028"],
-["p3017s1","p4028"]
+["p3017s1","p4028"],
+  ["p2004","p3018"],
+["p2004s1","p3018"],
+["p4025","p5043"],
+["p4025s1","p5043"],
+["p4026","p5044"],
+["p4026s1","p5044"],
+["p3018","p4029"],
+["p3018s1","p4029"],
+["p3201","p4030"],
+["p3201s1","p4030"]
 ];
 
 

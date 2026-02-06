@@ -1,5 +1,5 @@
-<!DOCTYPE html><html><head><meta charset='UTF-8'><!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v199 - Photos from Google Sheet</title>
+<!DOCTYPE html><html><head><meta charset='UTF-8'>
+<title>KarpTree v200 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -216,7 +216,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v199-9</p>
+    <p>Family Tree  v200-9</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -324,7 +324,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v199 (February 05, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v200 (February 05, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1660,22 +1660,26 @@ function layoutPathView(root){
     // Start from center
     let currentX = 15000 - totalWidth / 2;
     
-    // Position each person with proper spacing
+  // Position each person with proper spacing
     people.forEach(person => {
       let personWidth = getWidth(person);
       person.x = currentX + personWidth / 2; // Center of person box
       person.y = 150 + person.d * GENERATION_HEIGHT;
       
-      // Position spouses relative to person
+      // Position spouses relative to person - calculate based on getWidth logic
       if(person.sp.length === 1){
-        person.sp[0].x = person.x + SPOUSE_OFFSET + SPOUSE_WIDTH / 2;
+        // Person in center, spouse to right
+        // Person occupies: -PERSON_WIDTH/2 to +PERSON_WIDTH/2 from person.x
+        // Spouse should be at: PERSON_WIDTH/2 + gap to PERSON_WIDTH/2 + gap + SPOUSE_WIDTH
+        person.sp[0].x = person.x + PERSON_WIDTH/2 + 20 + SPOUSE_WIDTH/2; // 20px gap
         person.sp[0].y = person.y;
         person.sp[0].side = 'right';
       } else if(person.sp.length === 2){
-        person.sp[0].x = person.x - SPOUSE_OFFSET - SPOUSE_WIDTH / 2;
+        // Left spouse, then person, then right spouse
+        person.sp[0].x = person.x - PERSON_WIDTH/2 - 20 - SPOUSE_WIDTH/2; // 20px gap
         person.sp[0].y = person.y;
         person.sp[0].side = 'left';
-        person.sp[1].x = person.x + SPOUSE_OFFSET + SPOUSE_WIDTH / 2;
+        person.sp[1].x = person.x + PERSON_WIDTH/2 + 20 + SPOUSE_WIDTH/2; // 20px gap
         person.sp[1].y = person.y;
         person.sp[1].side = 'right';
       }

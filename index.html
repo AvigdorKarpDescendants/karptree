@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v205 - Photos from Google Sheet</title>
+<title>KarpTree v206 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -18,6 +18,7 @@ html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:1
 .password-error{color:#c0392b;margin-bottom:10px;font-size:14px;}
 #zoom{transform-origin:0 0;}
 #zoomOuter{position:relative;width:50000px;height:15000px;}
+#svg{overflow:visible;}
 svg{background:transparent;}
 .n{text-anchor:middle;font-size:12px;font-weight:bold;}
 .d{text-anchor:middle;font-size:11px;}
@@ -217,7 +218,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v205+5</p>
+    <p>Family Tree  v206+5</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -319,7 +320,7 @@ svg{background:transparent;}
 </div>
 <div id='wrap' style='position:absolute;top:40px;left:0;right:0;bottom:0;overflow:auto;'>
   <div id="zoomOuter">
-    <div id="zoom"><svg id="svg" width="50000" height="15000"></svg></div>
+    <div id="zoom"><svg id="svg" width="50000" height="15000" style="overflow:visible;"></svg></div>
   </div>
 </div>
 
@@ -329,7 +330,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v205 (February 05, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v206 (February 05, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>

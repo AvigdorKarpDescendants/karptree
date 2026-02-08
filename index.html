@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v206 - Photos from Google Sheet</title>
+<title>KarpTree v207 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -17,8 +17,6 @@ html,body{margin:0;overflow:hidden;background:#eef2f7;font-family:Arial;height:1
 .password-box button:hover{background:#5568d3;}
 .password-error{color:#c0392b;margin-bottom:10px;font-size:14px;}
 #zoom{transform-origin:0 0;}
-#zoomOuter{position:relative;width:50000px;height:15000px;}
-#svg{overflow:visible;}
 svg{background:transparent;}
 .n{text-anchor:middle;font-size:12px;font-weight:bold;}
 .d{text-anchor:middle;font-size:11px;}
@@ -218,7 +216,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v206+5</p>
+    <p>Family Tree  v207+5</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -318,11 +316,7 @@ svg{background:transparent;}
 <button onclick='clearRelationship()' style='width:48%;padding:6px;background:#999;color:white;border:none;border-radius:4px;cursor:pointer;'>Clear</button>
 <div id='result' style='margin-top:8px;font-size:12px;max-width:200px;'></div>
 </div>
-<div id='wrap' style='position:absolute;top:40px;left:0;right:0;bottom:0;overflow:auto;'>
-  <div id="zoomOuter">
-    <div id="zoom"><svg id="svg" width="50000" height="15000" style="overflow:visible;"></svg></div>
-  </div>
-</div>
+<div id='wrap' style='position:absolute;top:40px;left:0;right:0;bottom:0;overflow:auto;'><div id='zoom'><svg id='svg' width='70000' height='15000'></svg></div></div>
 
 <!-- User Guide Modal -->
 <div id='userGuideModal' class='modal-overlay' onclick='if(event.target===this) closeUserGuide()'>
@@ -330,7 +324,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v206 (February 05, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v207 (February 05, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1780,7 +1774,7 @@ function layoutPathView(root){
     totalWidth -= MIN_PADDING; // Remove last padding
     
     // Start from center
-    let currentX = 15000 - totalWidth / 2;
+    let currentX = 35000 - totalWidth / 2;
     
   // Position each person with proper spacing
     people.forEach(person => {
@@ -1851,7 +1845,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
  let bg=document.createElementNS("http://www.w3.org/2000/svg","rect");
  bg.setAttribute("x",0);
  bg.setAttribute("y",0);
- bg.setAttribute("width",50000);  // Increased width for wider tree
+ bg.setAttribute("width",70000);  // Increased width for wider tree
  bg.setAttribute("height",10000);
  bg.setAttribute("fill","white");
  svg.appendChild(bg);
@@ -1861,7 +1855,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
    let band=document.createElementNS("http://www.w3.org/2000/svg","rect");
    band.setAttribute("x",0);
    band.setAttribute("y",150+gen*270-100);
-   band.setAttribute("width",50000);  // Increased width to cover wider tree
+   band.setAttribute("width",70000);  // Increased width to cover wider tree
    band.setAttribute("height",270);
    band.setAttribute("fill",gen%2===0?"rgba(200,220,255,0.4)":"rgba(255,245,220,0.4)");
    svg.appendChild(band);
@@ -4135,3 +4129,4 @@ document.getElementById('passwordInput').focus();
 </script>
 
 </body></html>
+

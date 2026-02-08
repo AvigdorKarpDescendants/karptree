@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v208 - Photos from Google Sheet</title>
+<title>KarpTree v209 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -212,7 +212,7 @@ svg{background:transparent;}
 
 .he{text-anchor:middle;font-size:12px;fill:#666;font-style:italic;}
 
-/* ===== Person info popup ===== */
+/* ===== Person info popup + icon ===== */
 .info-icon{font-size:16px; cursor:pointer; user-select:none;}
 #infoPopup{display:none; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
   width:min(720px, 92vw); max-height:85vh; overflow:auto; background:white; border:2px solid #2b4a7a;
@@ -231,7 +231,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v208+5</p>
+    <p>Family Tree  v209+5</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -339,7 +339,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v208 (February 05, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v209 (February 05, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -1963,6 +1963,18 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
     narIcon.onclick = () => showNarrativePopup(n.id);
     g.appendChild(narIcon);
   }
+
+  // Add info icon (person details)
+  let infoIcon = document.createElementNS("http://www.w3.org/2000/svg","text");
+  infoIcon.setAttribute("x", bx + W - 20);
+  infoIcon.setAttribute("y", by + 60);
+  infoIcon.setAttribute("font-size", "16");
+  infoIcon.setAttribute("class", "info-icon");
+  infoIcon.textContent = "ℹ️";
+  infoIcon.style.cursor = "pointer";
+  infoIcon.onclick = (ev) => { if(ev) ev.stopPropagation(); showInfoPopup(n.id); };
+  g.appendChild(infoIcon);
+
   
   svg.appendChild(g);
   // Draw English name - raised higher
@@ -3745,93 +3757,6 @@ function showPhotoPopup(personId) {
   popup.classList.add('show');
 }
 
-
-// ===== Person info popup helpers =====
-function genderLabel(g){
-  if(g==="m") return "Male";
-  if(g==="f") return "Female";
-  return g ? g : "Unknown";
-}
-function listNames(ids){
-  if(!ids || ids.length===0) return "—";
-  return ids.map(id => (P[id] ? P[id].n : id)).join(", ");
-}
-function getParentsOf(id){
-  return (chi && chi[id]) ? chi[id].slice() : [];
-}
-function getChildrenOf(id){
-  return (par && par[id]) ? par[id].slice() : [];
-}
-function getSpousesOf(id){
-  return (N && N[id] && N[id].sp) ? N[id].sp.map(x=>x.id) : [];
-}
-function getSiblingsOf(id){
-  const parents = getParentsOf(id);
-  if(parents.length===0) return [];
-  const sibSet = new Set();
-  parents.forEach(pid=>{
-    (par[pid]||[]).forEach(cid=>{
-      if(cid!==id) sibSet.add(cid);
-    });
-  });
-  return Array.from(sibSet);
-}
-function showInfoPopup(personId){
-  const p = P[personId];
-  if(!p) return;
-
-  // Fill header
-  const heb = p.heb ? ` • ${p.heb}` : "";
-  document.getElementById("infoName").textContent = p.n + heb;
-
-  // Subtitle
-  const b = p.b ? `Born: ${p.b}` : "";
-  const d = p.d ? `Died: ${p.d}` : "";
-  const bp = p.bp ? `Place of birth: ${p.bp}` : "";
-  const subParts = [];
-  subParts.push(`Gender: ${genderLabel(p.g)}`);
-  if(b) subParts.push(b);
-  if(d) subParts.push(d);
-  if(bp) subParts.push(bp);
-  document.getElementById("infoSub").textContent = subParts.join(" • ");
-
-  // Relationships
-  const parents = getParentsOf(personId);
-  const spouses = getSpousesOf(personId);
-  const siblings = getSiblingsOf(personId);
-  const children = getChildrenOf(personId);
-
-  const grid = document.getElementById("infoGrid");
-  grid.innerHTML = "";
-  const rows = [
-    ["Name", p.n || "—"],
-    ["Hebrew name", p.heb || "—"],
-    ["Gender", genderLabel(p.g)],
-    ["Parents", listNames(parents)],
-    ["Spouses", listNames(spouses)],
-    ["Siblings", listNames(siblings)],
-    ["Children", listNames(children)],
-    ["Birth year", p.b || "—"],
-    ["Death year", p.d || "—"],
-    ["Place of birth", p.bp || "—"],
-  ];
-  rows.forEach(([k,v])=>{
-    const dk=document.createElement("div"); dk.className="k"; dk.textContent=k;
-    const dv=document.createElement("div"); dv.className="v"; dv.textContent=v;
-    grid.appendChild(dk); grid.appendChild(dv);
-  });
-
-  // show
-  document.getElementById("infoBackdrop").style.display="block";
-  const pop=document.getElementById("infoPopup");
-  pop.style.display="block";
-}
-function hideInfoPopup(){
-  document.getElementById("infoPopup").style.display="none";
-  document.getElementById("infoBackdrop").style.display="none";
-}
-
-
 // Pre-load all photos for a person in the background
 function preLoadPhotos(photos) {
   // Create a hidden container for pre-loading images
@@ -4014,6 +3939,87 @@ function showNarrativePopup(personId) {
     }
   });
 }
+
+
+// ===== Person info popup helpers =====
+function genderLabel(g){
+  if(g==="m") return "Male";
+  if(g==="f") return "Female";
+  return g ? g : "Unknown";
+}
+function nameOf(id){
+  return (P && P[id] && P[id].n) ? P[id].n : id;
+}
+function listNames(ids){
+  if(!ids || ids.length===0) return "—";
+  return ids.map(nameOf).join(", ");
+}
+function getParentsOf(id){
+  return (chi && chi[id]) ? chi[id].slice() : [];
+}
+function getChildrenOf(id){
+  return (par && par[id]) ? par[id].slice() : [];
+}
+function getSpousesOf(id){
+  return (N && N[id] && N[id].sp) ? N[id].sp.map(x=>x.id) : [];
+}
+function getSiblingsOf(id){
+  const parents = getParentsOf(id);
+  if(parents.length===0) return [];
+  const sibSet = new Set();
+  parents.forEach(pid=>{
+    (par[pid]||[]).forEach(cid=>{
+      if(cid!==id) sibSet.add(cid);
+    });
+  });
+  return Array.from(sibSet);
+}
+function showInfoPopup(personId){
+  const p = (P ? P[personId] : null);
+  if(!p) return;
+
+  document.getElementById("infoName").textContent = (p.n || "—") + (p.heb ? (" • " + p.heb) : "");
+
+  const subParts = [];
+  subParts.push(`Gender: ${genderLabel(p.g)}`);
+  if(p.b) subParts.push(`Born: ${p.b}`);
+  if(p.d) subParts.push(`Died: ${p.d}`);
+  if(p.bp) subParts.push(`Place of birth: ${p.bp}`);
+  document.getElementById("infoSub").textContent = subParts.join(" • ");
+
+  const parents = getParentsOf(personId);
+  const spouses = getSpousesOf(personId);
+  const siblings = getSiblingsOf(personId);
+  const children = getChildrenOf(personId);
+
+  const grid = document.getElementById("infoGrid");
+  grid.innerHTML = "";
+  const rows = [
+    ["Name", p.n || "—"],
+    ["Hebrew name", p.heb || "—"],
+    ["Gender", genderLabel(p.g)],
+    ["Parents", listNames(parents)],
+    ["Spouses", listNames(spouses)],
+    ["Siblings", listNames(siblings)],
+    ["Children", listNames(children)],
+    ["Birth year", p.b || "—"],
+    ["Death year", p.d || "—"],
+    ["Place of birth", p.bp || "—"],
+  ];
+  rows.forEach(([k,v])=>{
+    const dk=document.createElement("div"); dk.className="k"; dk.textContent=k;
+    const dv=document.createElement("div"); dv.className="v"; dv.textContent=v;
+    grid.appendChild(dk); grid.appendChild(dv);
+  });
+
+  document.getElementById("infoBackdrop").style.display="block";
+  document.getElementById("infoPopup").style.display="block";
+}
+function hideInfoPopup(){
+  document.getElementById("infoPopup").style.display="none";
+  document.getElementById("infoBackdrop").style.display="none";
+}
+
 
 // Render PDF using PDF.js
 async function renderPdfInModal(pdfUrl) {
@@ -4240,4 +4246,3 @@ document.getElementById('passwordInput').focus();
 </div>
 
 </body></html>
-

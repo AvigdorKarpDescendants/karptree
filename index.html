@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v210 - Photos from Google Sheet</title>
+<title>KarpTree v211 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -233,7 +233,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v210</p>
+    <p>Family Tree  v211</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -341,7 +341,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v210 (February 08, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v211 (February 08, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3985,39 +3985,44 @@ function showInfoPopup(personId){
   const p = (P ? P[personId] : null);
   if(!p) return;
 
-  document.getElementById("infoName").textContent = (p.n || "—") + (p.heb ? (" • " + p.heb) : "");
-subParts.push(`Gender: ${genderLabel(p.g)}`);
-  if(p.b)
-if(p.d)
-if(p.bp)
-document.getElementById("infoSub").textContent = "";
-const parents = getParentsOf(personId);
-  const spouses = getSpousesOf(personId);
+  // Header: names only
+  const title = (p.n || "—") + (p.heb ? (" • " + p.heb) : "");
+  document.getElementById("infoName").textContent = title;
+  document.getElementById("infoSub").textContent = "";
+
+  // Relationships
+  const parents  = getParentsOf(personId);
+  const spouses  = getSpousesOf(personId);
   const siblings = getSiblingsOf(personId);
   const children = getChildrenOf(personId);
 
+  // Grid
   const grid = document.getElementById("infoGrid");
   grid.innerHTML = "";
   const rows = [
-    ["Name", p.n || "—"],
-    ["Hebrew name", p.heb || "—"],
     ["Gender", genderLabel(p.g)],
     ["Parents", listNames(parents)],
     ["Spouses", listNames(spouses)],
     ["Siblings", listNames(siblings)],
     ["Children", listNames(children)],
-    ["Birth year", p.b || "—"],
-    ["Death year", p.d || "—"],
-    ["Place of birth", p.bp || "—"],
+    ["Birth year", (p.b ?? "—")],
+    ["Death year", (p.d ?? "—")],
+    ["Place of birth", (p.bp ? p.bp : "—")]
   ];
   rows.forEach(([k,v])=>{
     const dk=document.createElement("div"); dk.className="k"; dk.textContent=k;
-    const dv=document.createElement("div"); dv.className="v"; dv.textContent=v;
+    const dv=document.createElement("div"); dv.className="v"; dv.textContent=(v===null||v===undefined||v==="")?"—":String(v);
     grid.appendChild(dk); grid.appendChild(dv);
   });
 
+  // Footer
+  const foot = document.getElementById("infoFooter");
+  if(foot) foot.textContent = `Person ID: ${personId}`;
+
+  // Show
   document.getElementById("infoBackdrop").style.display="block";
-  document.getElementById("infoPopup").style.display="block";
+  const pop=document.getElementById("infoPopup");
+  pop.style.display="block";
 }
 function hideInfoPopup(){
   document.getElementById("infoPopup").style.display="none";

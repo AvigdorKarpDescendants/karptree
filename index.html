@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v209 - Photos from Google Sheet</title>
+<title>KarpTree v210 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -225,13 +225,15 @@ svg{background:transparent;}
 #infoPopup .closeBtn{position:sticky; top:0; float:right; background:#eef2f7; border:1px solid #b8c3d6;
   border-radius:10px; padding:6px 10px; cursor:pointer; font-weight:600;}
 #infoBackdrop{display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:99998;}
+#infoFooter{margin-top:14px;padding-top:10px;border-top:1px solid #e6e9f0;color:#666;font-size:12px;}
+#infoPopup .sub:empty{display:none;}
 
 </style></head>
 <body>
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v209+7</p>
+    <p>Family Tree  v210</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -339,7 +341,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v209 (February 05, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v210 (February 08, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3984,15 +3986,12 @@ function showInfoPopup(personId){
   if(!p) return;
 
   document.getElementById("infoName").textContent = (p.n || "—") + (p.heb ? (" • " + p.heb) : "");
-
-  const subParts = [];
-  subParts.push(`Gender: ${genderLabel(p.g)}`);
-  if(p.b) subParts.push(`Born: ${p.b}`);
-  if(p.d) subParts.push(`Died: ${p.d}`);
-  if(p.bp) subParts.push(`Place of birth: ${p.bp}`);
-  document.getElementById("infoSub").textContent = subParts.join(" • ");
-
-  const parents = getParentsOf(personId);
+subParts.push(`Gender: ${genderLabel(p.g)}`);
+  if(p.b)
+if(p.d)
+if(p.bp)
+document.getElementById("infoSub").textContent = "";
+const parents = getParentsOf(personId);
   const spouses = getSpousesOf(personId);
   const siblings = getSiblingsOf(personId);
   const children = getChildrenOf(personId);
@@ -4248,6 +4247,7 @@ document.getElementById('passwordInput').focus();
   <h2 id="infoName"></h2>
   <div class="sub" id="infoSub"></div>
   <div class="grid" id="infoGrid"></div>
+  <div id="infoFooter"></div>
 </div>
 
 </body></html>

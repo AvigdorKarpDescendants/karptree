@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v211 - Photos from Google Sheet</title>
+<title>KarpTree v213 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -228,12 +228,36 @@ svg{background:transparent;}
 #infoFooter{margin-top:14px;padding-top:10px;border-top:1px solid #e6e9f0;color:#666;font-size:12px;}
 #infoPopup .sub:empty{display:none;}
 
+
+/* ===== Gen-row navigation arrows (Gen 2 / Gen 3) ===== */
+.genRowArrow{
+  position:fixed;
+  width:52px;height:52px;
+  border-radius:999px;
+  background:rgba(44,62,80,0.88);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  font-weight:900;
+  cursor:pointer;
+  z-index:3000;
+  user-select:none;
+  box-shadow:0 6px 18px rgba(0,0,0,0.25);
+}
+.genRowArrow:hover{background:rgba(44,62,80,0.97);}
+.genRowArrow.left{left:10px;}
+.genRowArrow.right{right:10px;}
+.genRowArrow[data-gen="2"]{ /* positioned by JS */ }
+.genRowArrow[data-gen="3"]{ /* positioned by JS */ }
+
 </style></head>
 <body>
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v211</p>
+    <p>Family Tree  v213</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -341,7 +365,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v211 (February 08, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v213 (February 08, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -940,6 +964,118 @@ function toggleMenu(menuId){
     }
   });
 }
+
+
+// ===== Gen-row navigation (Gen 2 / Gen 3 arrows) =====
+const genRowNavState = { 2: null, 3: null };
+
+function genRowNavList(gen){
+  if(!window.N) return [];
+  const ids = [];
+  for(const id in N){
+    const n = N[id];
+    if(!n) continue;
+    if(n.d !== gen) continue;
+    if(!Number.isFinite(n.x) || !Number.isFinite(n.y)) continue;
+    // Skip unlaid nodes (0,0) except root
+    if(n.x === 0 && n.y === 0 && id !== currentRoot) continue;
+    ids.push(id);
+  }
+  ids.sort((a,b)=> (N[a].x - N[b].x));
+  return ids;
+}
+
+function genRowNavCenterOn(id){
+  const wrap = document.getElementById("wrap");
+  if(!wrap || !N || !N[id]) return;
+  const scale = (typeof sc === "number" && sc>0) ? sc : 1;
+  wrap.scrollLeft = N[id].x * scale - wrap.clientWidth/2;
+  wrap.scrollTop  = N[id].y * scale - wrap.clientHeight/2 - 70;
+}
+
+function genRowNavCurrentIndex(gen, list){
+  if(!list.length) return -1;
+  const curId = genRowNavState[gen];
+  const fromState = curId ? list.indexOf(curId) : -1;
+  if(fromState >= 0) return fromState;
+
+  // choose closest to viewport center X (in content coords)
+  const wrap = document.getElementById("wrap");
+  const scale = (typeof sc === "number" && sc>0) ? sc : 1;
+  const cx = wrap ? (wrap.scrollLeft + wrap.clientWidth/2) / scale : 0;
+
+  let best = 0, bestDist = Infinity;
+  for(let i=0;i<list.length;i++){
+    const id = list[i];
+    const dist = Math.abs(N[id].x - cx);
+    if(dist < bestDist){ bestDist = dist; best = i; }
+  }
+  return best;
+}
+
+function genRowNavMove(gen, dir){
+  if(!window.N) return;
+  const list = genRowNavList(gen);
+  if(!list.length) return;
+
+  let idx = genRowNavCurrentIndex(gen, list);
+  let next = idx + dir;
+  if(next < 0) next = list.length - 1;
+  if(next >= list.length) next = 0;
+
+  const id = list[next];
+  genRowNavState[gen] = id;
+  genRowNavCenterOn(id);
+}
+
+function updateGenRowArrowPositions(){
+  const wrap = document.getElementById("wrap");
+  if(!wrap || !window.N) return;
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const scale = (typeof sc === "number" && sc>0) ? sc : 1;
+
+  function place(gen){
+    const L = document.getElementById(`gen${gen}Left`);
+    const R = document.getElementById(`gen${gen}Right`);
+    if(!L || !R) return;
+
+    const list = genRowNavList(gen);
+    if(!list.length){
+      L.style.display = "none";
+      R.style.display = "none";
+      return;
+    }
+
+    // Use actual y of this generation (from any node) so it matches your on-screen gen labels
+    const y = N[list[0]].y * scale;
+    const yInWrap = y - wrap.scrollTop;
+    let top = wrapRect.top + yInWrap - 26; // 26 = half of 52px button
+
+    // Clamp within wrap viewport
+    const minTop = wrapRect.top + 6;
+    const maxTop = wrapRect.bottom - 52 - 6;
+    if(top < minTop) top = minTop;
+    if(top > maxTop) top = maxTop;
+
+    L.style.top = `${top}px`;
+    R.style.top = `${top}px`;
+    L.style.display = "flex";
+    R.style.display = "flex";
+  }
+
+  place(2);
+  place(3);
+}
+
+// keep arrows aligned while scrolling / resizing
+window.addEventListener("resize", ()=>{ try{updateGenRowArrowPositions();}catch(e){} });
+document.addEventListener("DOMContentLoaded", ()=>{
+  const wrap = document.getElementById("wrap");
+  if(wrap) wrap.addEventListener("scroll", ()=>{ try{updateGenRowArrowPositions();}catch(e){} });
+  try{updateGenRowArrowPositions();}catch(e){}
+});
+
 
 // Close menus when clicking outside
 document.addEventListener('click',function(e){
@@ -2390,7 +2526,8 @@ function Z(k){
   
   // Adjust scroll to keep the center point in the same viewport position
   wrap.scrollLeft=newViewCenterX-wrap.clientWidth/2;
-  wrap.scrollTop=newViewCenterY-wrap.clientHeight/2;
+  wrap.scrollTop = newViewCenterY - wrap.clientHeight/2;
+  try{updateGenRowArrowPositions();}catch(e){}
 }
 
 // Zoom control functions with 10% increment and 0.1x to 5x limits
@@ -2458,7 +2595,9 @@ function filterByGeneration(gen){
   layout(currentRoot);
   draw(currentRoot,maxGen);
   
-  // Recenter view
+  
+  try{updateGenRowArrowPositions();}catch(e){}
+// Recenter view
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
       let wrap=document.getElementById("wrap");
@@ -3631,8 +3770,10 @@ function findAndHighlightPerson(){
         
         wrap.scrollLeft = N[personId].x - wrap.clientWidth/2;
         wrap.scrollTop = N[personId].y - wrap.clientHeight/2 - 70;
+        try{updateGenRowArrowPositions();}catch(e){}
       }, 50);
     }
+  }
   }
 }
 
@@ -4254,5 +4395,13 @@ document.getElementById('passwordInput').focus();
   <div class="grid" id="infoGrid"></div>
   <div id="infoFooter"></div>
 </div>
+
+
+<!-- Gen-row navigation arrows -->
+<div id="gen2Left"  class="genRowArrow left"  data-gen="2" data-dir="-1" title="Gen 2: previous" onclick="genRowNavMove(2,-1)">◀</div>
+<div id="gen2Right" class="genRowArrow right" data-gen="2" data-dir="1"  title="Gen 2: next"     onclick="genRowNavMove(2, 1)">▶</div>
+
+<div id="gen3Left"  class="genRowArrow left"  data-gen="3" data-dir="-1" title="Gen 3: previous" onclick="genRowNavMove(3,-1)">◀</div>
+<div id="gen3Right" class="genRowArrow right" data-gen="3" data-dir="1"  title="Gen 3: next"     onclick="genRowNavMove(3, 1)">▶</div>
 
 </body></html>

@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v213 - Photos from Google Sheet</title>
+<title>KarpTree v214 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -257,7 +257,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v213</p>
+    <p>Family Tree  v214</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -365,7 +365,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v213 (February 08, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v214 (February 08, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -3689,18 +3689,12 @@ function highlightPerson(id){
 }
 
 // Find and highlight a person by name
+
 function findAndHighlightPerson(){
-  // Clear all previous highlights/selections first (but NOT the input field)
   document.querySelectorAll(".findHighlight").forEach(el => el.remove());
-  
   let personName = document.getElementById("findPersonInput").value.trim();
-  
-  if(!personName){
-    alert("Please enter a name");
-    return;
-  }
-  
-  // Find person ID by name
+  if(!personName){ alert("Please enter a name"); return; }
+
   let personId = null;
   for(let id in P){
     if(P[id].n.toLowerCase() === personName.toLowerCase()){
@@ -3708,28 +3702,17 @@ function findAndHighlightPerson(){
       break;
     }
   }
-  
-  if(!personId){
-    alert("Person not found: " + personName);
-    return;
-  }
-  
-  // Clear any previous highlights
-  document.querySelectorAll(".findHighlight").forEach(el => el.remove());
-  
-  // Make sure person is in current view
+  if(!personId){ alert("Person not found: " + personName); return; }
+
   if(!N[personId]){
-    // Rebuild to include this person
     rebuildN();
     draw(currentRoot, maxGen);
   }
-  
-  // Add red/yellow highlight
+
   if(N[personId]){
     let n = N[personId];
     let svg = document.getElementById("svg");
-    
-    // Red border
+
     let rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
     rect.setAttribute("class","findHighlight");
     rect.setAttribute("x", n.x - 125);
@@ -3738,11 +3721,10 @@ function findAndHighlightPerson(){
     rect.setAttribute("height", 85);
     rect.setAttribute("rx", 12);
     rect.setAttribute("fill", "none");
-    rect.setAttribute("stroke", "#FF0000"); // Red
+    rect.setAttribute("stroke", "#FF0000");
     rect.setAttribute("stroke-width", "5");
     svg.appendChild(rect);
-    
-    // Yellow border inside
+
     let rect2 = document.createElementNS("http://www.w3.org/2000/svg","rect");
     rect2.setAttribute("class","findHighlight");
     rect2.setAttribute("x", n.x - 120);
@@ -3751,31 +3733,25 @@ function findAndHighlightPerson(){
     rect2.setAttribute("height", 75);
     rect2.setAttribute("rx", 10);
     rect2.setAttribute("fill", "none");
-    rect2.setAttribute("stroke", "#FFD700"); // Yellow
+    rect2.setAttribute("stroke", "#FFD700");
     rect2.setAttribute("stroke-width", "3");
     svg.appendChild(rect2);
-    
-    // Center on person with zoom compensation
+
     let wrap = document.getElementById("wrap");
-    if(wrap && N[personId]){
-      // Reset zoom to 1.0
+    if(wrap){
       sc = 1;
       document.getElementById("zoomDisplay").textContent = "1.0x";
       document.getElementById("zoom").style.transform = `scale(${sc})`;
-      
+
       setTimeout(() => {
-        // let zoomLevel = document.body.style.zoom ? parseFloat(document.body.style.zoom) : 1.0;
-        // let adjustedX = (N[personId].x / zoomLevel) - (wrap.clientWidth / (2 * zoomLevel));
-        // let adjustedY = (N[personId].y / zoomLevel) - (wrap.clientHeight / (2 * zoomLevel)) - 70;
-        
         wrap.scrollLeft = N[personId].x - wrap.clientWidth/2;
-        wrap.scrollTop = N[personId].y - wrap.clientHeight/2 - 70;
+        wrap.scrollTop  = N[personId].y - wrap.clientHeight/2 - 70;
         try{updateGenRowArrowPositions();}catch(e){}
       }, 50);
     }
   }
-  }
 }
+
 
 // Clear find highlight
 function clearFindHighlight(){

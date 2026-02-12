@@ -1,154 +1,7 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v222 - Photos from Google Sheet</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
-// ===== Gen-row navigation arrows (SVG-native; scroll + zoom naturally) =====
-(function(){
-  if(!window.GenRowNav){ window.GenRowNav = {}; }
-  const NS = window.GenRowNav;
-
-  NS.clear = function(){
-    const svg = document.getElementById("svg");
-    if(!svg) return;
-    svg.querySelectorAll(".genRowNavArrow").forEach(el=>el.remove());
-  };
-
-  NS.depthFromLabel = function(labelGen){
-    return Math.max(0, parseInt(labelGen,10) - 1);
-  };
-
-  NS.candidates = function(depth){
-    const ids = [];
-    if(!window.N) return ids;
-    for(const id in N){
-      const n = N[id];
-      if(!n) continue;
-      if(n.d !== depth) continue;
-      if(!Number.isFinite(n.x) || !Number.isFinite(n.y)) continue;
-      if(n.x === 0 && n.y === 0 && id !== currentRoot) continue;
-      ids.push(id);
-    }
-    ids.sort((a,b)=> N[a].x - N[b].x);
-    return ids;
-  };
-
-  if(!NS.state){ NS.state = {}; }
-
-  NS.centerOn = function(id){
-    const wrap = document.getElementById("wrap");
-    if(!wrap || !window.N || !N[id]) return;
-    const scale = (typeof sc === "number" && sc>0) ? sc : 1;
-    wrap.scrollLeft = N[id].x * scale - wrap.clientWidth/2;
-    wrap.scrollTop  = N[id].y * scale - wrap.clientHeight/2 - 70;
-  };
-
-  NS.move = function(labelGen, dir){
-    const depth = NS.depthFromLabel(labelGen);
-    const list = NS.candidates(depth);
-    if(!list.length) return;
-
-    let idx = -1;
-    const cur = NS.state[labelGen];
-    if(cur) idx = list.indexOf(cur);
-
-    if(idx < 0){
-      const wrap = document.getElementById("wrap");
-      const scale = (typeof sc === "number" && sc>0) ? sc : 1;
-      const cx = wrap ? (wrap.scrollLeft + wrap.clientWidth/2)/scale : 0;
-      let best=0, bestDist=Infinity;
-      for(let i=0;i<list.length;i++){
-        const dist = Math.abs(N[list[i]].x - cx);
-        if(dist < bestDist){ bestDist=dist; best=i; }
-      }
-      idx = best;
-    }
-
-    let next = idx + dir;
-    if(next < 0) next = list.length - 1;
-    if(next >= list.length) next = 0;
-
-    const id = list[next];
-    NS.state[labelGen] = id;
-    NS.centerOn(id);
-  };
-
-  NS.makeBtn = function(x, y, labelGen, dir){
-    const svg = document.getElementById("svg");
-    const g = document.createElementNS("http://www.w3.org/2000/svg","g");
-    g.setAttribute("class","genRowNavArrow");
-    g.setAttribute("transform", `translate(${x},${y})`);
-    g.style.cursor = "pointer";
-
-    const r = document.createElementNS("http://www.w3.org/2000/svg","rect");
-    r.setAttribute("x", -26); r.setAttribute("y", -26);
-    r.setAttribute("width", 52); r.setAttribute("height", 52);
-    r.setAttribute("rx", 26);
-    r.setAttribute("fill", "rgba(44,62,80,0.85)");
-    r.setAttribute("stroke", "rgba(20,30,45,0.6)");
-    r.setAttribute("stroke-width", "2");
-    g.appendChild(r);
-
-    const t = document.createElementNS("http://www.w3.org/2000/svg","text");
-    t.setAttribute("x", 0); t.setAttribute("y", 10);
-    t.setAttribute("text-anchor", "middle");
-    t.setAttribute("font-size", "26");
-    t.setAttribute("font-weight", "900");
-    t.setAttribute("fill", "#fff");
-    t.textContent = (dir < 0) ? "◀" : "▶";
-    g.appendChild(t);
-
-    g.addEventListener("click", (ev)=>{ ev.stopPropagation(); NS.move(labelGen, dir); });
-    svg.appendChild(g);
-  };
-
-  NS.draw = function(){
-    const svg = document.getElementById("svg");
-    if(!svg || !window.N) return;
-    NS.clear();
-
-    const svgWidth = parseFloat(svg.getAttribute("width") || "70000") || 70000;
-
-    function drawFor(labelGen){
-      const depth = NS.depthFromLabel(labelGen);
-      const list = NS.candidates(depth);
-      if(!list.length) return;
-
-      const rowY = N[list[0]].y;
-      const leftX = 60;
-      const rightX = svgWidth - 60;
-
-      NS.makeBtn(leftX, rowY, labelGen, -1);
-      NS.makeBtn(rightX, rowY, labelGen,  1);
-    }
-
-    drawFor(2);
-    drawFor(3);
-  };
-
-  if(typeof window.draw === "function" && !window.__drawWrappedForGenRowNav){
-    window.__drawWrappedForGenRowNav = true;
-    const __origDraw = window.draw;
-    window.draw = function(root, mg){
-      const r = __origDraw(root, mg);
-      try{ NS.draw(); }catch(e){}
-      return r;
-    };
-  }
-})();
-
-</script>
+<title>KarpTree v214 - Photos from Google Sheet</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-
-// ===== Safety guards for intro mode globals (avoid ReferenceError) =====
-if(typeof window.introMode === "undefined"){ window.introMode = false; }
-if(typeof window.exitIntroMode === "undefined"){
-  window.exitIntroMode = function(){
-    window.introMode = false;
-    const intro = document.getElementById("introOverlay") || document.getElementById("intro") || document.getElementById("introMode");
-    if(intro) intro.style.display = "none";
-  };
-}
-
-
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -399,14 +252,12 @@ svg{background:transparent;}
 .genRowArrow[data-gen="2"]{ /* positioned by JS */ }
 .genRowArrow[data-gen="3"]{ /* positioned by JS */ }
 
-
-.genRowNavArrow{pointer-events:all;}
 </style></head>
 <body>
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v222</p>
+    <p>Family Tree  v214</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -514,7 +365,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v222 (February 08, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v214 (February 08, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>

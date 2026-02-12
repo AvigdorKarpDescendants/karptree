@@ -1,18 +1,22 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v217 - Photos from Google Sheet</title>
+<title>KarpTree v219 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
-// ===== Gen-row navigation (Gen 2 / Gen 3 arrows) =====
-// On-screen Gen numbers start at 1; internal depth starts at 0.
-// depth = labelGen - 1
-const genRowNavState = {2:null, 3:null};
+// ===== Gen-row arrows drawn INSIDE the SVG (scroll + zoom naturally) =====
+function clearGenRowArrows(){
+  const svg = document.getElementById("svg");
+  if(!svg) return;
+  svg.querySelectorAll(".genRowNavArrow").forEach(el=>el.remove());
+}
 
-function genRowDepth(labelGen){
+// labelGen is on-screen "Gen X" number (same as slider label)
+// internal depth = labelGen - 1
+function genDepthFromLabel(labelGen){
   return Math.max(0, parseInt(labelGen,10) - 1);
 }
 
-function genRowNavListDepth(depth){
-  if(!window.N) return [];
+function genRowCandidates(depth){
   const ids = [];
+  if(!window.N) return ids;
   for(const id in N){
     const n = N[id];
     if(!n) continue;
@@ -25,32 +29,29 @@ function genRowNavListDepth(depth){
   return ids;
 }
 
-function genRowNavCenterOn(id){
-  const wrap = document.getElementById("wrap");
-  if(!wrap || !N[id]) return;
-  const scale = (typeof sc === "number" && sc>0) ? sc : 1;
-  wrap.scrollLeft = N[id].x * scale - wrap.clientWidth/2;
-  wrap.scrollTop  = N[id].y * scale - wrap.clientHeight/2 - 70;
-}
+const genRowNavState = {}; // keyed by labelGen
 
 function genRowNavMoveLabel(labelGen, dir){
-  if(!window.N) return;
-  const depth = genRowDepth(labelGen);
-  const list = genRowNavListDepth(depth);
+  const depth = genDepthFromLabel(labelGen);
+  const list = genRowCandidates(depth);
   if(!list.length) return;
 
-  let idx = 0;
-  const cur = genRowNavState[labelGen];
-  if(cur && list.includes(cur)){
-    idx = list.indexOf(cur);
-  } else {
+  // Determine current index
+  let idx = -1;
+  const curId = genRowNavState[labelGen];
+  if(curId){
+    idx = list.indexOf(curId);
+  }
+
+  if(idx < 0){
+    // Pick closest to viewport center X
     const wrap = document.getElementById("wrap");
     const scale = (typeof sc === "number" && sc>0) ? sc : 1;
-    const cx = (wrap.scrollLeft + wrap.clientWidth/2) / scale;
-    let best = 0, bestDist = Infinity;
+    const cx = wrap ? (wrap.scrollLeft + wrap.clientWidth/2) / scale : 0;
+    let best=0, bestDist=Infinity;
     for(let i=0;i<list.length;i++){
       const dist = Math.abs(N[list[i]].x - cx);
-      if(dist < bestDist){ bestDist = dist; best = i; }
+      if(dist < bestDist){ bestDist=dist; best=i; }
     }
     idx = best;
   }
@@ -61,81 +62,91 @@ function genRowNavMoveLabel(labelGen, dir){
 
   const id = list[next];
   genRowNavState[labelGen] = id;
-  genRowNavCenterOn(id);
+
+  // Center on selected person (respect zoom)
+  const wrap = document.getElementById("wrap");
+  if(!wrap || !N[id]) return;
+  const scale = (typeof sc === "number" && sc>0) ? sc : 1;
+  wrap.scrollLeft = N[id].x * scale - wrap.clientWidth/2;
+  wrap.scrollTop  = N[id].y * scale - wrap.clientHeight/2 - 70;
 }
 
-function updateGenRowArrowPositions(){
-  const wrap = document.getElementById("wrap");
-  if(!wrap || !window.N) return;
+function makeSvgButton(x, y, labelGen, dir){
+  const svg = document.getElementById("svg");
+  const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.setAttribute("class","genRowNavArrow");
+  g.setAttribute("transform", `translate(${x},${y})`);
+  g.style.cursor = "pointer";
 
-  const wrapRect = wrap.getBoundingClientRect();
-  const scale = (typeof sc === "number" && sc>0) ? sc : 1;
+  const r = document.createElementNS("http://www.w3.org/2000/svg","rect");
+  r.setAttribute("x", -26); r.setAttribute("y", -26);
+  r.setAttribute("width", 52); r.setAttribute("height", 52);
+  r.setAttribute("rx", 26);
+  r.setAttribute("fill", "rgba(44,62,80,0.85)");
+  r.setAttribute("stroke", "rgba(20,30,45,0.6)");
+  r.setAttribute("stroke-width", "2");
+  g.appendChild(r);
 
-  function place(labelGen){
-    const L = document.getElementById("gen"+labelGen+"Left");
-    const R = document.getElementById("gen"+labelGen+"Right");
-    if(!L || !R) return;
+  const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+  t.setAttribute("x", 0); t.setAttribute("y", 10);
+  t.setAttribute("text-anchor", "middle");
+  t.setAttribute("font-size", "26");
+  t.setAttribute("font-weight", "900");
+  t.setAttribute("fill", "#fff");
+  t.textContent = (dir < 0) ? "◀" : "▶";
+  g.appendChild(t);
 
-    const depth = genRowDepth(labelGen);
-    const list = genRowNavListDepth(depth);
-    if(!list.length){ L.style.display="none"; R.style.display="none"; return; }
+  g.addEventListener("click", (ev)=>{
+    ev.stopPropagation();
+    genRowNavMoveLabel(labelGen, dir);
+  });
 
-    const y = N[list[0]].y * scale;
-    const yInWrap = y - wrap.scrollTop;
-    let top = wrapRect.top + yInWrap - 26;
+  svg.appendChild(g);
+  return g;
+}
 
-    const minTop = wrapRect.top + 6;
-    const maxTop = wrapRect.bottom - 52 - 6;
-    if(top < minTop) top = minTop;
-    if(top > maxTop) top = maxTop;
+function drawGenRowArrows(){
+  // Draw arrows only for Gen 2 and Gen 3 (screen labels)
+  // Only show if those generations exist in current draw.
+  const svg = document.getElementById("svg");
+  if(!svg || !window.N) return;
 
-    L.style.top = top + "px";
-    R.style.top = top + "px";
-    L.style.display = "flex";
-    R.style.display = "flex";
+  clearGenRowArrows();
+
+  // Determine current SVG width in use (for right edge)
+  const svgWidth = parseFloat(svg.getAttribute("width") || "70000") || 70000;
+
+  function drawFor(labelGen){
+    const depth = genDepthFromLabel(labelGen);
+    const list = genRowCandidates(depth);
+    if(!list.length) return; // do not show if not visible in this draw
+
+    // Use any node's y as the row anchor (matches your band labels: y = 150 + depth*270)
+    const rowY = N[list[0]].y;
+
+    // Place at left/right margins inside SVG coordinate space
+    const leftX  = 60;
+    const rightX = svgWidth - 60;
+
+    makeSvgButton(leftX,  rowY, labelGen, -1);
+    makeSvgButton(rightX, rowY, labelGen,  1);
   }
 
-  place(2);
-  place(3);
+  drawFor(2);
+  drawFor(3);
 }
 
-window.addEventListener("resize", ()=>updateGenRowArrowPositions());
-document.addEventListener("DOMContentLoaded", ()=>{
-  const wrap = document.getElementById("wrap");
 
-
-// Ensure arrow positions update after redraws
-if(typeof draw === "function" && !window.__drawWrappedForGenArrows){
-  window.__drawWrappedForGenArrows = true;
+// Ensure SVG gen-row arrows are redrawn after each draw()
+if(typeof draw === "function" && !window.__drawWrappedForSvgGenArrows){
+  window.__drawWrappedForSvgGenArrows = true;
   const __origDraw = draw;
   window.draw = function(root, mg){
     const r = __origDraw(root, mg);
-    try{ updateGenRowArrowPositions(); }catch(e){}
+    try{ drawGenRowArrows(); }catch(e){}
     return r;
   };
 }
-
-  
-
-function genRowNavBoot(){
-  // Keep trying until layout nodes exist (after password / build / draw)
-  let tries = 0;
-  const timer = setInterval(()=>{
-    tries++;
-    try{ updateGenRowArrowPositions(); }catch(e){}
-    // once N is available and at least one gen list exists, stop
-    try{
-      if(window.N && (genRowNavListDepth(genRowDepth(2)).length || genRowNavListDepth(genRowDepth(3)).length)){
-        clearInterval(timer);
-      }
-    }catch(e){}
-    if(tries > 80) clearInterval(timer); // ~20 seconds max
-  }, 250);
-}
-
-if(wrap) wrap.addEventListener("scroll", ()=>updateGenRowArrowPositions());
-  setTimeout(()=>{updateGenRowArrowPositions(); genRowNavBoot();}, 300);
-});
 
 </script>
 <script>
@@ -386,9 +397,6 @@ svg{background:transparent;}
 .genRowArrow:hover{background:rgba(44,62,80,0.97);}
 .genRowArrow.left{left:10px;}
 .genRowArrow.right{right:10px;}
-#gen2Left,#gen2Right{top:38%;}
-#gen3Left,#gen3Right{top:58%;}
-
 .genRowArrow[data-gen="2"]{ /* positioned by JS */ }
 .genRowArrow[data-gen="3"]{ /* positioned by JS */ }
 
@@ -397,7 +405,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v217</p>
+    <p>Family Tree  v219</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -505,7 +513,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v217 (February 08, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v219 (February 08, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -2736,7 +2744,9 @@ function filterByGeneration(gen){
   draw(currentRoot,maxGen);
   
   
-  try{updateGenRowArrowPositions();}catch(e){}
+  
+  try{drawGenRowArrows();}catch(e){}
+try{updateGenRowArrowPositions();}catch(e){}
 // Recenter view
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{

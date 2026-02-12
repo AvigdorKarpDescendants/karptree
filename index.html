@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v216 - Photos from Google Sheet</title>
+<title>KarpTree v217 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
 // ===== Gen-row navigation (Gen 2 / Gen 3 arrows) =====
 // On-screen Gen numbers start at 1; internal depth starts at 0.
@@ -102,8 +102,39 @@ function updateGenRowArrowPositions(){
 window.addEventListener("resize", ()=>updateGenRowArrowPositions());
 document.addEventListener("DOMContentLoaded", ()=>{
   const wrap = document.getElementById("wrap");
-  if(wrap) wrap.addEventListener("scroll", ()=>updateGenRowArrowPositions());
-  setTimeout(updateGenRowArrowPositions, 300);
+
+
+// Ensure arrow positions update after redraws
+if(typeof draw === "function" && !window.__drawWrappedForGenArrows){
+  window.__drawWrappedForGenArrows = true;
+  const __origDraw = draw;
+  window.draw = function(root, mg){
+    const r = __origDraw(root, mg);
+    try{ updateGenRowArrowPositions(); }catch(e){}
+    return r;
+  };
+}
+
+  
+
+function genRowNavBoot(){
+  // Keep trying until layout nodes exist (after password / build / draw)
+  let tries = 0;
+  const timer = setInterval(()=>{
+    tries++;
+    try{ updateGenRowArrowPositions(); }catch(e){}
+    // once N is available and at least one gen list exists, stop
+    try{
+      if(window.N && (genRowNavListDepth(genRowDepth(2)).length || genRowNavListDepth(genRowDepth(3)).length)){
+        clearInterval(timer);
+      }
+    }catch(e){}
+    if(tries > 80) clearInterval(timer); // ~20 seconds max
+  }, 250);
+}
+
+if(wrap) wrap.addEventListener("scroll", ()=>updateGenRowArrowPositions());
+  setTimeout(()=>{updateGenRowArrowPositions(); genRowNavBoot();}, 300);
 });
 
 </script>
@@ -355,6 +386,9 @@ svg{background:transparent;}
 .genRowArrow:hover{background:rgba(44,62,80,0.97);}
 .genRowArrow.left{left:10px;}
 .genRowArrow.right{right:10px;}
+#gen2Left,#gen2Right{top:38%;}
+#gen3Left,#gen3Right{top:58%;}
+
 .genRowArrow[data-gen="2"]{ /* positioned by JS */ }
 .genRowArrow[data-gen="3"]{ /* positioned by JS */ }
 
@@ -363,7 +397,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v216</p>
+    <p>Family Tree  v217</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -471,7 +505,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v216 (February 08, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v217 (February 08, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>

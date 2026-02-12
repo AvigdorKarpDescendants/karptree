@@ -1,6 +1,112 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v214 - Photos from Google Sheet</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<title>KarpTree v216 - Photos from Google Sheet</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
+// ===== Gen-row navigation (Gen 2 / Gen 3 arrows) =====
+// On-screen Gen numbers start at 1; internal depth starts at 0.
+// depth = labelGen - 1
+const genRowNavState = {2:null, 3:null};
+
+function genRowDepth(labelGen){
+  return Math.max(0, parseInt(labelGen,10) - 1);
+}
+
+function genRowNavListDepth(depth){
+  if(!window.N) return [];
+  const ids = [];
+  for(const id in N){
+    const n = N[id];
+    if(!n) continue;
+    if(n.d !== depth) continue;
+    if(!Number.isFinite(n.x) || !Number.isFinite(n.y)) continue;
+    if(n.x === 0 && n.y === 0 && id !== currentRoot) continue;
+    ids.push(id);
+  }
+  ids.sort((a,b)=> N[a].x - N[b].x);
+  return ids;
+}
+
+function genRowNavCenterOn(id){
+  const wrap = document.getElementById("wrap");
+  if(!wrap || !N[id]) return;
+  const scale = (typeof sc === "number" && sc>0) ? sc : 1;
+  wrap.scrollLeft = N[id].x * scale - wrap.clientWidth/2;
+  wrap.scrollTop  = N[id].y * scale - wrap.clientHeight/2 - 70;
+}
+
+function genRowNavMoveLabel(labelGen, dir){
+  if(!window.N) return;
+  const depth = genRowDepth(labelGen);
+  const list = genRowNavListDepth(depth);
+  if(!list.length) return;
+
+  let idx = 0;
+  const cur = genRowNavState[labelGen];
+  if(cur && list.includes(cur)){
+    idx = list.indexOf(cur);
+  } else {
+    const wrap = document.getElementById("wrap");
+    const scale = (typeof sc === "number" && sc>0) ? sc : 1;
+    const cx = (wrap.scrollLeft + wrap.clientWidth/2) / scale;
+    let best = 0, bestDist = Infinity;
+    for(let i=0;i<list.length;i++){
+      const dist = Math.abs(N[list[i]].x - cx);
+      if(dist < bestDist){ bestDist = dist; best = i; }
+    }
+    idx = best;
+  }
+
+  let next = idx + dir;
+  if(next < 0) next = list.length - 1;
+  if(next >= list.length) next = 0;
+
+  const id = list[next];
+  genRowNavState[labelGen] = id;
+  genRowNavCenterOn(id);
+}
+
+function updateGenRowArrowPositions(){
+  const wrap = document.getElementById("wrap");
+  if(!wrap || !window.N) return;
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const scale = (typeof sc === "number" && sc>0) ? sc : 1;
+
+  function place(labelGen){
+    const L = document.getElementById("gen"+labelGen+"Left");
+    const R = document.getElementById("gen"+labelGen+"Right");
+    if(!L || !R) return;
+
+    const depth = genRowDepth(labelGen);
+    const list = genRowNavListDepth(depth);
+    if(!list.length){ L.style.display="none"; R.style.display="none"; return; }
+
+    const y = N[list[0]].y * scale;
+    const yInWrap = y - wrap.scrollTop;
+    let top = wrapRect.top + yInWrap - 26;
+
+    const minTop = wrapRect.top + 6;
+    const maxTop = wrapRect.bottom - 52 - 6;
+    if(top < minTop) top = minTop;
+    if(top > maxTop) top = maxTop;
+
+    L.style.top = top + "px";
+    R.style.top = top + "px";
+    L.style.display = "flex";
+    R.style.display = "flex";
+  }
+
+  place(2);
+  place(3);
+}
+
+window.addEventListener("resize", ()=>updateGenRowArrowPositions());
+document.addEventListener("DOMContentLoaded", ()=>{
+  const wrap = document.getElementById("wrap");
+  if(wrap) wrap.addEventListener("scroll", ()=>updateGenRowArrowPositions());
+  setTimeout(updateGenRowArrowPositions, 300);
+});
+
+</script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 </script>
@@ -257,7 +363,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v214</p>
+    <p>Family Tree  v216</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -365,7 +471,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v214 (February 08, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v216 (February 08, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>

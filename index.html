@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v214 - Photos from Google Sheet</title>
+<title>KarpTree v225 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -228,36 +228,25 @@ svg{background:transparent;}
 #infoFooter{margin-top:14px;padding-top:10px;border-top:1px solid #e6e9f0;color:#666;font-size:12px;}
 #infoPopup .sub:empty{display:none;}
 
-
-/* ===== Gen-row navigation arrows (Gen 2 / Gen 3) ===== */
-.genRowArrow{
+.grArrow{
   position:fixed;
-  width:52px;height:52px;
-  border-radius:999px;
-  background:rgba(44,62,80,0.88);
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:26px;
-  font-weight:900;
+  display:none;
   cursor:pointer;
-  z-index:3000;
+  font-size:28px;
+  color:rgba(60,60,60,0.5);
   user-select:none;
-  box-shadow:0 6px 18px rgba(0,0,0,0.25);
+  z-index:3000;
+  padding:2px 6px;
+  line-height:1;
 }
-.genRowArrow:hover{background:rgba(44,62,80,0.97);}
-.genRowArrow.left{left:10px;}
-.genRowArrow.right{right:10px;}
-.genRowArrow[data-gen="2"]{ /* positioned by JS */ }
-.genRowArrow[data-gen="3"]{ /* positioned by JS */ }
+.grArrow:hover{color:rgba(60,60,60,0.85);}
 
 </style></head>
 <body>
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v214</p>
+    <p>Family Tree  v225</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -365,7 +354,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v214 (February 08, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v225 (February 15, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -967,10 +956,10 @@ function toggleMenu(menuId){
 
 
 // ===== Gen-row navigation (Gen 2 / Gen 3 arrows) =====
-const genRowNavState = { 2: null, 3: null };
+const genRowNavState = { 1: null, 2: null };
 
 function genRowNavList(gen){
-  if(!window.N) return [];
+  if(!N) return [];
   const ids = [];
   for(const id in N){
     const n = N[id];
@@ -1014,68 +1003,70 @@ function genRowNavCurrentIndex(gen, list){
 }
 
 function genRowNavMove(gen, dir){
-  if(!window.N) return;
+  if(!N) return;
   const list = genRowNavList(gen);
   if(!list.length) return;
 
   let idx = genRowNavCurrentIndex(gen, list);
   let next = idx + dir;
+  const wrapping = (next < 0 || next >= list.length);
   if(next < 0) next = list.length - 1;
   if(next >= list.length) next = 0;
 
   const id = list[next];
+  if(wrapping){
+    const arrow = document.getElementById("gr"+gen+(dir<0?"L":"R"));
+    if(arrow){
+      let tip = document.createElement("span");
+      tip.textContent = "WRAP";
+      tip.style.cssText = "position:fixed;background:rgba(0,0,0,0.75);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:bold;pointer-events:none;z-index:3001;";
+      const r = arrow.getBoundingClientRect();
+      tip.style.top = (r.top - 24) + "px";
+      tip.style.left = (dir < 0 ? r.left : r.right - 40) + "px";
+      document.body.appendChild(tip);
+      setTimeout(function(){ tip.remove(); genRowNavState[gen] = id; genRowNavCenterOn(id); }, 1000);
+    }
+    return;
+  }
+
   genRowNavState[gen] = id;
   genRowNavCenterOn(id);
 }
 
 function updateGenRowArrowPositions(){
   const wrap = document.getElementById("wrap");
-  if(!wrap || !window.N) return;
-
+  if(!wrap || !N) return;
   const wrapRect = wrap.getBoundingClientRect();
   const scale = (typeof sc === "number" && sc>0) ? sc : 1;
 
-  function place(gen){
-    const L = document.getElementById(`gen${gen}Left`);
-    const R = document.getElementById(`gen${gen}Right`);
+  [1, 2].forEach(function(gen){
+    const L = document.getElementById("gr"+gen+"L");
+    const R = document.getElementById("gr"+gen+"R");
     if(!L || !R) return;
-
     const list = genRowNavList(gen);
-    if(!list.length){
-      L.style.display = "none";
-      R.style.display = "none";
-      return;
-    }
+    if(!list.length){ L.style.display="none"; R.style.display="none"; return; }
 
-    // Use actual y of this generation (from any node) so it matches your on-screen gen labels
     const y = N[list[0]].y * scale;
     const yInWrap = y - wrap.scrollTop;
-    let top = wrapRect.top + yInWrap - 26; // 26 = half of 52px button
-
-    // Clamp within wrap viewport
-    const minTop = wrapRect.top + 6;
-    const maxTop = wrapRect.bottom - 52 - 6;
+    let top = wrapRect.top + yInWrap - 14;
+    const minTop = wrapRect.top + 4;
+    const maxTop = wrapRect.bottom - 32;
     if(top < minTop) top = minTop;
     if(top > maxTop) top = maxTop;
 
-    L.style.top = `${top}px`;
-    R.style.top = `${top}px`;
-    L.style.display = "flex";
-    R.style.display = "flex";
-  }
-
-  place(2);
-  place(3);
+    L.style.top = top + "px";
+    R.style.top = top + "px";
+    L.style.display = "block";
+    R.style.display = "block";
+  });
 }
 
-// keep arrows aligned while scrolling / resizing
-window.addEventListener("resize", ()=>{ try{updateGenRowArrowPositions();}catch(e){} });
-document.addEventListener("DOMContentLoaded", ()=>{
+window.addEventListener("resize", function(){ try{updateGenRowArrowPositions();}catch(e){} });
+document.addEventListener("DOMContentLoaded", function(){
   const wrap = document.getElementById("wrap");
-  if(wrap) wrap.addEventListener("scroll", ()=>{ try{updateGenRowArrowPositions();}catch(e){} });
+  if(wrap) wrap.addEventListener("scroll", function(){ try{updateGenRowArrowPositions();}catch(e){} });
   try{updateGenRowArrowPositions();}catch(e){}
 });
-
 
 // Close menus when clicking outside
 document.addEventListener('click',function(e){
@@ -1384,7 +1375,25 @@ p5047:{n:"Esther Held",b:null,d:null,g:"f",bp:"",heb:"",src:null},
 p5048:{n:"Chaindi Frenkel",b:null,d:null,g:"f",bp:"",heb:"",src:null},
 p4032:{n:"Shmuel Karp Neuman",b:null,d:null,g:"m",bp:"",heb:"ר׳ שמואל קארפ נוימן",src:2},
 p4033:{n:"Yehuda Karp Neuman",b:null,d:null,g:"m",bp:"",heb:"ר׳ יהודה קארפ נוימן",src:2},
-p4034:{n:"Sarah Breindl Karp Neuman",b:null,d:null,g:"f",bp:"",heb:"מ׳ שרה בריינדל קארפ נוימן",src:2}
+p4034:{n:"Sarah Breindl Karp Neuman",b:null,d:null,g:"f",bp:"",heb:"מ׳ שרה בריינדל קארפ נוימן",src:2},
+p3202:{n:"Mordechai Hoffert",b:1885,d:1950,g:"m",bp:"Rozwadov, Poland",heb:"ר׳ מרדכי הופערט",src:2},
+p3202s1:{n:"Etil Sure Hoffert",b:1890,d:1946,g:"f",bp:"Stalowa Wola, Poland",heb:"מ׳ עטיל שרה הופערט (ויזען)",src:2},
+p4035:{n:"Miriam Beer",b:1909,d:1989,g:"f",bp:"Poland",heb:"מ׳ מרים בעער (הופרט)",src:2},
+p4035s1:{n:"Ahron Beer",b:1909,d:1999,g:"m",bp:"Poland",heb:"ר׳ אהרן בעער",src:2},
+p4036:{n:"Zvi Hershel Hoffert",b:1906,d:2005,g:"m",bp:"Poland",heb:"ר׳ צבי הרשל הופערט",src:2},
+p4036s1:{n:"Miriam Hoffert",b:1902,d:2016,g:"f",bp:"Poland",heb:"מ׳ מרים הופערט (פריווער)",src:2},
+p4037:{n:"Ester Breindla Forshrim",b:1907,d:1978,g:"f",bp:"Poland",heb:"מ׳ אסתר ברינדלה פורשירם (הופרט)",src:2},
+p4037s1:{n:"Ephraim Vorschirm",b:1900,d:1983,g:"m",bp:"Mielec, Poland",heb:"ר׳ אפרים פורשירם",src:2},
+p4038:{n:"Yafa Miller",b:1912,d:1978,g:"f",bp:"Stalowa Wola, Poland",heb:"מ׳ יפה מילר (הופרט)",src:2},
+p4038s1:{n:"Moshe Itzhak Miller",b:1909,d:1978,g:"m",bp:"Jerusalem, Israel",heb:"ר׳ משה יצחק מילר",src:2},
+p4039:{n:"Lea Sheps",b:1924,d:1986,g:"f",bp:"Poland",heb:"מ׳ לאה שפס (הופרט)",src:2},
+p4039s1:{n:"Shalom Sheps",b:1917,d:1979,g:"m",bp:"Poland",heb:"ר׳ שלום שפס",src:2},
+p4040:{n:"Malka Margalit",b:1895,d:null,g:"f",bp:"Poland",heb:"מ׳ מלכה מרגלית (הופרט)",src:2},
+p4040s1:{n:"Yitzchak Margalit",b:1913,d:null,g:"m",bp:"",heb:"ר׳ יצחק מרגלית",src:2},
+p5049:{n:"Shaul Beer",b:1936,d:2017,g:"m",bp:"Poland",heb:"ר׳ שאול בעער",src:2},
+p5049s1:{n:"Leah Beer",b:1938,d:1997,g:"f",bp:"Leipzig, Germany",heb:"מ׳ לאה בעער (וואהרנברג)",src:2},
+p5050:{n:"Tuvia Porat",b:1930,d:2014,g:"m",bp:"Poland",heb:"ר׳ טוביה פורת",src:2},
+p5050s1:{n:"Lea Porat",b:1933,d:2001,g:"f",bp:"",heb:"מ׳ לאה פורת (ווישיגרוד)",src:2}
 };
 
 const SP=[
@@ -1474,7 +1483,16 @@ const SP=[
   ["p3018","p3018s1"],
 ["p4025","p4025s1"],
 ["p5044","p5044s1"],
-["p4031","p4031s1"]
+["p4031","p4031s1"],
+["p3202","p3202s1"],
+["p4035","p4035s1"],
+["p4036","p4036s1"],
+["p4037","p4037s1"],
+["p4038","p4038s1"],
+["p4039","p4039s1"],
+["p4040","p4040s1"],
+["p5049","p5049s1"],
+["p5050","p5050s1"]
 ];
 
 
@@ -1565,7 +1583,16 @@ const PR=[
 ["p4031","p5048"],
 ["p4031s1","p5048"],["p3016","p4032"],
 ["p3016","p4033"],
-["p3016","p4034"]  
+["p3016","p4034"],
+["p2002","p3202"],["p2002s1","p3202"],
+["p3202","p4035"],["p3202s1","p4035"],
+["p3202","p4036"],["p3202s1","p4036"],
+["p3202","p4037"],["p3202s1","p4037"],
+["p3202","p4038"],["p3202s1","p4038"],
+["p3202","p4039"],["p3202s1","p4039"],
+["p3202","p4040"],["p3202s1","p4040"],
+["p4035","p5049"],["p4035s1","p5049"],
+["p4037","p5050"],["p4037s1","p5050"]
 ];
 
 
@@ -2027,6 +2054,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
    label.setAttribute("fill","#666");
    label.textContent="Gen "+(gen+1);
    svg.appendChild(label);
+
  }
 
  function R(x,y,w,h,f,b){
@@ -2376,6 +2404,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
  }
 
  node(N[rootId]);
+
 }
 
 // Draw tree with highlighted paths for relationship visualization
@@ -2594,9 +2623,7 @@ function filterByGeneration(gen){
   build(currentRoot,maxGen-1); // maxGen-1 because we count from 0
   layout(currentRoot);
   draw(currentRoot,maxGen);
-  
-  
-  try{updateGenRowArrowPositions();}catch(e){}
+
 // Recenter view
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
@@ -3746,7 +3773,6 @@ function findAndHighlightPerson(){
       setTimeout(() => {
         wrap.scrollLeft = N[personId].x - wrap.clientWidth/2;
         wrap.scrollTop  = N[personId].y - wrap.clientHeight/2 - 70;
-        try{updateGenRowArrowPositions();}catch(e){}
       }, 50);
     }
   }
@@ -4373,11 +4399,10 @@ document.getElementById('passwordInput').focus();
 </div>
 
 
-<!-- Gen-row navigation arrows -->
-<div id="gen2Left"  class="genRowArrow left"  data-gen="2" data-dir="-1" title="Gen 2: previous" onclick="genRowNavMove(2,-1)">◀</div>
-<div id="gen2Right" class="genRowArrow right" data-gen="2" data-dir="1"  title="Gen 2: next"     onclick="genRowNavMove(2, 1)">▶</div>
-
-<div id="gen3Left"  class="genRowArrow left"  data-gen="3" data-dir="-1" title="Gen 3: previous" onclick="genRowNavMove(3,-1)">◀</div>
-<div id="gen3Right" class="genRowArrow right" data-gen="3" data-dir="1"  title="Gen 3: next"     onclick="genRowNavMove(3, 1)">▶</div>
+<span id="gr1L" class="grArrow" style="left:6px;" onclick="genRowNavMove(1,-1)">&lt;</span>
+<span id="gr1R" class="grArrow" style="right:22px;" onclick="genRowNavMove(1,1)">&gt;</span>
+<span id="gr2L" class="grArrow" style="left:6px;" onclick="genRowNavMove(2,-1)">&lt;</span>
+<span id="gr2R" class="grArrow" style="right:22px;" onclick="genRowNavMove(2,1)">&gt;</span>
 
 </body></html>
+

@@ -495,8 +495,18 @@ async function loadPhotosFromSheet() {
       // Load photos
       for (let j = 0; j < row.length; j++) {
         if (header[j].match(/^Photo/) && row[j]) {
-          const num = row[j];
-          const filename = `4400_Karp_Asher_P_${String(num).padStart(7, '0')}A.jpg`;
+          const val = row[j].trim();
+          let filename;
+
+          if (/^H/i.test(val)) {
+            // H-prefix: construct filename as Hxxx_PersonName.jpg
+            const personName = P[personId] ? P[personId].n.replace(/ /g, '_') : personId;
+            filename = `${val}_${personName}.jpg`;
+          } else {
+            // Numeric: use original naming convention
+            filename = `4400_Karp_Asher_P_${String(val).padStart(7, '0')}A.jpg`;
+          }
+
           photoManifestData.push({
             personId: personId,
             url: `https://raw.githubusercontent.com/avigdorkarpdescendants/karptree/main/photos/${filename}`,

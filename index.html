@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v226 - Photos from Google Sheet</title>
+<title>KarpTree v227 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -246,7 +246,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v226</p>
+    <p>Family Tree  v227</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -354,7 +354,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v226 (February 16, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v227 (February 16, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -500,7 +500,7 @@ async function loadPhotosFromSheet() {
 
           if (/^H/i.test(val)) {
             // H-prefix: construct filename as Hxxx_PersonName.jpg
-            const personName = P[personId] ? P[personId].n.replace(/ /g, '_') : personId;
+            const personName = P[personId] ? P[personId].n.replace(/[\[\]]/g, '').replace(/ /g, '_') : personId;
             filename = `${val}_${personName}.jpg`;
           } else {
             // Numeric: use original naming convention
@@ -1142,7 +1142,7 @@ p3012s1:{n:"Wife [Flus]",b:null,d:null,g:"f",bp:"",heb:"",src:null},
 p3013:{n:"Yehudit Berta",b:null,d:null,g:"f",bp:"",heb:"",src:null},
 p3013s1:{n:"Mr. Kraus",b:null,d:null,g:"m",bp:"",heb:"",src:null},
 p3014:{n:"Haim Azriel Karp",b:1894,d:null,g:"m",bp:"",heb:"ר׳ חיים עזריאל קארפּ",src:23},
-p3201:{n:"Meml Frimet",b:1874,d:1928,g:"f",bp:"Rozwadow",heb:"",src:3},
+p3201:{n:"Meml Frimet Karp [Birnbaum]",b:1874,d:1928,g:"f",bp:"Rozwadow",heb:"",src:3},
 p3201s1:{n:"Hershel Birnbaum",b:1874,d:1949,g:"m",bp:"Rozwadow",heb:"",src:3},
 p4001:{n:"Lycha Karp",b:1904,d:null,g:"f",bp:"",heb:"",src:null},
 p4001s1:{n:"Moshe Michrovky",b:1900,d:1985,g:"m",bp:"",heb:"",src:null},

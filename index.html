@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v227 - Photos from Google Sheet</title>
+<title>KarpTree v235 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -241,12 +241,86 @@ svg{background:transparent;}
 }
 .grArrow:hover{color:rgba(60,60,60,0.85);}
 
+/* Compass nav widget */
+#compassNav{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  z-index:3000;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  background:rgba(255,255,255,0.92);
+  border-radius:16px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.3);
+  padding:8px;
+  user-select:none;
+}
+#compassNav .comp-row{
+  display:flex;
+  align-items:center;
+  gap:2px;
+}
+#compassNav .comp-btn{
+  width:36px;
+  height:36px;
+  border:none;
+  background:none;
+  cursor:pointer;
+  font-size:20px;
+  font-weight:bold;
+  color:#444;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.15s, color 0.15s;
+}
+#compassNav .comp-btn:hover{
+  background:rgba(0,0,0,0.12);
+  color:#111;
+}
+#compassNav .comp-btn:active{
+  background:rgba(0,0,0,0.2);
+}
+#compassNav .comp-center{
+  width:32px;
+  height:32px;
+  border:none;
+  background:rgba(0,0,0,0.08);
+  border-radius:50%;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:bold;
+  color:#999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.15s;
+}
+#compassNav .comp-center:hover{
+  background:rgba(0,0,0,0.15);
+  color:#555;
+}
+#compassNav .comp-label{
+  font-size:10px;
+  color:#999;
+  margin-top:2px;
+}
+/* Selection highlight on SVG nodes */
+.compass-selected rect:first-child{
+  stroke:#ff6600 !important;
+  stroke-width:3.5 !important;
+  filter:drop-shadow(0 0 6px rgba(255,102,0,0.5));
+}
+
 </style></head>
 <body>
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v227</p>
+    <p>Family Tree  v235</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -262,9 +336,12 @@ svg{background:transparent;}
 
 <!-- Intro Continue Button -->
 <div id='introButton' style='position:fixed;top:70%;left:50%;transform:translateX(-50%);width:600px;z-index:500;display:flex;justify-content:center;'>
-  <button onclick='exitIntroMode()' style='padding:16px 40px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:bold;box-shadow:0 4px 15px rgba(0,0,0,0.2);'>
-    Click to Continue
-  </button>
+  <div style='text-align:center;'>
+    <button onclick='exitIntroMode()' style='padding:16px 40px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:bold;box-shadow:0 4px 15px rgba(0,0,0,0.2);'>
+      Click to Continue
+    </button>
+    <div style='margin-top:10px;font-size:13px;color:white;background:rgba(0,0,0,0.55);padding:6px 14px;border-radius:6px;display:inline-block;'>See <strong>User Guide</strong> for recent updates &nbsp;•&nbsp; Last updated February 23, 2026</div>
+  </div>
 </div>
 
 <!-- Menu Bar -->
@@ -277,6 +354,7 @@ svg{background:transparent;}
 <button onclick='toggleMenu("videoMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>Videos</button>
 <button onclick='openUserGuide()' style='margin-right:10px;padding:8px 16px;background:#27ae60;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>📖 User Guide</button>
 <button onclick='openRozwadow()' style='margin-right:10px;padding:8px 16px;background:#8b4513;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>🏘️ Rozwadów</button>
+<button onclick='toggleMenu("exportMenu")' style='margin-right:10px;padding:8px 16px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;'>⬇ Export</button>
 <div style='flex:1;'></div>
 <button onclick='zoomIn()' style='margin-right:5px;padding:8px 12px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:16px;font-weight:bold;'>+</button>
 <button onclick='zoomOut()' style='margin-right:10px;padding:8px 12px;background:#34495e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:16px;font-weight:bold;'>−</button>
@@ -346,6 +424,13 @@ svg{background:transparent;}
 <button onclick='clearRelationship()' style='width:48%;padding:6px;background:#999;color:white;border:none;border-radius:4px;cursor:pointer;'>Clear</button>
 <div id='result' style='margin-top:8px;font-size:12px;max-width:200px;'></div>
 </div>
+<!-- Export Menu (hidden by default) -->
+<div id='exportMenu' style='display:none;position:fixed;top:50px;left:10px;z-index:25;background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);min-width:220px;'>
+<div style='font-weight:bold;margin-bottom:10px;'>Export Blood Relatives</div>
+<button onclick='downloadBloodRelativesCSV();toggleMenu("exportMenu")' style='width:100%;padding:8px;background:#1a7a4a;color:white;border:none;border-radius:4px;cursor:pointer;margin-bottom:6px;text-align:left;'>📊 Spreadsheet (CSV)</button>
+<button id='exportTxtBtn' onclick='downloadBloodRelativesTXT()' style='width:100%;padding:8px;background:#1a4a7a;color:white;border:none;border-radius:4px;cursor:pointer;text-align:left;'>📄 Full Text with Narratives</button>
+</div>
+
 <div id='wrap' style='position:absolute;top:40px;left:0;right:0;bottom:0;overflow:auto;'><div id='zoom'><svg id='svg' width='70000' height='15000'></svg></div></div>
 
 <!-- User Guide Modal -->
@@ -354,12 +439,19 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v227 (February 16, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v235 (February 23, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
-      <p>KarpTree is an interactive family tree visualization featuring 234 people across 7 generations. The tree uses a horizontal spouse layout where married couples are shown side-by-side with connecting lines.</p>
-      
+      <p>KarpTree is an interactive family tree visualization featuring 304 people across 7 generations. The tree uses a horizontal spouse layout where married couples are shown side-by-side with connecting lines.</p>
+
+      <h2>📋 Recent Updates</h2>
+      <table>
+        <tr><th>Date</th><th>Update</th></tr>
+        <tr><td>February 23, 2026</td><td>Added <strong>Export</strong> menu — download all blood relatives as a spreadsheet (CSV) or full text file with narratives included</td></tr>
+        <tr><td>February 23, 2026</td><td>Tree now includes <strong>304 people</strong></td></tr>
+      </table>
+
       <h2>🧭 Navigation & Controls</h2>
       <h3>Toolbar Buttons</h3>
       <table>
@@ -376,7 +468,25 @@ svg{background:transparent;}
       <div class='tip'>
         <strong>💡 Zoom Tip:</strong> Use your mouse wheel to zoom in/out. Click and drag to pan around!
       </div>
-      
+
+      <h2>🧭 Compass Navigator</h2>
+      <p>The compass control in the bottom-left corner lets you navigate the tree person by person:</p>
+      <ol style='margin-left:40px;'>
+        <li><strong>Click any person's box</strong> to select them (orange highlight)</li>
+        <li>Use the compass buttons to move through the tree:</li>
+      </ol>
+      <table>
+        <tr><th>Button</th><th>Action</th></tr>
+        <tr><td><strong>▲ Up</strong></td><td>Go to the selected person's parent</td></tr>
+        <tr><td><strong>◀ Left</strong></td><td>Move to the next person to the left (same generation, skips spouses)</td></tr>
+        <tr><td><strong>● Center</strong></td><td>Re-center the view on the selected person</td></tr>
+        <tr><td><strong>▶ Right</strong></td><td>Move to the next person to the right (same generation, skips spouses)</td></tr>
+        <tr><td><strong>▼ Down</strong></td><td>Go to the leftmost child of the selected person</td></tr>
+      </table>
+      <div class='tip'>
+        <strong>💡 Breadcrumb:</strong> If you press Up and then Down, the compass remembers where you came from and returns you to the same child (not the leftmost). You can also select a spouse — Down will navigate to that spouse's children specifically.
+      </div>
+
       <h2>🔍 Find Person</h2>
       <p>Quickly locate and highlight a person in the tree:</p>
       <ol style='margin-left:40px;'>
@@ -426,6 +536,7 @@ svg{background:transparent;}
       <ul>
         <li><strong>Mouse Wheel:</strong> Zoom in/out</li>
         <li><strong>Click + Drag:</strong> Pan around the tree</li>
+        <li><strong>Click a person:</strong> Select them for compass navigation</li>
         <li><strong>← →:</strong> Navigate photos in gallery</li>
         <li><strong>Esc:</strong> Close photo gallery or this guide</li>
       </ul>
@@ -953,7 +1064,7 @@ let relationshipCalc = null;
 
 // Menu toggle function
 function toggleMenu(menuId){
-  let menus=['findMenu','genMenu','focusMenu','relMenu','cousinMenu','videoMenu'];
+  let menus=['findMenu','genMenu','focusMenu','relMenu','cousinMenu','videoMenu','exportMenu'];
   menus.forEach(id=>{
     if(id===menuId){
       let menu=document.getElementById(id);
@@ -1078,9 +1189,156 @@ document.addEventListener("DOMContentLoaded", function(){
   try{updateGenRowArrowPositions();}catch(e){}
 });
 
+// ===== Compass Navigation =====
+let compassSelectedId = null;
+let compassBreadcrumb = []; // stack of IDs: pushed on Up, popped on Down
+
+function compassSelect(id, keepBreadcrumb){
+  if(!N || !N[id]) return;
+  if(!keepBreadcrumb) compassBreadcrumb = [];
+  // Remove previous highlight
+  let prev = document.querySelector('.compass-selected');
+  if(prev) prev.classList.remove('compass-selected');
+  compassSelectedId = id;
+  // Highlight the new selection
+  let el = document.querySelector('[data-person-id="'+id+'"]');
+  if(el) el.classList.add('compass-selected');
+  // Update label
+  let lbl = document.getElementById('compassLabel');
+  if(lbl) lbl.textContent = N[id].p.n || id;
+}
+
+// Given any person ID, return the blood relative (if spouse, return their partner)
+function compassBloodOf(id){
+  if(!id || !N[id]) return null;
+  if(isBloodDescendant(id)) return id;
+  // This is a spouse — find their blood partner
+  const node = N[id];
+  for(let i = 0; i < node.sp.length; i++){
+    if(isBloodDescendant(node.sp[i].id)) return node.sp[i].id;
+  }
+  return null;
+}
+
+function compassGetSameRowPeople(){
+  // Get all blood relatives at the same depth as selected person (or their blood partner)
+  if(!compassSelectedId || !N || !N[compassSelectedId]) return [];
+  const bloodId = compassBloodOf(compassSelectedId);
+  if(!bloodId) return [];
+  const targetD = N[bloodId].d;
+  const ids = [];
+  for(const id in N){
+    const n = N[id];
+    if(!n || n.d !== targetD) continue;
+    if(!Number.isFinite(n.x) || !Number.isFinite(n.y)) continue;
+    if(n.x === 0 && n.y === 0 && id !== currentRoot) continue;
+    if(!isBloodDescendant(id)) continue;
+    ids.push(id);
+  }
+  ids.sort((a,b) => N[a].x - N[b].x);
+  return ids;
+}
+
+function compassMove(dir){
+  compassBreadcrumb = []; // lateral movement breaks the up/down path
+  if(!compassSelectedId){ compassAutoSelect(); if(!compassSelectedId) return; }
+  const list = compassGetSameRowPeople();
+  if(!list.length) return;
+  // Find current position using blood relative
+  const bloodId = compassBloodOf(compassSelectedId) || compassSelectedId;
+  let idx = list.indexOf(bloodId);
+  if(idx < 0) idx = 0;
+  let next = idx + dir;
+  if(next < 0) next = list.length - 1;
+  if(next >= list.length) next = 0;
+  compassSelect(list[next]);
+  genRowNavCenterOn(list[next]);
+}
+
+function compassCenter(){
+  if(!compassSelectedId){ compassAutoSelect(); if(!compassSelectedId) return; }
+  genRowNavCenterOn(compassSelectedId);
+}
+
+function compassUp(){
+  if(!compassSelectedId){ compassAutoSelect(); if(!compassSelectedId) return; }
+  // Remember where we came from so Down can return here
+  compassBreadcrumb.push(compassSelectedId);
+  // If spouse, go to their blood partner first
+  const bloodId = compassBloodOf(compassSelectedId);
+  if(!bloodId){ compassBreadcrumb.pop(); return; }
+  // Find blood parent of the blood relative
+  const parents = chi[bloodId];
+  if(!parents || !parents.length){ compassBreadcrumb.pop(); return; }
+  let bloodParent = parents.find(pid => isBloodDescendant(pid));
+  if(!bloodParent) bloodParent = parents[0];
+  compassSelect(bloodParent, true);
+  genRowNavCenterOn(bloodParent);
+}
+
+function compassGetChildrenOf(selectedId){
+  // Get children relevant to the selected person
+  const bloodId = compassBloodOf(selectedId);
+  if(!bloodId) return [];
+  const node = N[bloodId];
+  if(!node || !node.ch || !node.ch.length) return [];
+  // If a spouse is selected, only return children of that spouse pairing
+  if(selectedId !== bloodId){
+    const spouseChildren = node.ch.filter(c => {
+      const parents = chi[c.id] || [];
+      return parents.indexOf(selectedId) >= 0;
+    });
+    if(spouseChildren.length) return spouseChildren;
+  }
+  // Otherwise return all children
+  return node.ch;
+}
+
+function compassDown(){
+  if(!compassSelectedId){ compassAutoSelect(); if(!compassSelectedId) return; }
+  // If we have a breadcrumb (came here via Up), return to where we were
+  if(compassBreadcrumb.length){
+    const returnTo = compassBreadcrumb.pop();
+    if(N[returnTo]){
+      compassSelect(returnTo, true);
+      genRowNavCenterOn(returnTo);
+      return;
+    }
+  }
+  // Otherwise find leftmost child
+  const children = compassGetChildrenOf(compassSelectedId);
+  if(!children.length) return;
+  let leftmost = children[0];
+  for(let i = 1; i < children.length; i++){
+    if(children[i].x < leftmost.x) leftmost = children[i];
+  }
+  compassSelect(leftmost.id, true);
+  genRowNavCenterOn(leftmost.id);
+}
+
+function compassAutoSelect(){
+  // Auto-select the person closest to viewport center
+  if(!N) return;
+  const wrap = document.getElementById("wrap");
+  if(!wrap) return;
+  const scale = (typeof sc === "number" && sc > 0) ? sc : 1;
+  const cx = (wrap.scrollLeft + wrap.clientWidth/2) / scale;
+  const cy = (wrap.scrollTop + wrap.clientHeight/2) / scale;
+  let bestId = null, bestDist = Infinity;
+  for(const id in N){
+    const n = N[id];
+    if(!n || !Number.isFinite(n.x) || !Number.isFinite(n.y)) continue;
+    if(n.x === 0 && n.y === 0 && id !== currentRoot) continue;
+    if(!isBloodDescendant(id)) continue;
+    const dist = Math.hypot(n.x - cx, n.y - cy);
+    if(dist < bestDist){ bestDist = dist; bestId = id; }
+  }
+  if(bestId) compassSelect(bestId);
+}
+
 // Close menus when clicking outside
 document.addEventListener('click',function(e){
-  let menus=['findMenu','genMenu','focusMenu','relMenu','cousinMenu','videoMenu'];
+  let menus=['findMenu','genMenu','focusMenu','relMenu','cousinMenu','videoMenu','exportMenu'];
   let clickedInside=false;
   
   // Check if click was inside any menu or on a menu button
@@ -2106,8 +2364,9 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   
   // Create clickable group for main person
   let g = document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.setAttribute("data-person-id", n.id);
   g.style.cursor = "pointer";
-  g.onclick = () => showPhotoPopup(n.id);
+  g.onclick = () => { compassSelect(n.id); };
   
   let r = document.createElementNS("http://www.w3.org/2000/svg","rect");
   r.setAttribute("x", bx);
@@ -2157,28 +2416,42 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   g.appendChild(infoIcon);
 
   
-  svg.appendChild(g);
-  // Draw English name - raised higher
-  T(n.x, n.y - 15, n.p.n, "n");
-  
-  // Draw Hebrew name below English with more spacing (1/2 as much movement)
-  if(n.p.heb) T(n.x, n.y, n.p.heb, "he");
-  
-  // Draw source reference in upper left corner
-  if(n.p.src && n.p.src !== null) {
-    let srcText = document.createElementNS("http://www.w3.org/2000/svg","text");
-    srcText.setAttribute("x", n.x - 110);
-    srcText.setAttribute("y", n.y - 25);
-    srcText.setAttribute("font-size", "8");
-    srcText.setAttribute("fill", "#999");
-    srcText.setAttribute("text-anchor", "start");
-    srcText.textContent = n.p.src;
-    svg.appendChild(srcText);
+  // Add text elements inside the group so clicks on text also select
+  let nameEl = document.createElementNS("http://www.w3.org/2000/svg","text");
+  nameEl.setAttribute("x", n.x); nameEl.setAttribute("y", n.y - 15);
+  nameEl.setAttribute("class", "n"); nameEl.textContent = n.p.n;
+  g.appendChild(nameEl);
+
+  if(n.p.heb){
+    let hebEl = document.createElementNS("http://www.w3.org/2000/svg","text");
+    hebEl.setAttribute("x", n.x); hebEl.setAttribute("y", n.y);
+    hebEl.setAttribute("class", "he"); hebEl.textContent = n.p.heb;
+    g.appendChild(hebEl);
   }
-  
+
+  if(n.p.src && n.p.src !== null){
+    let srcText = document.createElementNS("http://www.w3.org/2000/svg","text");
+    srcText.setAttribute("x", n.x - 110); srcText.setAttribute("y", n.y - 25);
+    srcText.setAttribute("font-size", "8"); srcText.setAttribute("fill", "#999");
+    srcText.setAttribute("text-anchor", "start"); srcText.textContent = n.p.src;
+    g.appendChild(srcText);
+  }
+
   let ds = dateStr(n.p);
-  if(ds) T(n.x, n.y + 13, ds, "d");  // Dates below with more spacing
-  if(n.p.bp) T(n.x, n.y + 28, n.p.bp, "d");
+  if(ds){
+    let dsEl = document.createElementNS("http://www.w3.org/2000/svg","text");
+    dsEl.setAttribute("x", n.x); dsEl.setAttribute("y", n.y + 13);
+    dsEl.setAttribute("class", "d"); dsEl.textContent = ds;
+    g.appendChild(dsEl);
+  }
+  if(n.p.bp){
+    let bpEl = document.createElementNS("http://www.w3.org/2000/svg","text");
+    bpEl.setAttribute("x", n.x); bpEl.setAttribute("y", n.y + 28);
+    bpEl.setAttribute("class", "d"); bpEl.textContent = n.p.bp;
+    g.appendChild(bpEl);
+  }
+
+  svg.appendChild(g);
   
   // Draw spouses horizontally beside blood relative
   let spouseConnectionPoints = {}; // Track where children should connect
@@ -2272,8 +2545,9 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
     
     // Create clickable group for spouse
     let sg = document.createElementNS("http://www.w3.org/2000/svg","g");
+    sg.setAttribute("data-person-id", s.id);
     sg.style.cursor = "pointer";
-    sg.onclick = () => showPhotoPopup(s.id);
+    sg.onclick = () => { compassSelect(s.id); };
     
     let sr = document.createElementNS("http://www.w3.org/2000/svg","rect");
     sr.setAttribute("x", sx);
@@ -2310,12 +2584,34 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
       sg.appendChild(snarIcon);
     }
     
-    svg.appendChild(sg);
-    T(s.x, s.y - 13, s.p.n, "n");  // English name raised higher
-    if(s.p.heb) T(s.x, s.y + 2, s.p.heb, "he");  // Hebrew name lower
+    // Add text inside group so clicks on text also select
+    let snameEl = document.createElementNS("http://www.w3.org/2000/svg","text");
+    snameEl.setAttribute("x", s.x); snameEl.setAttribute("y", s.y - 13);
+    snameEl.setAttribute("class", "n"); snameEl.textContent = s.p.n;
+    sg.appendChild(snameEl);
+
+    if(s.p.heb){
+      let shebEl = document.createElementNS("http://www.w3.org/2000/svg","text");
+      shebEl.setAttribute("x", s.x); shebEl.setAttribute("y", s.y + 2);
+      shebEl.setAttribute("class", "he"); shebEl.textContent = s.p.heb;
+      sg.appendChild(shebEl);
+    }
+
     let ds2 = dateStr(s.p);
-    if(ds2) T(s.x, s.y + 13, ds2, "d");  // Dates with spacing
-    if(s.p.bp) T(s.x, s.y + 24, s.p.bp, "d");
+    if(ds2){
+      let sdsEl = document.createElementNS("http://www.w3.org/2000/svg","text");
+      sdsEl.setAttribute("x", s.x); sdsEl.setAttribute("y", s.y + 13);
+      sdsEl.setAttribute("class", "d"); sdsEl.textContent = ds2;
+      sg.appendChild(sdsEl);
+    }
+    if(s.p.bp){
+      let sbpEl = document.createElementNS("http://www.w3.org/2000/svg","text");
+      sbpEl.setAttribute("x", s.x); sbpEl.setAttribute("y", s.y + 24);
+      sbpEl.setAttribute("class", "d"); sbpEl.textContent = s.p.bp;
+      sg.appendChild(sbpEl);
+    }
+
+    svg.appendChild(sg);
     
     // Draw horizontal === line between blood relative and spouse
     // Stagger Y position if multiple spouses (left higher, right lower)
@@ -2818,7 +3114,7 @@ function clearAll(){
   document.querySelectorAll(".findHighlight").forEach(el=>el.remove());
   
   // Close all menus
-  let menus=['findMenu','genMenu','focusMenu','relMenu','cousinMenu','videoMenu'];
+  let menus=['findMenu','genMenu','focusMenu','relMenu','cousinMenu','videoMenu','exportMenu'];
   menus.forEach(id=>document.getElementById(id).style.display='none');
   
   // Recenter
@@ -4182,6 +4478,179 @@ function hideInfoPopup(){
   document.getElementById("infoBackdrop").style.display="none";
 }
 
+function downloadBloodRelativesCSV(){
+  function csvCell(val){
+    if(val===null||val===undefined) val="";
+    val=String(val);
+    if(val.includes(",")||val.includes('"')||val.includes("\n")) val='"'+val.replace(/"/g,'""')+'"';
+    return val;
+  }
+  const headers=["ID","Name","Hebrew Name","Gender","Birth Year","Death Year","Place of Birth","Parents","Spouses","Siblings","Children"];
+  const rows=[headers.map(csvCell).join(",")];
+  buildGenealogicalOrder().forEach(id=>{
+    const p=P[id];
+    const parents=getParentsOf(id).map(nameOf).join("; ");
+    const spouses=getSpousesOf(id).map(nameOf).join("; ");
+    const siblings=getSiblingsOf(id).map(nameOf).join("; ");
+    const children=getChildrenOf(id).map(nameOf).join("; ");
+    const row=[
+      id,
+      p.n||"",
+      p.heb||"",
+      genderLabel(p.g),
+      p.b!=null?p.b:"",
+      p.d!=null?p.d:"",
+      p.bp||"",
+      parents,
+      spouses,
+      siblings,
+      children
+    ];
+    rows.push(row.map(csvCell).join(","));
+  });
+  const bom="\uFEFF"; // UTF-8 BOM so Excel handles Hebrew correctly
+  const blob=new Blob([bom+rows.join("\n")],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="KarpTree_blood_relatives.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function extractPdfText(url){
+  try{
+    const pdf = await pdfjsLib.getDocument(url).promise;
+    let text = "";
+    for(let i=1; i<=pdf.numPages; i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      let lastY = null;
+      content.items.forEach(item=>{
+        if(lastY !== null && Math.abs(item.transform[5] - lastY) > 5) text += "\n";
+        text += item.str;
+        lastY = item.transform[5];
+      });
+      text += "\n";
+    }
+    return text.trim();
+  }catch(e){
+    return "(Could not extract narrative text: " + e.message + ")";
+  }
+}
+
+// Returns ids of blood relatives in genealogical order:
+// DFS from roots, children sorted by birth year asc then by id.
+// Includes p0001 (Moshe of Radomysl) explicitly.
+function buildGenealogicalOrder(){
+  const eligible = new Set(Object.keys(P).filter(id => isBloodDescendant(id) || id === 'p0001'));
+
+  function birthOrId(a, b){
+    const ba = P[a] ? P[a].b : null;
+    const bb = P[b] ? P[b].b : null;
+    if(ba != null && bb != null) return ba - bb;
+    if(ba != null) return -1;
+    if(bb != null) return 1;
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+
+  // Roots: eligible people with no eligible parents
+  const roots = [];
+  for(const id of eligible){
+    const parents = (chi[id] || []).filter(p => eligible.has(p));
+    if(parents.length === 0) roots.push(id);
+  }
+  roots.sort(birthOrId);
+
+  const visited = new Set();
+  const result = [];
+  function visit(id){
+    if(visited.has(id)) return;
+    visited.add(id);
+    result.push(id);
+    const kids = (par[id] || []).filter(k => eligible.has(k));
+    kids.sort(birthOrId);
+    kids.forEach(visit);
+  }
+  roots.forEach(visit);
+  // safety: any not yet visited
+  for(const id of eligible){ if(!visited.has(id)) result.push(id); }
+  return result;
+}
+
+async function downloadBloodRelativesTXT(){
+  const btn = document.getElementById("exportTxtBtn");
+  btn.textContent = "Generating…";
+  btn.disabled = true;
+  toggleMenu("exportMenu");
+
+  // Fetch GitHub file list once for narrative URL lookups
+  let githubFiles = null;
+  async function getNarUrl(personId){
+    if(!narrativeData[personId]) return null;
+    try{
+      if(!githubFiles){
+        const res = await fetch("https://api.github.com/repos/avigdorkarpdescendants/karptree/contents/narratives");
+        const data = await res.json();
+        if(Array.isArray(data)) githubFiles = data;
+        else return null; // rate-limited or error
+      }
+      const pattern = new RegExp(`^${personId}_.*\\.pdf$`, 'i');
+      const match = githubFiles.find(f => pattern.test(f.name));
+      return match ? `https://raw.githubusercontent.com/avigdorkarpdescendants/karptree/main/narratives/${encodeURIComponent(match.name)}` : null;
+    }catch(e){ return null; }
+  }
+
+  const sep = "=".repeat(60);
+  const lines = [];
+  lines.push("KARPTREE — BLOOD RELATIVES");
+  lines.push("Generated: " + new Date().toLocaleDateString());
+  lines.push(sep);
+  lines.push("");
+
+  const ids = buildGenealogicalOrder();
+  for(const id of ids){
+    const p = P[id];
+    const parents  = getParentsOf(id).map(nameOf).join(", ") || "—";
+    const spouses  = getSpousesOf(id).map(nameOf).join(", ") || "—";
+    const siblings = getSiblingsOf(id).map(nameOf).join(", ") || "—";
+    const children = getChildrenOf(id).map(nameOf).join(", ") || "—";
+
+    lines.push(sep);
+    lines.push((p.n || id) + (p.heb ? "  •  " + p.heb : ""));
+    lines.push("ID: " + id);
+    lines.push(sep);
+    lines.push("Gender:         " + genderLabel(p.g));
+    lines.push("Birth year:     " + (p.b != null ? p.b : "—"));
+    lines.push("Death year:     " + (p.d != null ? p.d : "—"));
+    lines.push("Place of birth: " + (p.bp || "—"));
+    lines.push("Parents:        " + parents);
+    lines.push("Spouses:        " + spouses);
+    lines.push("Siblings:       " + siblings);
+    lines.push("Children:       " + children);
+
+    const narUrl = await getNarUrl(id);
+    if(narUrl){
+      lines.push("");
+      lines.push("NARRATIVE");
+      lines.push("-".repeat(40));
+      const text = await extractPdfText(narUrl);
+      lines.push(text);
+    }
+    lines.push("");
+  }
+
+  const blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "KarpTree_blood_relatives.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+
+  btn.textContent = "📄 Full Text with Narratives";
+  btn.disabled = false;
+}
 
 // Render PDF using PDF.js
 async function renderPdfInModal(pdfUrl) {
@@ -4409,10 +4878,27 @@ document.getElementById('passwordInput').focus();
 </div>
 
 
+<!-- gen-row nav arrows hidden
 <span id="gr1L" class="grArrow" style="left:6px;" onclick="genRowNavMove(1,-1)">&lt;</span>
 <span id="gr1R" class="grArrow" style="right:22px;" onclick="genRowNavMove(1,1)">&gt;</span>
 <span id="gr2L" class="grArrow" style="left:6px;" onclick="genRowNavMove(2,-1)">&lt;</span>
 <span id="gr2R" class="grArrow" style="right:22px;" onclick="genRowNavMove(2,1)">&gt;</span>
+-->
+
+<div id="compassNav">
+  <div class="comp-row">
+    <button class="comp-btn" onclick="compassUp()" title="Go to parent">&#9650;</button>
+  </div>
+  <div class="comp-row">
+    <button class="comp-btn" onclick="compassMove(-1)" title="Previous person">&lt;</button>
+    <button class="comp-center" onclick="compassCenter()" title="Center on selected">&#9679;</button>
+    <button class="comp-btn" onclick="compassMove(1)" title="Next person">&gt;</button>
+  </div>
+  <div class="comp-row">
+    <button class="comp-btn" onclick="compassDown()" title="Go to first child">&#9660;</button>
+  </div>
+  <div id="compassLabel" class="comp-label">Click to select</div>
+</div>
 
 </body></html>
 

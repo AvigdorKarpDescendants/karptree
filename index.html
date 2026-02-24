@@ -1,5 +1,5 @@
 <<!DOCTYPE html><html><head><meta charset='UTF-8'>
-<title>KarpTree v235 - Photos from Google Sheet</title>
+<title>KarpTree v237 - Photos from Google Sheet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -320,7 +320,7 @@ svg{background:transparent;}
 <div id="passwordModal">
   <div class="password-box">
     <h2 style="white-space:nowrap;">🔒 Avigdor-Karp-Descendants</h2>
-    <p>Family Tree  v235</p>
+    <p>Family Tree  v237</p>
     <div id="passwordError" class="password-error" style="display:none;"></div>
     <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">Access</button>
@@ -439,7 +439,7 @@ svg{background:transparent;}
     <button class='modal-close' onclick='closeUserGuide()'>✕</button>
     <div class='modal-body'>
       <h1>🌳 KarpTree User Guide</h1>
-      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v235 (February 23, 2026)</p>
+      <p style='font-size:0.9em;color:#999;margin-bottom:10px;'>Version: KarpTree v237 (February 23, 2026)</p>
       <p style='font-size:1.2em;color:#666;margin-bottom:30px;'>Interactive Family Tree - Features & Instructions</p>
       
       <h2>📖 Overview</h2>
@@ -2366,7 +2366,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
   let g = document.createElementNS("http://www.w3.org/2000/svg","g");
   g.setAttribute("data-person-id", n.id);
   g.style.cursor = "pointer";
-  g.onclick = () => { compassSelect(n.id); };
+  g.onclick = () => { compassSelect(n.id); showPhotoPopup(n.id); };
   
   let r = document.createElementNS("http://www.w3.org/2000/svg","rect");
   r.setAttribute("x", bx);
@@ -2547,7 +2547,7 @@ function draw(rootId=currentRoot,maxDepth=maxGen){
     let sg = document.createElementNS("http://www.w3.org/2000/svg","g");
     sg.setAttribute("data-person-id", s.id);
     sg.style.cursor = "pointer";
-    sg.onclick = () => { compassSelect(s.id); };
+    sg.onclick = () => { compassSelect(s.id); showPhotoPopup(s.id); };
     
     let sr = document.createElementNS("http://www.w3.org/2000/svg","rect");
     sr.setAttribute("x", sx);
@@ -4539,13 +4539,32 @@ async function extractPdfText(url){
   }
 }
 
-// Returns ids of blood relatives in genealogical order:
-// DFS from roots, children sorted by birth year asc then by id.
+// Returns ids of blood relatives ordered by:
+//   1. Generation (0, 1, 2, ...) derived from ID thousands digit
+//   2. Within generation: parent group (lowest eligible parent ID)
+//   3. Within parent group: birth year ascending, then ID ascending
 // Includes p0001 (Moshe of Radomysl) explicitly.
 function buildGenealogicalOrder(){
   const eligible = new Set(Object.keys(P).filter(id => isBloodDescendant(id) || id === 'p0001'));
 
-  function birthOrId(a, b){
+  // Generation = thousands digit of the numeric part of the ID
+  function genOf(id){
+    const m = id.match(/^p(\d+)/);
+    if(!m) return 99;
+    return Math.floor(parseInt(m[1]) / 1000);
+  }
+
+  // Canonical parent key for grouping siblings: lowest eligible parent ID, or '' for roots
+  function parentKeyOf(id){
+    const parents = (chi[id] || []).filter(p => eligible.has(p));
+    if(parents.length === 0) return '';
+    return parents.slice().sort()[0];
+  }
+
+  // Within-generation comparator: parent group → birth year → id
+  function compareInGen(a, b){
+    const pa = parentKeyOf(a), pb = parentKeyOf(b);
+    if(pa !== pb) return pa < pb ? -1 : 1;
     const ba = P[a] ? P[a].b : null;
     const bb = P[b] ? P[b].b : null;
     if(ba != null && bb != null) return ba - bb;
@@ -4554,27 +4573,19 @@ function buildGenealogicalOrder(){
     return a < b ? -1 : a > b ? 1 : 0;
   }
 
-  // Roots: eligible people with no eligible parents
-  const roots = [];
+  // Group by generation then sort within each
+  const byGen = {};
   for(const id of eligible){
-    const parents = (chi[id] || []).filter(p => eligible.has(p));
-    if(parents.length === 0) roots.push(id);
+    const g = genOf(id);
+    if(!byGen[g]) byGen[g] = [];
+    byGen[g].push(id);
   }
-  roots.sort(birthOrId);
 
-  const visited = new Set();
   const result = [];
-  function visit(id){
-    if(visited.has(id)) return;
-    visited.add(id);
-    result.push(id);
-    const kids = (par[id] || []).filter(k => eligible.has(k));
-    kids.sort(birthOrId);
-    kids.forEach(visit);
-  }
-  roots.forEach(visit);
-  // safety: any not yet visited
-  for(const id of eligible){ if(!visited.has(id)) result.push(id); }
+  Object.keys(byGen).map(Number).sort((a,b)=>a-b).forEach(gen=>{
+    byGen[gen].sort(compareInGen);
+    result.push(...byGen[gen]);
+  });
   return result;
 }
 
